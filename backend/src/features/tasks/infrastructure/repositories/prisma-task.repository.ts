@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
 import { ITaskRepository } from '../../domain/repositories/task.repository.interface';
 import { Task } from '../../domain/entities/task.entity';
@@ -25,9 +29,27 @@ export class PrismaTaskRepository implements ITaskRepository {
     return raws.map(raw => this.mapToTask(raw));
   }
 
-  async findByAssignee(userId: string): Promise<Task[]> {
+  async findByAssigneeId(orgId: string, assigneeId: string): Promise<Task[]> {
     const raws = await this.prisma.task.findMany({
-      where: { assigneeId: userId, isDeleted: false },
+      where: { orgId, assigneeId, isDeleted: false },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return raws.map(raw => this.mapToTask(raw));
+  }
+
+  async findByContactId(orgId: string, contactId: string): Promise<Task[]> {
+    const raws = await this.prisma.task.findMany({
+      where: { orgId, contactId, isDeleted: false } as any,
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return raws.map(raw => this.mapToTask(raw));
+  }
+
+  async findByDealId(orgId: string, dealId: string): Promise<Task[]> {
+    const raws = await this.prisma.task.findMany({
+      where: { orgId, dealId, isDeleted: false } as any,
       orderBy: { createdAt: 'desc' }
     });
 
@@ -45,8 +67,8 @@ export class PrismaTaskRepository implements ITaskRepository {
       creatorId: raw.creatorId,
       dueDate: raw.dueDate || undefined,
       completedAt: raw.completedAt || undefined,
-      relatedContactId: raw.relatedContactId || undefined,
-      relatedDealId: raw.relatedDealId || undefined,
+      contactId: raw.contactId || undefined,
+      dealId: raw.dealId || undefined,
       tags: raw.tags,
       isDeleted: raw.isDeleted,
       version: raw.version,
@@ -66,8 +88,8 @@ export class PrismaTaskRepository implements ITaskRepository {
       creatorId: task.creatorId,
       dueDate: task.dueDate,
       completedAt: task.completedAt,
-      relatedContactId: task.relatedContactId,
-      relatedDealId: task.relatedDealId,
+      contactId: task.contactId,
+      dealId: task.dealId,
       tags: task.tags,
       isDeleted: task.isDeleted,
       version: { increment: 1 },

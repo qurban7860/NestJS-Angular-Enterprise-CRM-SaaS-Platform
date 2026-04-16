@@ -247,8 +247,8 @@ model Task {
   creatorId        String
   dueDate          DateTime?
   completedAt      DateTime?
-  relatedContactId String?
-  relatedDealId    String?
+  contactId        String?
+  dealId           String?
   tags             String[]
   version          Int          @default(0)
   isDeleted        Boolean      @default(false)
@@ -258,17 +258,19 @@ model Task {
   org       Organization @relation(fields: [orgId], references: [id])
   assignee  User?        @relation("TaskAssignee", fields: [assigneeId], references: [id])
   creator   User         @relation("TaskCreator", fields: [creatorId], references: [id])
-  contact   Contact?     @relation("TaskContact", fields: [relatedContactId], references: [id])
-  deal      Deal?        @relation("TaskDeal", fields: [relatedDealId], references: [id])
+  contact   Contact?     @relation("TaskContact", fields: [contactId], references: [id])
+  deal      Deal?        @relation("TaskDeal", fields: [dealId], references: [id])
   comments  TaskComment[]
   files     FileMetadata[] @relation("TaskFiles")
 
-  @@index([orgId])
-  @@index([assigneeId])
-  @@index([creatorId])
-  @@index([status])
-  @@index([priority])
-  @@index([dueDate])
+  // Composite indexes optimized for multi-tenant query patterns
+  @@index([orgId, assigneeId])   // "My tasks" — filter by org + assignee
+  @@index([orgId, contactId])    // "Contact tasks" — filter by org + contact
+  @@index([orgId, dealId])       // "Deal tasks" — filter by org + deal
+  @@index([orgId, status])       // Board view — filter by org + status
+  @@index([orgId, priority])     // Priority view — filter by org + priority
+  @@index([orgId, dueDate])      // Calendar view — filter by org + due date
+  @@index([creatorId])           // Tasks I created
   @@map("tasks")
 }
 

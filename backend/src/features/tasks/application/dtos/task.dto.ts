@@ -37,17 +37,34 @@ export class CreateTaskDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  relatedContactId?: string;
+  contactId?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  relatedDealId?: string;
+  dealId?: string;
   
   @ApiProperty()
   @IsOptional()
   @IsString()
   status?: string;
+}
+
+export class TaskFiltersDto {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  assigneeId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  contactId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  dealId?: string;
 }
 
 export class TaskResponseDto {
@@ -62,6 +79,15 @@ export class TaskResponseDto {
 
   @ApiProperty()
   priority!: string;
+
+  @ApiProperty({ required: false })
+  assigneeId?: string;
+
+  @ApiProperty({ required: false })
+  contactId?: string;
+
+  @ApiProperty({ required: false })
+  dealId?: string;
 
   @ApiProperty()
   createdAt!: Date;

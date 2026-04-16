@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Entity } from '../../../../core/domain/base/entity.base';
 import { Result } from '../../../../core/domain/base/result';
 
@@ -14,8 +15,8 @@ interface TaskProps {
   creatorId: string;
   dueDate?: Date;
   completedAt?: Date;
-  relatedContactId?: string;
-  relatedDealId?: string;
+  contactId?: string;
+  dealId?: string;
   tags: string[];
   isDeleted: boolean;
   version: number;
@@ -37,8 +38,8 @@ export class Task extends Entity<TaskProps> {
   get creatorId(): string { return this.props.creatorId; }
   get dueDate(): Date | undefined { return this.props.dueDate; }
   get completedAt(): Date | undefined { return this.props.completedAt; }
-  get relatedContactId(): string | undefined { return this.props.relatedContactId; }
-  get relatedDealId(): string | undefined { return this.props.relatedDealId; }
+  get contactId(): string | undefined { return this.props.contactId; }
+  get dealId(): string | undefined { return this.props.dealId; }
   get tags(): string[] { return this.props.tags; }
   get isDeleted(): boolean { return this.props.isDeleted; }
   get version(): number { return this.props.version; }

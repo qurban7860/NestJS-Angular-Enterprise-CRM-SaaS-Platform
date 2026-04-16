@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
 import { IFileMetadataRepository } from '../../domain/repositories/file-metadata.repository.interface';
 import { FileMetadata } from '../../domain/entities/file-metadata.entity';
