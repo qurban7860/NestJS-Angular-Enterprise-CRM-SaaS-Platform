@@ -12,6 +12,7 @@ import type { Response } from 'express';
 import type { IStorageProvider } from '../../infrastructure/storage/storage-provider.interface';
 import type { IFileMetadataRepository } from '../../domain/repositories/file-metadata.repository.interface';
 import { UploadFileResponseDto } from '../../application/dtos/file.dto';
+import { ListFilesUseCase } from '../../application/use-cases/list-files.use-case';
 
 @ApiTags('Files')
 @ApiBearerAuth()
@@ -19,6 +20,7 @@ import { UploadFileResponseDto } from '../../application/dtos/file.dto';
 export class FilesController {
   constructor(
     private readonly uploadUseCase: UploadFileUseCase,
+    private readonly listFilesUseCase: ListFilesUseCase,
     @Inject('IStorageProvider') private readonly storageProvider: IStorageProvider,
     @Inject('IFileMetadataRepository') private readonly fileRepo: IFileMetadataRepository,
   ) {}
@@ -56,6 +58,21 @@ export class FilesController {
       throw new InternalServerErrorException(result.error);
     }
 
+    return result.getValue();
+  }
+
+  @Get('entity/:type/:id')
+  @ApiOperation({ summary: 'List all attached files for a related entity' })
+  @ApiResponse({ status: 200, type: [UploadFileResponseDto] })
+  async getFilesByEntity(
+    @Param('type') type: string,
+    @Param('id') id: string
+  ) {
+    const result = await this.listFilesUseCase.execute({
+      relatedEntityType: type,
+      relatedEntityId: id,
+    });
+    if (result.isFailure) throw new InternalServerErrorException(result.error);
     return result.getValue();
   }
 

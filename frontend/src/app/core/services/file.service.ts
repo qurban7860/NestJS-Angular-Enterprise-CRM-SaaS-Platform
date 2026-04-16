@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface FileUploadResponse {
@@ -25,7 +25,15 @@ export class FileService {
     if (relatedEntityType) formData.append('relatedEntityType', relatedEntityType);
     if (relatedEntityId) formData.append('relatedEntityId', relatedEntityId);
 
-    return this.http.post<FileUploadResponse>(`${this.apiUrl}/upload`, formData);
+    return this.http.post<any>(`${this.apiUrl}/upload`, formData).pipe(
+      map(res => (res as any).data)
+    );
+  }
+
+  getFilesByEntity(relatedEntityType: string, relatedEntityId: string): Observable<FileUploadResponse[]> {
+    return this.http.get<any>(`${this.apiUrl}/entity/${relatedEntityType}/${relatedEntityId}`).pipe(
+      map(res => (res as any).data)
+    );
   }
 
   getFileUrl(id: string): string {

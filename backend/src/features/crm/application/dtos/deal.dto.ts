@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsEnum, IsOptional } from 'class-validator';
+import { IsString, IsNumber, IsEnum, IsOptional, IsUUID } from 'class-validator';
 
 export enum DealStage {
   PROSPECTING = 'PROSPECTING',
@@ -27,21 +27,23 @@ export class CreateDealDto {
   @IsEnum(DealStage)
   stage!: DealStage;
 
-  @ApiProperty()
-  @IsString()
+  @ApiProperty({ required: false })
   @IsOptional()
-  contactId!: string;
+  @IsUUID()
+  contactId?: string;
 
-  @ApiProperty()
-  @IsString()
+  @ApiProperty({ required: false })
   @IsOptional()
-  companyId!: string;
+  @IsUUID()
+  companyId?: string;
 
   @IsOptional()
-  orgId!: string;
+  @IsUUID()
+  orgId?: string;
   
   @IsOptional()
-  ownerId!: string;
+  @IsUUID()
+  ownerId?: string;
 }
 
 export class DealResponseDto {
@@ -66,11 +68,11 @@ export class DealResponseDto {
   @ApiProperty()
   ownerId!: string;
 
-  @ApiProperty()
-  contactId!: string;
+  @ApiProperty({ required: false })
+  contactId?: string;
 
-  @ApiProperty()
-  companyId!: string;
+  @ApiProperty({ required: false })
+  companyId?: string;
 
   @ApiProperty()
   createdAt!: Date;

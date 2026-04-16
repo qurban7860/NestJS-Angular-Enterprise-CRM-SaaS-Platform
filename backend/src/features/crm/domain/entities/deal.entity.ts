@@ -10,8 +10,8 @@ interface DealProps {
   stage: DealStage;
   orgId: string;
   ownerId: string;
-  contactId: string;
-  companyId: string;
+  contactId?: string;
+  companyId?: string;
   expectedCloseDate?: Date;
   closedAt?: Date;
   isDeleted: boolean;
@@ -32,8 +32,8 @@ export class Deal extends Entity<DealProps> {
   get stage(): DealStage { return this.props.stage; }
   get orgId(): string { return this.props.orgId; }
   get ownerId(): string { return this.props.ownerId; }
-  get contactId(): string { return this.props.contactId; }
-  get companyId(): string { return this.props.companyId; }
+  get contactId(): string | undefined { return this.props.contactId; }
+  get companyId(): string | undefined { return this.props.companyId; }
   get expectedCloseDate(): Date | undefined { return this.props.expectedCloseDate; }
   get closedAt(): Date | undefined { return this.props.closedAt; }
   get isDeleted(): boolean { return this.props.isDeleted; }

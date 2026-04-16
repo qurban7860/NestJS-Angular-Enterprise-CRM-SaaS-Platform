@@ -19,8 +19,8 @@ export class CreateDealUseCase implements UseCase<CreateDealDto, DealResponseDto
       stage: request.stage,
       contactId: request.contactId,
       companyId: request.companyId,
-      ownerId: request.ownerId,
-      orgId: request.orgId,
+      ownerId: request.ownerId!,
+      orgId: request.orgId!,
       isDeleted: false,
     });
 

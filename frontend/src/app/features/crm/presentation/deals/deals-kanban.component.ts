@@ -200,7 +200,14 @@ export class DealsKanbanComponent implements OnInit {
 
   submitDeal() {
     if (this.dealForm.valid) {
-      this.store.dispatch(CRMActions.createDeal({ deal: this.dealForm.value }));
+      const formValue = this.dealForm.value;
+      const payload = {
+        ...formValue,
+        contactId: formValue.contactId === '00000000-0000-0000-0000-000000000000' ? null : formValue.contactId,
+        companyId: formValue.companyId === '00000000-0000-0000-0000-000000000000' ? null : formValue.companyId
+      };
+
+      this.store.dispatch(CRMActions.createDeal({ deal: payload }));
       this.closeCreateModal();
     }
   }

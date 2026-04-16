@@ -6,12 +6,17 @@ import { Contact } from '../../domain/entities/contact.entity';
 import { Injectable, Inject } from '@nestjs/common';
 
 @Injectable()
-export class CreateContactUseCase implements UseCase<CreateContactDto, ContactResponseDto> {
+export class CreateContactUseCase implements UseCase<
+  CreateContactDto,
+  ContactResponseDto
+> {
   constructor(
     @Inject('ICRMRepository') private readonly crmRepo: ICRMRepository,
   ) {}
 
-  async execute(request: CreateContactDto): Promise<Result<ContactResponseDto>> {
+  async execute(
+    request: CreateContactDto,
+  ): Promise<Result<ContactResponseDto>> {
     const contactOrError = Contact.create({
       firstName: request.firstName,
       lastName: request.lastName,

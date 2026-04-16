@@ -209,8 +209,8 @@ model Deal {
   valueCurrency     String    @default("USD")
   stage             DealStage @default(PROSPECTING)
   orgId             String
-  companyId         String
-  contactId         String
+  companyId         String?
+  contactId         String?
   ownerId           String
   expectedCloseDate DateTime?
   closedAt          DateTime?
@@ -219,8 +219,8 @@ model Deal {
   updatedAt         DateTime  @updatedAt
 
   org       Organization @relation(fields: [orgId], references: [id])
-  company   Company      @relation(fields: [companyId], references: [id])
-  contact   Contact      @relation("DealContact", fields: [contactId], references: [id])
+  company   Company?     @relation(fields: [companyId], references: [id])
+  contact   Contact?     @relation("DealContact", fields: [contactId], references: [id])
   owner     User         @relation("DealOwner", fields: [ownerId], references: [id])
   tasks     Task[]       @relation("TaskDeal")
   files     FileMetadata[] @relation("DealFiles")
