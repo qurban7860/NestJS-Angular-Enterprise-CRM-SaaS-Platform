@@ -1,0 +1,390 @@
+// ============================================================
+// Prisma Schema - Enterprise Platform
+// PostgreSQL · Clean Architecture · DDD
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  MANAGER
+  MEMBER
+}
+
+enum ContactStatus {
+  LEAD
+  QUALIFIED
+  CUSTOMER
+  CHURNED
+}
+
+enum CompanySize {
+  STARTUP
+  SMB
+  MID
+  ENTERPRISE
+}
+
+enum DealStage {
+  PROSPECTING
+  QUALIFICATION
+  PROPOSAL
+  NEGOTIATION
+  CLOSED_WON
+  CLOSED_LOST
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_COMPLETED
+  TASK_OVERDUE
+  DEAL_STAGE_CHANGED
+  COMMENT_ADDED
+  FILE_UPLOADED
+  SYSTEM
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  BOTH
+}
+
+enum WidgetType {
+  TASKS_SUMMARY
+  CRM_PIPELINE
+  RECENT_ACTIVITY
+  DEAL_VALUE
+  OVERDUE_TASKS
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  EXPORT
+}
+
+// ─────────────────────────────────────────────
+// USER
+// ─────────────────────────────────────────────
+
+model User {
+  id             String   @id @default(uuid())
+  email          String   @unique
+  passwordHash   String
+  firstName      String
+  lastName       String
+  role           Role     @default(MEMBER)
+  orgId          String
+  avatarUrl      String?
+  isActive       Boolean  @default(true)
+  refreshToken   String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  org              Organization     @relation(fields: [orgId], references: [id])
+  ownedContacts    Contact[]        @relation("ContactOwner")
+  ownedDeals       Deal[]           @relation("DealOwner")
+  assignedTasks    Task[]           @relation("TaskAssignee")
+  createdTasks     Task[]           @relation("TaskCreator")
+  comments         TaskComment[]
+  notifications    Notification[]
+  uploadedFiles    FileMetadata[]
+  widgets          Widget[]
+
+  auditLogs        AuditLog[]       @relation("UserAuditLogs")
+
+  @@index([email])
+  @@index([orgId])
+  @@map("users")
+}
+
+// ─────────────────────────────────────────────
+// ORGANIZATION
+// ─────────────────────────────────────────────
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  contacts  Contact[]
+  companies Company[]
+  deals     Deal[]
+  tasks     Task[]
+
+  @@map("organizations")
+}
+
+// ─────────────────────────────────────────────
+// CRM
+// ─────────────────────────────────────────────
+
+model Contact {
+  id          String        @id @default(uuid())
+  firstName   String
+  lastName    String
+  email       String
+  phone       String?
+  status      ContactStatus @default(LEAD)
+  tags        String[]
+  notes       String?
+  orgId       String
+  ownerId     String
+  companyId   String?
+  isDeleted   Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  org         Organization  @relation(fields: [orgId], references: [id])
+  owner       User          @relation("ContactOwner", fields: [ownerId], references: [id])
+  company     Company?      @relation(fields: [companyId], references: [id])
+  deals       Deal[]        @relation("DealContact")
+  tasks       Task[]        @relation("TaskContact")
+  files       FileMetadata[] @relation("ContactFiles")
+
+  @@unique([email, orgId])
+  @@index([orgId])
+  @@index([ownerId])
+  @@index([status])
+  @@index([companyId])
+  @@map("contacts")
+}
+
+model Company {
+  id        String      @id @default(uuid())
+  name      String
+  industry  String?
+  website   String?
+  size      CompanySize @default(SMB)
+  orgId     String
+  isDeleted Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  org       Organization @relation(fields: [orgId], references: [id])
+  contacts  Contact[]
+  deals     Deal[]
+
+  @@unique([name, orgId])
+  @@index([orgId])
+  @@map("companies")
+}
+
+model Deal {
+  id                String    @id @default(uuid())
+  title             String
+  valueAmount       Decimal   @db.Decimal(15, 2)
+  valueCurrency     String    @default("USD")
+  stage             DealStage @default(PROSPECTING)
+  orgId             String
+  companyId         String
+  contactId         String
+  ownerId           String
+  expectedCloseDate DateTime?
+  closedAt          DateTime?
+  isDeleted         Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  org       Organization @relation(fields: [orgId], references: [id])
+  company   Company      @relation(fields: [companyId], references: [id])
+  contact   Contact      @relation("DealContact", fields: [contactId], references: [id])
+  owner     User         @relation("DealOwner", fields: [ownerId], references: [id])
+  tasks     Task[]       @relation("TaskDeal")
+  files     FileMetadata[] @relation("DealFiles")
+
+  @@index([orgId])
+  @@index([stage])
+  @@index([ownerId])
+  @@index([companyId])
+  @@map("deals")
+}
+
+// ─────────────────────────────────────────────
+// TASKS
+// ─────────────────────────────────────────────
+
+model Task {
+  id               String       @id @default(uuid())
+  title            String
+  description      String?
+  status           TaskStatus   @default(TODO)
+  priority         TaskPriority @default(MEDIUM)
+  orgId            String
+  assigneeId       String?
+  creatorId        String
+  dueDate          DateTime?
+  completedAt      DateTime?
+  relatedContactId String?
+  relatedDealId    String?
+  tags             String[]
+  version          Int          @default(0)
+  isDeleted        Boolean      @default(false)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  org       Organization @relation(fields: [orgId], references: [id])
+  assignee  User?        @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  creator   User         @relation("TaskCreator", fields: [creatorId], references: [id])
+  contact   Contact?     @relation("TaskContact", fields: [relatedContactId], references: [id])
+  deal      Deal?        @relation("TaskDeal", fields: [relatedDealId], references: [id])
+  comments  TaskComment[]
+  files     FileMetadata[] @relation("TaskFiles")
+
+  @@index([orgId])
+  @@index([assigneeId])
+  @@index([creatorId])
+  @@index([status])
+  @@index([priority])
+  @@index([dueDate])
+  @@map("tasks")
+}
+
+model TaskComment {
+  id        String   @id @default(uuid())
+  taskId    String
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id])
+
+  @@index([taskId])
+  @@index([authorId])
+  @@map("task_comments")
+}
+
+// ─────────────────────────────────────────────
+// NOTIFICATIONS
+// ─────────────────────────────────────────────
+
+model Notification {
+  id          String              @id @default(uuid())
+  recipientId String
+  type        NotificationType
+  channel     NotificationChannel @default(IN_APP)
+  title       String
+  body        String
+  metadata    Json                @default("{}")
+  isRead      Boolean             @default(false)
+  readAt      DateTime?
+  createdAt   DateTime            @default(now())
+
+  recipient User @relation(fields: [recipientId], references: [id])
+
+  @@index([recipientId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// ─────────────────────────────────────────────
+// FILE UPLOAD
+// ─────────────────────────────────────────────
+
+model FileMetadata {
+  id                String  @id @default(uuid())
+  originalName      String
+  storagePath       String  @unique
+  mimeType          String
+  sizeBytes         Int
+  uploadedById      String
+  relatedEntityType String?
+  relatedContactId  String?
+  relatedDealId     String?
+  relatedTaskId     String?
+  isDeleted         Boolean  @default(false)
+  createdAt         DateTime @default(now())
+
+  uploadedBy User     @relation(fields: [uploadedById], references: [id])
+  contact    Contact? @relation("ContactFiles", fields: [relatedContactId], references: [id])
+  deal       Deal?    @relation("DealFiles", fields: [relatedDealId], references: [id])
+  task       Task?    @relation("TaskFiles", fields: [relatedTaskId], references: [id])
+
+  @@index([uploadedById])
+  @@index([relatedContactId])
+  @@index([relatedDealId])
+  @@index([relatedTaskId])
+  @@map("file_metadata")
+}
+
+// ─────────────────────────────────────────────
+// DASHBOARD WIDGETS
+// ─────────────────────────────────────────────
+
+model Widget {
+  id        String     @id @default(uuid())
+  userId    String
+  type      WidgetType
+  positionX Int        @default(0)
+  positionY Int        @default(0)
+  width     Int        @default(4)
+  height    Int        @default(3)
+  config    Json       @default("{}")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("widgets")
+}
+
+// ─────────────────────────────────────────────
+// AUDIT LOGS
+// ─────────────────────────────────────────────
+
+model AuditLog {
+  id           String      @id @default(uuid())
+  userId       String
+  orgId        String
+  action       AuditAction
+  entityType   String
+  entityId     String
+  changes      Json        @default("{}")
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime    @default(now())
+
+  user         User        @relation("UserAuditLogs", fields: [userId], references: [id])
+
+  @@index([orgId])
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

@@ -1,0 +1,81 @@
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { AppModule } from './app.module';
+import cookieParser from 'cookie-parser';
+import compression from 'compression';
+import helmet from 'helmet';
+import { WinstonModule } from 'nest-winston';
+import { createWinstonLogger } from './core/infrastructure/logger/winston.logger';
+
+async function bootstrap() {
+  const logger = WinstonModule.createLogger(createWinstonLogger());
+
+  const app = await NestFactory.create(AppModule, { logger });
+
+  const config = app.get(ConfigService);
+  const port = config.get<number>('PORT', 3000);
+  const corsOrigin = config.get<string>('CORS_ORIGIN', 'http://localhost:4200');
+
+  // ── Security Middleware ─────────────────────────────────
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
+    },
+    crossOriginEmbedderPolicy: true,
+    hsts: { maxAge: 31536000, includeSubDomains: true },
+  }));
+
+  app.use(compression());
+  app.use(cookieParser());
+
+  // ── CORS ─────────────────────────────────────────────────
+  app.enableCors({
+    origin: corsOrigin,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key'],
+    exposedHeaders: ['X-RateLimit-Limit', 'X-RateLimit-Remaining'],
+  });
+
+  // ── API Versioning ────────────────────────────────────────
+  app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
+
+  // ── Global Pipes ─────────────────────────────────────────
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,           // Strip unknown fields (prevents mass assignment)
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
+
+  // ── Global Prefix ─────────────────────────────────────────
+  app.setGlobalPrefix('api');
+
+  // ── Swagger (non-production) ──────────────────────────────
+  if (config.get('NODE_ENV') !== 'production') {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('Enterprise Platform API')
+      .setDescription('Production-grade API — CRM, Tasks, Notifications, Dashboard, Files')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('api/docs', app, document, {
+      swaggerOptions: { persistAuthorization: true },
+    });
+  }
+
+  await app.listen(port);
+  logger.log(`🚀 Server running on http://localhost:${port}/api/v1`, 'Bootstrap');
+  logger.log(`📚 Swagger docs at http://localhost:${port}/api/docs`, 'Bootstrap');
+}
+
+bootstrap();
