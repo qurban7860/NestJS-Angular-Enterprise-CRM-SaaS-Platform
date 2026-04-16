@@ -13,10 +13,10 @@ interface TaskProps {
   orgId: string;
   assigneeId?: string;
   creatorId: string;
-  dueDate?: Date;
-  completedAt?: Date;
-  contactId?: string;
-  dealId?: string;
+  dueDate?: Date | null;
+  completedAt?: Date | null;
+  contactId?: string | null;
+  dealId?: string | null;
   tags: string[];
   isDeleted: boolean;
   version: number;
@@ -36,10 +36,10 @@ export class Task extends Entity<TaskProps> {
   get orgId(): string { return this.props.orgId; }
   get assigneeId(): string | undefined { return this.props.assigneeId; }
   get creatorId(): string { return this.props.creatorId; }
-  get dueDate(): Date | undefined { return this.props.dueDate; }
-  get completedAt(): Date | undefined { return this.props.completedAt; }
-  get contactId(): string | undefined { return this.props.contactId; }
-  get dealId(): string | undefined { return this.props.dealId; }
+  get dueDate(): Date | null | undefined { return this.props.dueDate; }
+  get completedAt(): Date | null | undefined { return this.props.completedAt; }
+  get contactId(): string | null | undefined { return this.props.contactId; }
+  get dealId(): string | null | undefined { return this.props.dealId; }
   get tags(): string[] { return this.props.tags; }
   get isDeleted(): boolean { return this.props.isDeleted; }
   get version(): number { return this.props.version; }

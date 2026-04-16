@@ -6,7 +6,10 @@ export class CreateTaskDto {
   @IsString()
   title!: string;
 
-  @ApiProperty({ example: 'Detailed analysis of Q1 performance', required: false })
+  @ApiProperty({
+    example: 'Detailed analysis of Q1 performance',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   description?: string;
@@ -29,10 +32,14 @@ export class CreateTaskDto {
   @IsOptional()
   orgId!: string;
 
-  @ApiProperty({ example: '2026-05-01T10:00:00Z', required: false })
+  @ApiProperty({
+    example: '2026-05-01T10:00:00Z',
+    required: false,
+    nullable: true,
+  })
   @IsOptional()
   @IsDateString()
-  dueDate?: Date;
+  dueDate?: Date | null;
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -43,7 +50,7 @@ export class CreateTaskDto {
   @IsOptional()
   @IsString()
   dealId?: string;
-  
+
   @ApiProperty()
   @IsOptional()
   @IsString()
@@ -80,14 +87,17 @@ export class TaskResponseDto {
   @ApiProperty()
   priority!: string;
 
-  @ApiProperty({ required: false })
-  assigneeId?: string;
+  @ApiProperty({ required: false, nullable: true })
+  assigneeId?: string | null;
 
-  @ApiProperty({ required: false })
-  contactId?: string;
+  @ApiProperty({ required: false, nullable: true })
+  contactId?: string | null;
 
-  @ApiProperty({ required: false })
-  dealId?: string;
+  @ApiProperty({ required: false, nullable: true })
+  dealId?: string | null;
+
+  @ApiProperty({ required: false, nullable: true })
+  dueDate?: Date | null;
 
   @ApiProperty()
   createdAt!: Date;

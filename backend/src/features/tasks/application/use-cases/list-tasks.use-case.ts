@@ -35,6 +35,7 @@ export class ListTasksUseCase implements UseCase<{ orgId: string; filters?: any 
         assigneeId: task.assigneeId,
         contactId: task.contactId,
         dealId: task.dealId,
+        dueDate: task.dueDate,
         createdAt: task.createdAt!,
       }))
     );

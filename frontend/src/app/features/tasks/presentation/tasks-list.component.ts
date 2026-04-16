@@ -358,17 +358,21 @@ export class TasksListComponent implements OnInit {
   }
 
   submitTask() {
-    if (this.taskForm.valid) {
-      const taskData: any = { ...this.taskForm.getRawValue() };
-      // Clean up empty strings to null for backend
-      ['assigneeId', 'contactId', 'dealId', 'dueDate'].forEach(field => {
-        if (!taskData[field]) taskData[field] = null;
-      });
+  if (this.taskForm.valid) {
+    const rawValues = this.taskForm.getRawValue();
+    const taskData: any = { ...rawValues };
 
-      this.store.dispatch(TasksActions.createTask({ task: taskData }));
-      this.closeCreateModal();
+    if (taskData.dueDate) {
+      taskData.dueDate = new Date(taskData.dueDate).toISOString();
     }
+    ['assigneeId', 'contactId', 'dealId', 'dueDate'].forEach(field => {
+      if (!taskData[field]) taskData[field] = null;
+    });
+
+    this.store.dispatch(TasksActions.createTask({ task: taskData }));
+    this.closeCreateModal();
   }
+}
 
   onUploadSuccess(response: any) {
     this.store.dispatch(ToastActions.showToast({
