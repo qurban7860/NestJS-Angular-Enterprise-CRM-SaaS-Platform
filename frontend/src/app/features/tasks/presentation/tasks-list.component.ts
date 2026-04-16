@@ -30,85 +30,101 @@ import { AuthService } from '../../../core/services/auth.service';
 
       <!-- Create Task Modal Overlay -->
       @if (isModalOpen) {
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in zoom-in duration-200">
-          <div class="glass-panel w-full max-w-lg p-8 relative max-h-[90vh] overflow-y-auto">
-            <button (click)="closeCreateModal()" class="absolute top-6 right-6 text-brand-secondary hover:text-white transition-colors">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            
-            <div class="mb-8">
-              <h2 class="text-2xl font-bold">New Task</h2>
-              <p class="text-brand-secondary text-sm">Fill in the details to create a new assignment</p>
+  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in zoom-in duration-200">
+    <div class="glass-panel w-full max-w-lg p-8 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+      
+      <button (click)="closeCreateModal()" class="absolute top-6 right-6 text-brand-secondary hover:text-white transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      
+      <div class="mb-8">
+        <h2 class="text-2xl font-bold">New Task</h2>
+        <p class="text-brand-secondary text-sm">Fill in the details to create a new assignment</p>
+      </div>
+
+      <form [formGroup]="taskForm" (ngSubmit)="submitTask()" class="space-y-5">
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-brand-secondary mb-1">Task Title</label>
+            <input formControlName="title" type="text" placeholder="e.g., Follow up on Q2 proposal" 
+                   class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-brand-secondary mb-1">Description</label>
+            <textarea formControlName="description" rows="3" placeholder="Add context..." 
+                      class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all resize-none"></textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-brand-secondary mb-1">Priority Level</label>
+              <select formControlName="priority" 
+                class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all appearance-none cursor-pointer">
+                  <option value="LOW" class="bg-[#0a0a0a]">Low</option>
+                  <option value="MEDIUM" class="bg-[#0a0a0a]">Medium</option>
+                  <option value="HIGH" class="bg-[#0a0a0a]">High</option>
+                  <option value="URGENT" class="bg-[#0a0a0a]">Urgent</option>
+              </select>
             </div>
-
-            <form [formGroup]="taskForm" (ngSubmit)="submitTask()" class="space-y-6">
-              <div class="space-y-4">
-                <div>
-                  <label class="block text-xs font-bold uppercase tracking-wider text-brand-secondary mb-2">Title</label>
-                  <input formControlName="title" type="text" class="premium-input w-full" placeholder="e.g., Follow up on Q2 proposal">
-                </div>
-
-                <div>
-                  <label class="block text-xs font-bold uppercase tracking-wider text-brand-secondary mb-2">Description</label>
-                  <textarea formControlName="description" rows="2" class="premium-input w-full" placeholder="Add some context..."></textarea>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-brand-secondary mb-2">Priority</label>
-                    <select formControlName="priority" class="premium-input w-full bg-black">
-                      <option value="LOW">Low</option>
-                      <option value="MEDIUM">Medium</option>
-                      <option value="HIGH">High</option>
-                      <option value="URGENT">Urgent</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-brand-secondary mb-2">Due Date</label>
-                    <input formControlName="dueDate" type="date" class="premium-input w-full">
-                  </div>
-                </div>
-
-                <div class="border-t border-white/5 pt-4">
-                  <label class="block text-xs font-bold uppercase tracking-wider text-brand-secondary mb-2">Assignee</label>
-                  <select formControlName="assigneeId" class="premium-input w-full bg-black">
-                    <option value="">Unassigned</option>
-                    @for (user of users$ | async; track user.id) {
-                      <option [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
-                    }
-                  </select>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-brand-secondary mb-2">Link Contact</label>
-                    <select formControlName="contactId" class="premium-input w-full bg-black">
-                      <option value="">None</option>
-                      @for (c of contacts$ | async; track c.id) {
-                        <option [value]="c.id">{{ c.firstName }} {{ c.lastName }}</option>
-                      }
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-brand-secondary mb-2">Link Deal</label>
-                    <select formControlName="dealId" class="premium-input w-full bg-black">
-                      <option value="">None</option>
-                      @for (d of deals$ | async; track d.id) {
-                        <option [value]="d.id">{{ d.title }}</option>
-                      }
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div class="pt-4 flex gap-3">
-                <button type="button" (click)="closeCreateModal()" class="flex-1 px-4 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all text-sm font-medium">Cancel</button>
-                <button type="submit" [disabled]="taskForm.invalid" class="premium-button flex-1 py-3 disabled:opacity-50">Create Task</button>
-              </div>
-            </form>
+            <div>
+              <label class="block text-sm font-medium text-brand-secondary mb-1">Due Date</label>
+              <input formControlName="dueDate" type="date" 
+              class="cursor-pointer w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all [color-scheme:dark]">
+            </div>
           </div>
         </div>
-      }
+
+        <div class="pt-4 border-t border-white/5 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-brand-secondary mb-1">Assign To</label>
+            <select formControlName="assigneeId" class="cursor-pointer w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all appearance-none">
+              <option value="" class="bg-[#0a0a0a]">Unassigned</option>
+              @for (user of users$ | async; track user.id) {
+                <option [value]="user.id" class="bg-[#0a0a0a]">{{ user.firstName }} {{ user.lastName }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-brand-secondary mb-1">Link Contact</label>
+              <select formControlName="contactId" class="cursor-pointer w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all appearance-none">
+                <option value="" class="bg-[#0a0a0a]">None</option>
+                @for (c of contacts$ | async; track c.id) {
+                  <option [value]="c.id" class="bg-[#0a0a0a]">{{ c.firstName }} {{ c.lastName }}</option>
+                }
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-brand-secondary mb-1">Link Deal</label>
+              <select formControlName="dealId" class="cursor-pointer w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all appearance-none">
+                <option value="" class="bg-[#0a0a0a]">None</option>
+                @for (d of deals$ | async; track d.id) {
+                  <option [value]="d.id" class="bg-[#0a0a0a]">{{ d.title }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-6 flex gap-3">
+          <button type="button" (click)="closeCreateModal()" 
+                  class="flex-1 px-4 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all text-sm font-medium">
+            Cancel
+          </button>
+          <button type="submit" [disabled]="taskForm.invalid" 
+                  class="premium-button flex-1 py-3 disabled:opacity-50 disabled:cursor-not-allowed">
+            Create Task
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
 
       <!-- Advanced Filters -->
       <div class="flex flex-col lg:flex-row gap-4 items-center justify-between">
