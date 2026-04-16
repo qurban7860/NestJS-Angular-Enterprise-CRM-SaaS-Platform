@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { CRMActions } from '../../../../core/state/crm/crm.actions';
 import { selectContacts, selectIsLoading } from '../../../../core/state/crm/crm.reducer';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { map, startWith, combineLatest } from 'rxjs';
 
 @Component({
@@ -18,10 +18,43 @@ import { map, startWith, combineLatest } from 'rxjs';
           <h1 class="text-2xl font-bold">Contacts</h1>
           <p class="text-brand-secondary text-sm mt-1">Manage your customer relationships and leads</p>
         </div>
-        <button class="premium-button flex items-center gap-2">
+        <button (click)="openCreateModal()" class="premium-button flex items-center gap-2">
           <span class="text-lg">+</span> Add Contact
         </button>
       </div>
+
+      <!-- Add Contact Modal Overlay -->
+      @if (isModalOpen) {
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in zoom-in duration-200">
+          <div class="glass-panel w-full max-w-md p-8 relative">
+            <button (click)="closeCreateModal()" class="absolute top-4 right-4 text-brand-secondary hover:text-white transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-2xl font-bold mb-6">Add New Contact</h2>
+            <form [formGroup]="contactForm" (ngSubmit)="submitContact()" class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-brand-secondary mb-1">First Name</label>
+                  <input formControlName="firstName" type="text" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-brand-secondary mb-1">Last Name</label>
+                  <input formControlName="lastName" type="text" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all">
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-brand-secondary mb-1">Email Address</label>
+                <input formControlName="email" type="email" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-brand-secondary mb-1">Phone Number (Optional)</label>
+                <input formControlName="phone" type="text" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all">
+              </div>
+              <button type="submit" [disabled]="contactForm.invalid" class="premium-button w-full mt-6 py-3 disabled:opacity-50">Save Contact</button>
+            </form>
+          </div>
+        </div>
+      }
 
       <!-- Filters & Search -->
       <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -109,10 +142,20 @@ import { map, startWith, combineLatest } from 'rxjs';
 })
 export class ContactsListComponent implements OnInit {
   private store = inject(Store);
+  private fb = inject(FormBuilder);
   
   contacts$ = this.store.select(selectContacts);
   isLoading$ = this.store.select(selectIsLoading);
   searchControl = new FormControl('', { nonNullable: true });
+
+  isModalOpen = false;
+  contactForm = this.fb.group({
+    firstName: ['', Validators.required],
+    lastName: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    phone: [''],
+    companyId: [null]
+  });
 
   filteredContacts$ = combineLatest([
     this.contacts$,
@@ -130,6 +173,19 @@ export class ContactsListComponent implements OnInit {
 
   ngOnInit() {
     this.store.dispatch(CRMActions.loadContacts());
+  }
+
+  openCreateModal() { this.isModalOpen = true; }
+  closeCreateModal() { 
+    this.isModalOpen = false;
+    this.contactForm.reset();
+  }
+
+  submitContact() {
+    if (this.contactForm.valid) {
+      this.store.dispatch(CRMActions.createContact({ contact: this.contactForm.value }));
+      this.closeCreateModal();
+    }
   }
 
   getStatusClass(status: string): string {

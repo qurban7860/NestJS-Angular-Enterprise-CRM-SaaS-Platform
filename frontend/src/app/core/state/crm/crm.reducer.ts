@@ -36,6 +36,25 @@ export const crmFeature = createFeature({
     on(CRMActions.loadDeals, (state) => ({ ...state, isLoading: true, error: null })),
     on(CRMActions.loadDealsSuccess, (state, { deals }) => ({ ...state, isLoading: false, deals })),
     on(CRMActions.loadDealsFailure, (state, { error }) => ({ ...state, isLoading: false, error })),
+
+    on(CRMActions.createDeal, (state) => ({ ...state, isLoading: true })),
+    on(CRMActions.createDealSuccess, (state, { deal }) => ({
+      ...state,
+      isLoading: false,
+      deals: [deal, ...state.deals]
+    })),
+    on(CRMActions.createDealFailure, (state, { error }) => ({ ...state, isLoading: false, error })),
+
+    // Optimistic Update: instantly change the deals stage
+    on(CRMActions.updateDealStage, (state, { id, stage }) => ({
+      ...state,
+      deals: state.deals.map(d => d.id === id ? { ...d, stage } : d)
+    })),
+    // Revert Optimistic Update on failure
+    on(CRMActions.updateDealStageFailure, (state, { dealId, originalStage }) => ({
+      ...state,
+      deals: state.deals.map(d => d.id === dealId && originalStage ? { ...d, stage: originalStage } : d)
+    })),
   ),
 });
 

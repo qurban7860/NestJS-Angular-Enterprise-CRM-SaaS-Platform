@@ -60,9 +60,13 @@ export class Task extends Entity<TaskProps> {
     }, id));
   }
 
-  public complete(): void {
-    this.props.status = 'DONE';
-    this.props.completedAt = new Date();
+  public updateStatus(status: TaskStatus): void {
+    this.props.status = status;
+    if (status === 'DONE') {
+      this.props.completedAt = new Date();
+    } else {
+      this.props.completedAt = undefined;
+    }
     this.props.updatedAt = new Date();
   }
 

@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { CRMActions } from '../../../../core/state/crm/crm.actions';
 import { selectDeals, selectIsLoading } from '../../../../core/state/crm/crm.reducer';
@@ -15,7 +16,7 @@ interface KanbanColumn {
 @Component({
   selector: 'app-deals-kanban',
   standalone: true,
-  imports: [CommonModule, DragDropModule],
+  imports: [CommonModule, DragDropModule, ReactiveFormsModule],
   template: `
     <div class="h-[calc(100vh-12rem)] flex flex-col space-y-6 animate-in fade-in duration-500">
       <!-- Header -->
@@ -31,11 +32,53 @@ interface KanbanColumn {
                {{ total | currency:'USD':'symbol':'1.0-0' }}
             </span>
           </div>
-          <button class="premium-button flex items-center gap-2">
+          <button (click)="openCreateModal()" class="premium-button flex items-center gap-2">
             <span>+</span> New Deal
           </button>
         </div>
       </div>
+
+      <!-- Create Deal Modal Overlay -->
+      @if (isModalOpen) {
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in zoom-in duration-200">
+          <div class="glass-panel w-full max-w-md p-8 relative">
+            <button (click)="closeCreateModal()" class="absolute top-4 right-4 text-brand-secondary hover:text-white transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-2xl font-bold mb-6">Create New Deal</h2>
+            <form [formGroup]="dealForm" (ngSubmit)="submitDeal()" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-brand-secondary mb-1">Deal Title</label>
+                <input formControlName="title" type="text" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all" placeholder="E.g. Enterprise License">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-brand-secondary mb-1">Value Amount</label>
+                <input formControlName="valueAmount" type="number" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all" placeholder="50000">
+              </div>
+              <div class="flex gap-4">
+                <div class="flex-1">
+                  <label class="block text-sm font-medium text-brand-secondary mb-1">Currency</label>
+                  <select formControlName="valueCurrency" class="w-full bg-black/40 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all text-white">
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="AUD">AUD</option>
+                  </select>
+                </div>
+                <div class="flex-1">
+                  <label class="block text-sm font-medium text-brand-secondary mb-1">Stage</label>
+                  <select formControlName="stage" class="w-full bg-black/40 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all text-white">
+                    <option value="PROSPECTING">Prospecting</option>
+                    <option value="QUALIFICATION">Qualification</option>
+                    <option value="PROPOSAL">Proposal</option>
+                    <option value="NEGOTIATION">Negotiation</option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" [disabled]="dealForm.invalid" class="premium-button w-full mt-6 py-3 disabled:opacity-50">Create Pipeline Deal</button>
+            </form>
+          </div>
+        </div>
+      }
 
       <!-- Kanban Board -->
       <div class="flex-1 overflow-x-auto overflow-y-hidden">
@@ -114,9 +157,20 @@ interface KanbanColumn {
 })
 export class DealsKanbanComponent implements OnInit {
   private store = inject(Store);
+  private fb = inject(FormBuilder);
   
   deals$ = this.store.select(selectDeals);
   isLoading$ = this.store.select(selectIsLoading);
+
+  isModalOpen = false;
+  dealForm = this.fb.group({
+    title: ['', Validators.required],
+    valueAmount: [0, [Validators.required, Validators.min(0)]],
+    valueCurrency: ['USD', Validators.required],
+    stage: ['PROSPECTING', Validators.required],
+    contactId: ['00000000-0000-0000-0000-000000000000'],
+    companyId: ['00000000-0000-0000-0000-000000000000']
+  });
 
   stageIds = ['PROSPECTING', 'QUALIFICATION', 'PROPOSAL', 'NEGOTIATION', 'CLOSED_WON'];
   
@@ -138,15 +192,29 @@ export class DealsKanbanComponent implements OnInit {
     this.store.dispatch(CRMActions.loadDeals());
   }
 
+  openCreateModal() { this.isModalOpen = true; }
+  closeCreateModal() { 
+    this.isModalOpen = false;
+    this.dealForm.reset({ valueCurrency: 'USD', stage: 'PROSPECTING', contactId: '00000000-0000-0000-0000-000000000000', companyId: '00000000-0000-0000-0000-000000000000' });
+  }
+
+  submitDeal() {
+    if (this.dealForm.valid) {
+      this.store.dispatch(CRMActions.createDeal({ deal: this.dealForm.value }));
+      this.closeCreateModal();
+    }
+  }
+
   onDrop(event: CdkDragDrop<any[]>) {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
       const deal = event.previousContainer.data[event.previousIndex];
       const newStage = event.container.id;
+      const originalStage = event.previousContainer.id;
       
-      // We would normally dispatch an action here to update the stage in the backend
-      // CRMActions.updateDealStage({ id: deal.id, stage: newStage })
+      // OPTIMISTIC UPDATE: Dispatch immediately
+      this.store.dispatch(CRMActions.updateDealStage({ id: deal.id, stage: newStage }));
       
       transferArrayItem(
         event.previousContainer.data,

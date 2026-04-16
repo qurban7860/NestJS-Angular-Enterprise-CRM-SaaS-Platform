@@ -5,6 +5,8 @@ import { ListTasksUseCase } from '../../application/use-cases/list-tasks.use-cas
 import { CreateTaskDto, TaskResponseDto } from '../../application/dtos/task.dto';
 import { CurrentUser } from '../../../../core/presentation/decorators/current-user.decorator';
 
+import { UpdateTaskStatusUseCase } from '../../application/use-cases/update-task-status.use-case';
+
 @ApiTags('Tasks')
 @ApiBearerAuth()
 @Controller('tasks')
@@ -12,6 +14,7 @@ export class TasksController {
   constructor(
     private readonly createTaskUseCase: CreateTaskUseCase,
     private readonly listTasksUseCase: ListTasksUseCase,
+    private readonly updateTaskStatusUseCase: UpdateTaskStatusUseCase,
   ) {}
 
   @Get()
@@ -32,6 +35,26 @@ export class TasksController {
     const result = await this.createTaskUseCase.execute({
       ...dto,
       creatorId: user.id,
+      orgId: user.orgId,
+    });
+
+    if (result.isFailure) {
+      throw result.error;
+    }
+    return result.getValue();
+  }
+
+  @Patch(':id/status')
+  @ApiOperation({ summary: 'Update a task status' })
+  @ApiResponse({ status: 200, type: TaskResponseDto })
+  async updateStatus(
+    @Param('id') taskId: string,
+    @Body() dto: { status: string },
+    @CurrentUser() user: any
+  ) {
+    const result = await this.updateTaskStatusUseCase.execute({
+      taskId,
+      status: dto.status as any,
       orgId: user.orgId,
     });
 
