@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
 import { IUserRepository } from '../../domain/repositories/user.repository.interface';
 import { User } from '../../domain/entities/user.entity';
@@ -26,6 +27,14 @@ export class PrismaUserRepository implements IUserRepository {
 
     if (!user) return null;
     return this.mapper.toDomain(user);
+  }
+
+  async findByOrgId(orgId: string): Promise<User[]> {
+    const users = await this.prisma.user.findMany({
+      where: { orgId, isActive: true },
+    });
+
+    return users.map((user) => this.mapper.toDomain(user));
   }
 
   async exists(email: string): Promise<boolean> {

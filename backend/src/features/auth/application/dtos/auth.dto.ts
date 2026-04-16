@@ -51,3 +51,23 @@ export class AuthResponseDto {
   @ApiProperty({ description: 'JWT Access Token' })
   accessToken!: string;
 }
+
+export class UserResponseDto {
+  @ApiProperty()
+  id!: string;
+
+  @ApiProperty()
+  email!: string;
+
+  @ApiProperty()
+  firstName!: string;
+
+  @ApiProperty()
+  lastName!: string;
+
+  @ApiProperty()
+  role!: string;
+
+  @ApiProperty()
+  orgId!: string;
+}

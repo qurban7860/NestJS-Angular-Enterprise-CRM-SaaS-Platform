@@ -3,7 +3,7 @@ import { createActionGroup, emptyProps, props } from '@ngrx/store';
 export const TasksActions = createActionGroup({
   source: 'Tasks',
   events: {
-    'Load Tasks': emptyProps(),
+    'Load Tasks': props<{ filters?: { assigneeId?: string; contactId?: string; dealId?: string } }>(),
     'Load Tasks Success': props<{ tasks: any[] }>(),
     'Load Tasks Failure': props<{ error: string }>(),
 

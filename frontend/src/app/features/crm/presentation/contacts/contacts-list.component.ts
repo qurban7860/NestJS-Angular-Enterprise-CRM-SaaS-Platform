@@ -35,20 +35,20 @@ import { map, startWith, combineLatest } from 'rxjs';
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-brand-secondary mb-1">First Name</label>
-                  <input formControlName="firstName" type="text" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all">
+                  <input formControlName="firstName" type="text" placeholder="First Name" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all">
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-brand-secondary mb-1">Last Name</label>
-                  <input formControlName="lastName" type="text" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all">
+                  <input formControlName="lastName" type="text" placeholder="Last Name" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all">
                 </div>
               </div>
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Email Address</label>
-                <input formControlName="email" type="email" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all">
+                <input formControlName="email" type="email" placeholder="Email Address" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all">
               </div>
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Phone Number (Optional)</label>
-                <input formControlName="phone" type="text" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all">
+                <input formControlName="phone" type="text" placeholder="Phone Number" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all">
               </div>
               <button type="submit" [disabled]="contactForm.invalid" class="premium-button w-full mt-6 py-3 disabled:opacity-50">Save Contact</button>
             </form>

@@ -16,8 +16,9 @@ export class TasksService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/tasks`;
 
-  getTasks(): Observable<any[]> {
-    return this.http.get<ApiResponse<any[]>>(this.apiUrl).pipe(map(res => res.data));
+  getTasks(filters?: { assigneeId?: string; contactId?: string; dealId?: string }): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(this.apiUrl, { params: filters as any })
+      .pipe(map(res => res.data));
   }
 
   createTask(task: any): Observable<any> {

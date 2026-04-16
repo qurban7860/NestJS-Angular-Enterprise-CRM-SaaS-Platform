@@ -44,4 +44,10 @@ export class AuthService {
     return this.http.get<ApiResponse<User>>(`${this.apiUrl}/me`)
       .pipe(map(res => res.data));
   }
+
+  getUsers(): Observable<User[]> {
+    const baseUrl = this.apiUrl.replace('/auth', '/users');
+    return this.http.get<ApiResponse<User[]>>(baseUrl)
+      .pipe(map(res => res.data));
+  }
 }

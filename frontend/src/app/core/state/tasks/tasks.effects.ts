@@ -13,8 +13,8 @@ export class TasksEffects {
   loadTasks$ = createEffect(() =>
     this.actions$.pipe(
       ofType(TasksActions.loadTasks),
-      mergeMap(() =>
-        this.tasksService.getTasks().pipe(
+      mergeMap(({ filters }) =>
+        this.tasksService.getTasks(filters).pipe(
           map(tasks => TasksActions.loadTasksSuccess({ tasks })),
           catchError(error => of(TasksActions.loadTasksFailure({ error: error.message })))
         )
