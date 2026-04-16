@@ -21,7 +21,7 @@ export class GetDashboardStatsUseCase implements UseCase<string, DashboardStatsD
     ]);
 
     // Calculate Metrics
-    const activeDeals = deals.filter(d => d.status !== 'CLOSED_LOST' && d.status !== 'CLOSED_WON');
+    const activeDeals = deals.filter(d => d.stage !== 'CLOSED_LOST' && d.stage !== 'CLOSED_WON');
     const totalValue = deals.reduce((sum, d) => sum + d.valueAmount, 0);
     
     const totalTasks = tasks.length;
@@ -35,15 +35,14 @@ export class GetDashboardStatsUseCase implements UseCase<string, DashboardStatsD
         type: 'CONTACT',
         action: 'Added new contact',
         label: `${c.firstName} ${c.lastName}`,
-        timestamp: c.createdAt!,
+        timestamp: c.createdAt ? new Date(c.createdAt) : new Date(),
       })),
       ...deals.map(d => ({
         id: d.id,
         type: 'DEAL',
         action: 'Created deal',
         label: d.title,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        timestamp: d.createdAt!,
+        timestamp: d.createdAt ? new Date(d.createdAt) : new Date(),
         metadata: { value: d.valueAmount }
       })),
       ...tasks.map(t => ({
@@ -51,12 +50,13 @@ export class GetDashboardStatsUseCase implements UseCase<string, DashboardStatsD
         type: 'TASK',
         action: 'Task assigned',
         label: t.title,
-        timestamp: t.createdAt!,
+        timestamp: t.createdAt ? new Date(t.createdAt) : new Date(),
       }))
     ];
 
     // Sort by most recent and take top 10
     const recentActivity = activity
+      .filter(a => a.timestamp instanceof Date && !isNaN(a.timestamp.getTime()))
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
       .slice(0, 10);
 

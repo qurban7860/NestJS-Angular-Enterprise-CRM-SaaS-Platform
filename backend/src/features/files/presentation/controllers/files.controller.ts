@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable prettier/prettier */
 import { 
-  Controller, Post, Get, Param, UseInterceptors, UploadedFile, 
+  Controller, Post, Get, Param, Body, UseInterceptors, UploadedFile, 
   Res, ParseUUIDPipe, Inject, InternalServerErrorException 
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -43,8 +43,8 @@ export class FilesController {
   async upload(
     @UploadedFile() file: any,
     @CurrentUser() user: any,
-    @Param('relatedEntityType') relatedEntityType?: string,
-    @Param('relatedEntityId') relatedEntityId?: string,
+    @Body('relatedEntityType') relatedEntityType?: string,
+    @Body('relatedEntityId') relatedEntityId?: string,
   ) {
     const result = await this.uploadUseCase.execute({
       file,

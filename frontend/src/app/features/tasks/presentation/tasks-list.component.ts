@@ -6,12 +6,13 @@ import { selectTasks, selectIsLoading } from '../../../core/state/tasks/tasks.re
 import { FormControl, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { map, startWith, combineLatest } from 'rxjs';
 import { FileUploadComponent } from '../../../core/components/file-upload/file-upload.component';
+import { TaskCommentsComponent } from '../../../core/components/task-comments/task-comments.component';
 import { ToastActions } from '../../../core/state/toast/toast.actions';
 
 @Component({
   selector: 'app-tasks-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent],
+  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent, TaskCommentsComponent],
   template: `
     <div class="space-y-6 animate-in fade-in duration-500 max-w-5xl mx-auto pb-20">
       <!-- Header -->
@@ -141,13 +142,20 @@ import { ToastActions } from '../../../core/state/toast/toast.actions';
 
               <!-- Quick Attachment Area -->
               @if (selectedTaskId === task.id) {
-                <div class="glass-panel mx-4 p-4 border-t-0 rounded-t-none animate-in slide-in-from-top-2 duration-300">
-                  <h5 class="text-xs font-bold uppercase tracking-wider text-brand-secondary mb-3">Task Attachments</h5>
-                  <app-file-upload 
-                    [relatedEntityType]="'TASK'" 
-                    [relatedEntityId]="task.id"
-                    (uploadSuccess)="onUploadSuccess($event)"
-                  ></app-file-upload>
+                <div class="glass-panel mx-4 p-4 border-t-0 rounded-t-none animate-in slide-in-from-top-2 duration-300 space-y-6">
+                  <div>
+                    <h5 class="text-xs font-bold uppercase tracking-wider text-brand-secondary mb-3">Task Attachments</h5>
+                    <app-file-upload 
+                      [relatedEntityType]="'TASK'" 
+                      [relatedEntityId]="task.id"
+                      (uploadSuccess)="onUploadSuccess($event)"
+                    ></app-file-upload>
+                  </div>
+
+                  <div class="pt-4 border-t border-white/5">
+                    <h5 class="text-xs font-bold uppercase tracking-wider text-brand-secondary mb-3">Comments & Activity</h5>
+                    <app-task-comments [taskId]="task.id"></app-task-comments>
+                  </div>
                 </div>
               }
             </div>

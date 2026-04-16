@@ -30,10 +30,10 @@ export class PrismaFileMetadataRepository implements IFileMetadataRepository {
       mimeType: entity.mimeType,
       sizeBytes: entity.sizeBytes,
       uploadedById: entity.uploadedById,
-      relatedEntityType: (entity as any).props.relatedEntityType,
-      relatedContactId: (entity as any).props.relatedContactId,
-      relatedDealId: (entity as any).props.relatedDealId,
-      relatedTaskId: (entity as any).props.relatedTaskId,
+      relatedEntityType: (entity as any).props.relatedEntityType ?? null,
+      relatedContactId: (entity as any).props.relatedContactId ?? null,
+      relatedDealId: (entity as any).props.relatedDealId ?? null,
+      relatedTaskId: (entity as any).props.relatedTaskId ?? null,
       isDeleted: entity.isDeleted,
     };
 

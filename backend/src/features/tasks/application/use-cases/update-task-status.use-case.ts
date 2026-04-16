@@ -4,6 +4,7 @@ import type { ITaskRepository } from '../../domain/repositories/task.repository.
 import { TaskResponseDto } from '../dtos/task.dto';
 import { TaskStatus } from '../../domain/entities/task.entity';
 import { Injectable, Inject } from '@nestjs/common';
+import { NotificationsGateway } from '../../../notifications/infrastructure/gateways/notifications.gateway';
 
 export interface UpdateTaskStatusRequest {
   taskId: string;
@@ -15,6 +16,7 @@ export interface UpdateTaskStatusRequest {
 export class UpdateTaskStatusUseCase implements UseCase<UpdateTaskStatusRequest, TaskResponseDto> {
   constructor(
     @Inject('ITaskRepository') private readonly taskRepo: ITaskRepository,
+    private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
   async execute(request: UpdateTaskStatusRequest): Promise<Result<TaskResponseDto>> {
@@ -31,6 +33,16 @@ export class UpdateTaskStatusUseCase implements UseCase<UpdateTaskStatusRequest,
     task.updateStatus(request.status);
 
     await this.taskRepo.save(task);
+
+    // Notify creator if task is completed by someone else
+    if (request.status === 'DONE' && task.creatorId !== task.assigneeId) {
+      this.notificationsGateway.sendToUser(task.creatorId, 'notification', {
+        title: 'Task Completed',
+        message: `Task "${task.title}" has been marked as completed.`,
+        type: 'TASK_COMPLETED',
+        data: { taskId: task.id }
+      });
+    }
 
     return Result.ok<TaskResponseDto>({
       id: task.id,

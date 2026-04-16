@@ -41,7 +41,7 @@ export class UpdateDealStageUseCase implements UseCase<UpdateDealStageRequest, D
       ownerId: deal.ownerId,
       contactId: deal.contactId,
       companyId: deal.companyId,
-      createdAt: deal.createdAt,
+      createdAt: deal.createdAt!,
     });
   }
 }

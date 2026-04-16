@@ -179,8 +179,8 @@ export class PrismaCRMRepository implements ICRMRepository {
       ownerId: deal.ownerId,
       contactId: deal.contactId ?? null,
       companyId: deal.companyId ?? null,
-      expectedCloseDate: deal.expectedCloseDate,
-      closedAt: deal.closedAt,
+      expectedCloseDate: deal.expectedCloseDate ?? null,
+      closedAt: deal.closedAt ?? null,
       isDeleted: deal.isDeleted,
     };
 

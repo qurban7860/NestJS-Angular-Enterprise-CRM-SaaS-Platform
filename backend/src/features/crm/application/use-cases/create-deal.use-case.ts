@@ -41,7 +41,7 @@ export class CreateDealUseCase implements UseCase<CreateDealDto, DealResponseDto
       ownerId: deal.ownerId,
       contactId: deal.contactId,
       companyId: deal.companyId,
-      createdAt: deal.createdAt,
+      createdAt: deal.createdAt!,
     });
   }
 }

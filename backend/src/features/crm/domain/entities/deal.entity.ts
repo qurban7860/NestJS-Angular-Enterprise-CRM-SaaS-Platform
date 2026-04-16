@@ -20,8 +20,6 @@ interface DealProps {
 }
 
 export class Deal extends Entity<DealProps> {
-  createdAt: any;
-  status: string;
   private constructor(props: DealProps, id?: string) {
     super(props, id);
   }
@@ -37,6 +35,8 @@ export class Deal extends Entity<DealProps> {
   get expectedCloseDate(): Date | undefined { return this.props.expectedCloseDate; }
   get closedAt(): Date | undefined { return this.props.closedAt; }
   get isDeleted(): boolean { return this.props.isDeleted; }
+  get createdAt(): Date | undefined { return this.props.createdAt; }
+  get updatedAt(): Date | undefined { return this.props.updatedAt; }
 
   public static create(props: DealProps, id?: string): Result<Deal> {
     if (props.valueAmount < 0) return Result.fail<Deal>("Deal value cannot be negative");

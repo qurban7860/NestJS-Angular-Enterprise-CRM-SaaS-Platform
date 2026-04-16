@@ -27,4 +27,12 @@ export class TasksService {
   updateTaskStatus(taskId: string, status: string): Observable<any> {
     return this.http.patch<ApiResponse<any>>(`${this.apiUrl}/${taskId}/status`, { status }).pipe(map(res => res.data));
   }
+
+  getComments(taskId: string): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/${taskId}/comments`).pipe(map(res => res.data));
+  }
+
+  addComment(taskId: string, content: string): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/${taskId}/comments`, { content }).pipe(map(res => res.data));
+  }
 }
