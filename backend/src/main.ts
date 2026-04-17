@@ -15,67 +15,80 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { logger });
 
   const config = app.get(ConfigService);
-  const port = config.get<number>('PORT', 3000);
-  const corsOrigin = config.get<string>('CORS_ORIGIN', 'http://localhost:4200');
 
-  // ── Security Middleware ─────────────────────────────────
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:', 'https:'],
-      },
-    },
-    crossOriginEmbedderPolicy: true,
-    hsts: { maxAge: 31536000, includeSubDomains: true },
-  }));
+  const port = config.get<number>('PORT', 3000);
+
+  const corsOrigins = config
+    .get<string>('CORS_ORIGIN', '')
+    .split(',')
+    .map((origin) => origin.trim());
+
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+      hsts: { maxAge: 31536000, includeSubDomains: true },
+    }),
+  );
 
   app.use(compression());
   app.use(cookieParser());
 
   // ── CORS ─────────────────────────────────────────────────
   app.enableCors({
-    origin: corsOrigin,
+    origin: corsOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key'],
     exposedHeaders: ['X-RateLimit-Limit', 'X-RateLimit-Remaining'],
   });
 
-  // ── API Versioning ────────────────────────────────────────
-  app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
+  // ── API Versioning ─────────────────────────────────────
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+  });
 
-  // ── Global Pipes ─────────────────────────────────────────
+  // ── Global Pipes ───────────────────────────────────────
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,           // Strip unknown fields (prevents mass assignment)
+      whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
       transformOptions: { enableImplicitConversion: true },
     }),
   );
 
-  // ── Global Prefix ─────────────────────────────────────────
+  // ── Global Prefix ──────────────────────────────────────
   app.setGlobalPrefix('api');
 
-  // ── Swagger (non-production) ──────────────────────────────
+  // ── Swagger (disable in production) ────────────────────
   if (config.get('NODE_ENV') !== 'production') {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('Enterprise Platform API')
-      .setDescription('Production-grade API — CRM, Tasks, Notifications, Dashboard, Files')
+      .setDescription(
+        'Production-grade API — CRM, Tasks, Notifications, Dashboard, Files',
+      )
       .setVersion('1.0')
       .addBearerAuth()
       .build();
+
     const document = SwaggerModule.createDocument(app, swaggerConfig);
+
     SwaggerModule.setup('api/docs', app, document, {
       swaggerOptions: { persistAuthorization: true },
     });
   }
 
-  await app.listen(port);
-  logger.log(`🚀 Server running on http://localhost:${port}/api/v1`, 'Bootstrap');
-  logger.log(`📚 Swagger docs at http://localhost:${port}/api/docs`, 'Bootstrap');
+  await app.listen(port, '0.0.0.0');
+
+  const url = await app.getUrl();
+
+  logger.log(`🚀 Server running on ${url}/api/v1`, 'Bootstrap');
+
+  if (config.get('NODE_ENV') !== 'production') {
+    logger.log(`📚 Swagger docs at ${url}/api/docs`, 'Bootstrap');
+  }
 }
 
 bootstrap();
