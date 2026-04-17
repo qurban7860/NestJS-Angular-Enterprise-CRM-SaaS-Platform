@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { Store } from '@ngrx/store';
 import { selectAccessToken } from '../state/auth/auth.reducer';
+import { environment } from '../../../environments/environment';
 import { Subject } from 'rxjs';
 
 @Injectable({
@@ -10,7 +11,7 @@ import { Subject } from 'rxjs';
 export class SocketService {
   private socket: Socket | null = null;
   private store = inject(Store);
-  
+
   // Custom events observable
   private notificationSubject = new Subject<any>();
   notifications$ = this.notificationSubject.asObservable();
@@ -32,7 +33,7 @@ export class SocketService {
   private connect(token: string) {
     if (this.socket?.connected) return;
 
-    this.socket = io('http://localhost:3000/notifications', {
+    this.socket = io(`${environment.apiUrl}/notifications`, {
       auth: { token }
     });
 

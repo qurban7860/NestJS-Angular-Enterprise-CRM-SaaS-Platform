@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Observable, map } from 'rxjs';
 
 export interface User {
@@ -26,9 +27,9 @@ export interface ApiResponse<T> {
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/api/v1/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   login(credentials: any): Observable<AuthResponse> {
     return this.http
@@ -49,7 +50,7 @@ export class AuthService {
   }
 
   getUsers(): Observable<User[]> {
-    const baseUrl = this.apiUrl.replace('/auth', '/users');
+    const baseUrl = `${this.apiUrl}/users`;
     return this.http
       .get<ApiResponse<User[]>>(baseUrl)
       .pipe(map((res) => res.data));
