@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { CrmService } from '../../services/crm.service';
 import { CRMActions } from './crm.actions';
-import { catchError, map, mergeMap, of, tap } from 'rxjs';
+import { catchError, map, mergeMap, of, switchMap, tap } from 'rxjs';
 import { ToastActions } from '../toast/toast.actions';
 
 @Injectable()
@@ -22,17 +22,89 @@ export class CRMEffects {
     )
   );
 
+  loadContact$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(CRMActions.loadContact),
+      mergeMap(({ id }) =>
+        this.crmService.getContact(id).pipe(
+          map(contact => CRMActions.loadContactSuccess({ contact })),
+          catchError(error => of(CRMActions.loadContactFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
   createContact$ = createEffect(() =>
     this.actions$.pipe(
       ofType(CRMActions.createContact),
       mergeMap(({ contact }) =>
         this.crmService.createContact(contact).pipe(
-          map(newContact => CRMActions.createContactSuccess({ contact: newContact })),
-          tap(() => ToastActions.showToast({ 
-            message: 'New contact added successfully', 
-            toastType: 'success' 
-          })),
+          switchMap(newContact => [
+            CRMActions.createContactSuccess({ contact: newContact }),
+            ToastActions.showToast({ 
+              message: 'New contact added successfully', 
+              toastType: 'success' 
+            })
+          ]),
           catchError(error => of(CRMActions.createContactFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
+  updateContact$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(CRMActions.updateContact),
+      mergeMap(({ id, contact }) =>
+        this.crmService.updateContact(id, contact).pipe(
+          switchMap(updatedContact => [
+            CRMActions.updateContactSuccess({ contact: updatedContact }),
+            ToastActions.showToast({ 
+              message: 'Contact updated successfully', 
+              toastType: 'success' 
+            })
+          ]),
+          catchError(error => of(CRMActions.updateContactFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
+  deleteContact$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(CRMActions.deleteContact),
+      mergeMap(({ id }) =>
+        this.crmService.deleteContact(id).pipe(
+          switchMap(() => [
+            CRMActions.deleteContactSuccess({ id }),
+            ToastActions.showToast({ 
+              message: 'Contact deleted successfully', 
+              toastType: 'success' 
+            })
+          ]),
+          catchError(error => of(CRMActions.deleteContactFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
+  exportContacts$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(CRMActions.exportContacts),
+      mergeMap(() =>
+        this.crmService.exportContacts().pipe(
+          map(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'contacts.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            return CRMActions.exportContactsSuccess();
+          }),
+          catchError(error => of(CRMActions.exportContactsFailure({ error: error.message })))
         )
       )
     )
@@ -50,17 +122,49 @@ export class CRMEffects {
     )
   );
 
+  loadDeal$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(CRMActions.loadDeal),
+      mergeMap(({ id }) =>
+        this.crmService.getDeal(id).pipe(
+          map(deal => CRMActions.loadDealSuccess({ deal })),
+          catchError(error => of(CRMActions.loadDealFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
   createDeal$ = createEffect(() =>
     this.actions$.pipe(
       ofType(CRMActions.createDeal),
       mergeMap(({ deal }) =>
         this.crmService.createDeal(deal).pipe(
-          map(newDeal => CRMActions.createDealSuccess({ deal: newDeal })),
-          tap(() => ToastActions.showToast({ 
-            message: 'Pipeline deal created successfully', 
-            toastType: 'success' 
-          })),
+          switchMap(newDeal => [
+            CRMActions.createDealSuccess({ deal: newDeal }),
+            ToastActions.showToast({ 
+              message: 'Pipeline deal created successfully', 
+              toastType: 'success' 
+            })
+          ]),
           catchError(error => of(CRMActions.createDealFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
+  updateDeal$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(CRMActions.updateDeal),
+      mergeMap(({ id, deal }) =>
+        this.crmService.updateDeal(id, deal).pipe(
+          switchMap(updatedDeal => [
+            CRMActions.updateDealSuccess({ deal: updatedDeal }),
+            ToastActions.showToast({ 
+              message: 'Deal updated successfully', 
+              toastType: 'success' 
+            })
+          ]),
+          catchError(error => of(CRMActions.updateDealFailure({ error: error.message })))
         )
       )
     )
@@ -73,13 +177,52 @@ export class CRMEffects {
         this.crmService.updateDealStage(id, stage).pipe(
           map(updatedDeal => CRMActions.updateDealStageSuccess({ deal: updatedDeal })),
           catchError(error => {
-            // Note: Optimistic update rollback should technically pass originalStage
             return of(CRMActions.updateDealStageFailure({ 
               error: error.message, 
-              originalStage: '', // Simplified for now since we just log or show error
+              originalStage: '',
               dealId: id 
             }));
           })
+        )
+      )
+    )
+  );
+
+  deleteDeal$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(CRMActions.deleteDeal),
+      mergeMap(({ id }) =>
+        this.crmService.deleteDeal(id).pipe(
+          switchMap(() => [
+            CRMActions.deleteDealSuccess({ id }),
+            ToastActions.showToast({ 
+              message: 'Deal deleted successfully', 
+              toastType: 'success' 
+            })
+          ]),
+          catchError(error => of(CRMActions.deleteDealFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
+  exportDeals$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(CRMActions.exportDeals),
+      mergeMap(() =>
+        this.crmService.exportDeals().pipe(
+          map(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'deals.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            return CRMActions.exportDealsSuccess();
+          }),
+          catchError(error => of(CRMActions.exportDealsFailure({ error: error.message })))
         )
       )
     )

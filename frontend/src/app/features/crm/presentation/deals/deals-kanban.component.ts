@@ -6,6 +6,7 @@ import { CRMActions } from '../../../../core/state/crm/crm.actions';
 import { selectDeals, selectIsLoading } from '../../../../core/state/crm/crm.reducer';
 import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { map } from 'rxjs';
+import { ConfirmModalComponent } from '../../../../core/components/confirm-modal/confirm-modal.component';
 
 interface KanbanColumn {
   id: string;
@@ -16,7 +17,7 @@ interface KanbanColumn {
 @Component({
   selector: 'app-deals-kanban',
   standalone: true,
-  imports: [CommonModule, DragDropModule, ReactiveFormsModule],
+  imports: [CommonModule, DragDropModule, ReactiveFormsModule, ConfirmModalComponent],
   template: `
     <div class="h-[calc(100vh-12rem)] flex flex-col space-y-6 animate-in fade-in duration-500">
       <!-- Header -->
@@ -32,6 +33,10 @@ interface KanbanColumn {
                {{ total | currency:'USD':'symbol':'1.0-0' }}
             </span>
           </div>
+          <button (click)="exportDeals()" class="premium-button flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary/80">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Export
+          </button>
           <button (click)="openCreateModal()" class="premium-button flex items-center gap-2">
             <span>+</span> New Deal
           </button>
@@ -45,7 +50,7 @@ interface KanbanColumn {
             <button (click)="closeCreateModal()" class="absolute top-4 right-4 text-brand-secondary hover:text-white transition-colors">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <h2 class="text-2xl font-bold mb-6">Create New Deal</h2>
+            <h2 class="text-2xl font-bold mb-6">{{ editingDealId ? 'Edit Deal' : 'Create New Deal' }}</h2>
             <form [formGroup]="dealForm" (ngSubmit)="submitDeal()" class="space-y-4">
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Deal Title</label>
@@ -74,7 +79,7 @@ interface KanbanColumn {
                   </select>
                 </div>
               </div>
-              <button type="submit" [disabled]="dealForm.invalid" class="premium-button w-full mt-6 py-3 disabled:opacity-50">Create Pipeline Deal</button>
+              <button type="submit" [disabled]="dealForm.invalid" class="premium-button w-full mt-6 py-3 disabled:opacity-50">{{ editingDealId ? 'Update Pipeline Deal' : 'Create Pipeline Deal' }}</button>
             </form>
           </div>
         </div>
@@ -112,9 +117,21 @@ interface KanbanColumn {
                     [style.border-left-color]="getPriorityColor(deal.valueAmount)"
                   >
                     <div class="flex justify-between items-start mb-2">
-                      <h4 (click)="viewDeal(deal)" class="font-medium text-sm group-hover:text-brand-primary transition-colors cursor-pointer">
+                      <h4 class="font-medium text-sm group-hover:text-brand-primary transition-colors cursor-pointer pr-10">
                         {{ deal.title }}
                       </h4>
+                      <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
+                        <button (click)="editDeal(deal)" class="p-1 text-brand-secondary hover:text-white bg-black/40 rounded">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                          </svg>
+                        </button>
+                        <button (click)="deleteDeal(deal)" class="p-1 text-brand-secondary hover:text-red-400 bg-black/40 rounded">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                     
                     <div class="flex justify-between items-center mt-4">
@@ -146,6 +163,16 @@ interface KanbanColumn {
           }
         </div>
       </div>
+
+      @if (isConfirmModalOpen) {
+        <app-confirm-modal
+          title="Delete Deal"
+          [message]="'Are you sure you want to delete deal ' + dealToDelete?.title + '?'"
+          confirmText="Delete"
+          (confirm)="confirmDelete()"
+          (cancel)="cancelDelete()"
+        ></app-confirm-modal>
+      }
     </div>
   `,
   styles: [`
@@ -163,6 +190,9 @@ export class DealsKanbanComponent implements OnInit {
   isLoading$ = this.store.select(selectIsLoading);
 
   isModalOpen = false;
+  isConfirmModalOpen = false;
+  dealToDelete: any = null;
+  editingDealId: string | null = null;
   dealForm = this.fb.group({
     title: ['', Validators.required],
     valueAmount: [0, [Validators.required, Validators.min(0)]],
@@ -192,9 +222,14 @@ export class DealsKanbanComponent implements OnInit {
     this.store.dispatch(CRMActions.loadDeals());
   }
 
-  openCreateModal() { this.isModalOpen = true; }
+  openCreateModal() { 
+    this.editingDealId = null;
+    this.dealForm.reset({ valueCurrency: 'USD', stage: 'PROSPECTING', contactId: '00000000-0000-0000-0000-000000000000', companyId: '00000000-0000-0000-0000-000000000000' });
+    this.isModalOpen = true; 
+  }
   closeCreateModal() { 
     this.isModalOpen = false;
+    this.editingDealId = null;
     this.dealForm.reset({ valueCurrency: 'USD', stage: 'PROSPECTING', contactId: '00000000-0000-0000-0000-000000000000', companyId: '00000000-0000-0000-0000-000000000000' });
   }
 
@@ -207,7 +242,11 @@ export class DealsKanbanComponent implements OnInit {
         companyId: formValue.companyId === '00000000-0000-0000-0000-000000000000' ? null : formValue.companyId
       };
 
-      this.store.dispatch(CRMActions.createDeal({ deal: payload }));
+      if (this.editingDealId) {
+        this.store.dispatch(CRMActions.updateDeal({ id: this.editingDealId, deal: payload }));
+      } else {
+        this.store.dispatch(CRMActions.createDeal({ deal: payload }));
+      }
       this.closeCreateModal();
     }
   }
@@ -242,7 +281,38 @@ export class DealsKanbanComponent implements OnInit {
     alert(`Manage settings for ${columnId} stage`);
   }
 
-  viewDeal(deal: any) {
-    alert(`Viewing details for deal: ${deal.title}`);
+  editDeal(deal: any) {
+    this.editingDealId = deal.id;
+    this.dealForm.patchValue({
+      title: deal.title,
+      valueAmount: deal.valueAmount,
+      valueCurrency: deal.valueCurrency,
+      stage: deal.stage,
+      contactId: deal.contactId || '00000000-0000-0000-0000-000000000000',
+      companyId: deal.companyId || '00000000-0000-0000-0000-000000000000'
+    });
+    this.isModalOpen = true;
+  }
+
+  deleteDeal(deal: any) {
+    this.dealToDelete = deal;
+    this.isConfirmModalOpen = true;
+  }
+
+  confirmDelete() {
+    if (this.dealToDelete) {
+      this.store.dispatch(CRMActions.deleteDeal({ id: this.dealToDelete.id }));
+      this.dealToDelete = null;
+    }
+    this.isConfirmModalOpen = false;
+  }
+
+  cancelDelete() {
+    this.isConfirmModalOpen = false;
+    this.dealToDelete = null;
+  }
+
+  exportDeals() {
+    this.store.dispatch(CRMActions.exportDeals());
   }
 }

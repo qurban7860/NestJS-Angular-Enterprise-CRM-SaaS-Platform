@@ -14,11 +14,12 @@ import {
 } from '@angular/forms';
 import { map, startWith, combineLatest } from 'rxjs';
 import { ButtonComponent } from '../../../tasks/presentation/button.component';
+import { ConfirmModalComponent } from '../../../../core/components/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-contacts-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonComponent, ConfirmModalComponent],
   template: `
     <div class="space-y-6 animate-in fade-in duration-500">
       <!-- Header -->
@@ -61,7 +62,7 @@ import { ButtonComponent } from '../../../tasks/presentation/button.component';
                 ></path>
               </svg>
             </app-button>
-            <h2 class="text-2xl font-bold mb-6">Add New Contact</h2>
+            <h2 class="text-2xl font-bold mb-6">{{ editingContactId ? 'Edit Contact' : 'Add New Contact' }}</h2>
             <form
               [formGroup]="contactForm"
               (ngSubmit)="submitContact()"
@@ -122,7 +123,7 @@ import { ButtonComponent } from '../../../tasks/presentation/button.component';
                 [disabled]="contactForm.invalid"
                 variant="premium"
                 customClass="w-full mt-6 py-3 justify-center"
-                >Save Contact</app-button
+                >{{ editingContactId ? 'Update Contact' : 'Save Contact' }}</app-button
               >
             </form>
           </div>
@@ -159,7 +160,7 @@ import { ButtonComponent } from '../../../tasks/presentation/button.component';
 
         <div class="flex gap-2">
           <app-button variant="secondary" (clicked)="exportContacts()">Export</app-button>
-          <app-button variant="secondary" (clicked)="toggleFilters()">Filters</app-button>
+          <!-- <app-button variant="secondary" (clicked)="toggleFilters()">Filters</app-button> -->
         </div>
       </div>
 
@@ -233,18 +234,13 @@ import { ButtonComponent } from '../../../tasks/presentation/button.component';
                     <td class="px-6 py-4 text-brand-secondary text-sm">--</td>
                     <td class="px-6 py-4 text-right">
                       <app-button variant="ghost" (clicked)="editContact(contact)">
-                        <svg
-                          class="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                          ></path>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                        </svg>
+                      </app-button>
+                      <app-button variant="ghost" (clicked)="deleteContact(contact)" customClass="text-red-400 hover:text-red-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
                       </app-button>
                     </td>
@@ -279,6 +275,16 @@ import { ButtonComponent } from '../../../tasks/presentation/button.component';
           </div>
         }
       </div>
+
+      @if (isConfirmModalOpen) {
+        <app-confirm-modal
+          title="Delete Contact"
+          [message]="'Are you sure you want to delete ' + contactToDelete?.fullName + '?'"
+          confirmText="Delete"
+          (confirm)="confirmDelete()"
+          (cancel)="cancelDelete()"
+        ></app-confirm-modal>
+      }
     </div>
   `,
   styles: [
@@ -298,6 +304,9 @@ export class ContactsListComponent implements OnInit {
   searchControl = new FormControl('', { nonNullable: true });
 
   isModalOpen = false;
+  isConfirmModalOpen = false;
+  contactToDelete: any = null;
+  editingContactId: string | null = null;
   contactForm = this.fb.group({
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
@@ -326,18 +335,27 @@ export class ContactsListComponent implements OnInit {
   }
 
   openCreateModal() {
+    this.editingContactId = null;
+    this.contactForm.reset();
     this.isModalOpen = true;
   }
   closeCreateModal() {
     this.isModalOpen = false;
+    this.editingContactId = null;
     this.contactForm.reset();
   }
 
   submitContact() {
     if (this.contactForm.valid) {
-      this.store.dispatch(
-        CRMActions.createContact({ contact: this.contactForm.value }),
-      );
+      if (this.editingContactId) {
+        this.store.dispatch(
+          CRMActions.updateContact({ id: this.editingContactId, contact: this.contactForm.value }),
+        );
+      } else {
+        this.store.dispatch(
+          CRMActions.createContact({ contact: this.contactForm.value }),
+        );
+      }
       this.closeCreateModal();
     }
   }
@@ -365,7 +383,7 @@ export class ContactsListComponent implements OnInit {
   }
 
   exportContacts() {
-    alert('Export functionality will be integrated with the backend reporting service shortly.');
+    this.store.dispatch(CRMActions.exportContacts());
   }
 
   toggleFilters() {
@@ -373,6 +391,34 @@ export class ContactsListComponent implements OnInit {
   }
 
   editContact(contact: any) {
-    alert(`Opening edit modal for ${contact.fullName}...`);
+    this.editingContactId = contact.id;
+    // Basic split for demo purposes since fullName comes from backend 
+    const [firstName = '', lastName = ''] = (contact.fullName || '').split(' ');
+    this.contactForm.patchValue({
+      firstName,
+      lastName,
+      email: contact.email,
+      phone: contact.phone || '',
+      companyId: null
+    });
+    this.isModalOpen = true;
+  }
+
+  deleteContact(contact: any) {
+    this.contactToDelete = contact;
+    this.isConfirmModalOpen = true;
+  }
+
+  confirmDelete() {
+    if (this.contactToDelete) {
+      this.store.dispatch(CRMActions.deleteContact({ id: this.contactToDelete.id }));
+      this.contactToDelete = null;
+    }
+    this.isConfirmModalOpen = false;
+  }
+
+  cancelDelete() {
+    this.isConfirmModalOpen = false;
+    this.contactToDelete = null;
   }
 }

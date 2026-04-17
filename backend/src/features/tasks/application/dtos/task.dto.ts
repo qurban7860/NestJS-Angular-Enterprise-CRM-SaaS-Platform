@@ -72,6 +72,21 @@ export class TaskFiltersDto {
   @IsOptional()
   @IsString()
   dealId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  priority?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  status?: string;
 }
 
 export class TaskResponseDto {

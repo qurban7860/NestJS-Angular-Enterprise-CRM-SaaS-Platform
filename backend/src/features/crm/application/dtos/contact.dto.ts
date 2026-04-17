@@ -72,4 +72,9 @@ export class UpdateContactDto {
   @IsOptional()
   @IsString()
   status?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  companyId?: string;
 }

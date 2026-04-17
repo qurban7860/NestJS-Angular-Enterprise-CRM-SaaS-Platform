@@ -21,6 +21,17 @@ export const tasksFeature = createFeature({
     on(TasksActions.loadTasksSuccess, (state, { tasks }) => ({ ...state, isLoading: false, tasks })),
     on(TasksActions.loadTasksFailure, (state, { error }) => ({ ...state, isLoading: false, error })),
 
+    on(TasksActions.loadTask, (state) => ({ ...state, isLoading: true, error: null })),
+    on(TasksActions.loadTaskSuccess, (state, { task }) => {
+      const exists = state.tasks.find(t => t.id === task.id);
+      return {
+        ...state,
+        isLoading: false,
+        tasks: exists ? state.tasks.map(t => t.id === task.id ? task : t) : [...state.tasks, task]
+      };
+    }),
+    on(TasksActions.loadTaskFailure, (state, { error }) => ({ ...state, isLoading: false, error })),
+
     on(TasksActions.createTask, (state) => ({ ...state, isLoading: true })),
     on(TasksActions.createTaskSuccess, (state, { task }) => ({ 
       ...state, 
@@ -29,10 +40,33 @@ export const tasksFeature = createFeature({
     })),
     on(TasksActions.createTaskFailure, (state, { error }) => ({ ...state, isLoading: false, error })),
 
+    on(TasksActions.updateTask, (state) => ({ ...state, isLoading: true })),
+    on(TasksActions.updateTaskSuccess, (state, { task }) => ({
+      ...state,
+      isLoading: false,
+      tasks: state.tasks.map(t => t.id === task.id ? task : t)
+    })),
+    on(TasksActions.updateTaskFailure, (state, { error }) => ({ ...state, isLoading: false, error })),
+
+    on(TasksActions.updateTaskStatus, (state) => ({ ...state, isLoading: true })),
     on(TasksActions.updateTaskStatusSuccess, (state, { task }) => ({
       ...state,
+      isLoading: false,
       tasks: state.tasks.map(t => t.id === task.id ? task : t)
-    }))
+    })),
+    on(TasksActions.updateTaskStatusFailure, (state, { error }) => ({ ...state, isLoading: false, error })),
+
+    on(TasksActions.deleteTask, (state) => ({ ...state, isLoading: true })),
+    on(TasksActions.deleteTaskSuccess, (state, { id }) => ({
+      ...state,
+      isLoading: false,
+      tasks: state.tasks.filter(t => t.id !== id)
+    })),
+    on(TasksActions.deleteTaskFailure, (state, { error }) => ({ ...state, isLoading: false, error })),
+
+    on(TasksActions.exportTasks, (state) => ({ ...state, isLoading: true })),
+    on(TasksActions.exportTasksSuccess, (state) => ({ ...state, isLoading: false })),
+    on(TasksActions.exportTasksFailure, (state, { error }) => ({ ...state, isLoading: false, error }))
   ),
 });
 

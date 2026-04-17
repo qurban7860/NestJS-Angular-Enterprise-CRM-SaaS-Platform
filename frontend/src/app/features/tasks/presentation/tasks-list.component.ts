@@ -11,11 +11,12 @@ import { ToastActions } from '../../../core/state/toast/toast.actions';
 import { CrmService } from '../../../core/services/crm.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { ConfirmModalComponent } from '../../../core/components/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-tasks-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent, TaskCommentsComponent, DragDropModule],
+  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent, TaskCommentsComponent, DragDropModule, ConfirmModalComponent],
   template: `
     <div class="space-y-6 animate-in fade-in duration-500 max-w-[1400px] mx-auto pb-20 px-4 md:px-8">
       
@@ -33,6 +34,10 @@ import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from 
               <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path></svg> BOARD
             </button>
           </div>
+          <button (click)="exportTasks()" class="premium-button flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary/80">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Export
+          </button>
           <button (click)="openCreateModal()" class="premium-button flex items-center gap-2">
             <span>+</span> New Task
           </button>
@@ -138,6 +143,15 @@ import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from 
                         </div>
                       </div>
 
+                      <div class="absolute top-12 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex space-x-1">
+                        <button (click)="$event.stopPropagation(); editTask(task)" class="p-1 text-brand-secondary hover:text-white bg-black/40 rounded">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        </button>
+                        <button (click)="$event.stopPropagation(); deleteTask(task)" class="p-1 text-brand-secondary hover:text-red-400 bg-black/40 rounded">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                      </div>
+
                       @if (selectedTaskId === task.id) {
                         <div class="mt-4 pt-4 border-t border-white/10 space-y-4 cursor-default" (click)="$event.stopPropagation()">
                           <app-file-upload [relatedEntityType]="'TASK'" [relatedEntityId]="task.id" (uploadSuccess)="onUploadSuccess($event)"></app-file-upload>
@@ -187,6 +201,14 @@ import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from 
                       }
                     </div>
                   </div>
+                  <div class="flex items-center opacity-0 group-hover:opacity-100 transition-opacity z-10 space-x-2 mr-4">
+                    <button (click)="$event.stopPropagation(); editTask(task)" class="p-1.5 text-brand-secondary hover:text-white bg-black/40 rounded">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    </button>
+                    <button (click)="$event.stopPropagation(); deleteTask(task)" class="p-1.5 text-brand-secondary hover:text-red-400 bg-black/40 rounded">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                  </div>
                 </div>
 
                 @if (selectedTaskId === task.id) {
@@ -211,7 +233,17 @@ import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from 
               </div>
             }
           </div>
-        }
+      }
+    }
+      
+      @if (isConfirmModalOpen) {
+        <app-confirm-modal
+          [title]="taskToDelete ? 'Delete Task' : 'Delete Selected Tasks'"
+          [message]="taskToDelete ? 'Are you sure you want to delete task ' + taskToDelete.title + '?' : 'Are you sure you want to delete ' + selectedTasks.size + ' selected tasks?'"
+          confirmText="Delete"
+          (confirm)="confirmDelete()"
+          (cancel)="cancelDelete()"
+        ></app-confirm-modal>
       }
     </div>
 
@@ -222,7 +254,7 @@ import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from 
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
           <div class="mb-6">
-            <h2 class="text-xl font-bold">New Task</h2>
+            <h2 class="text-xl font-bold">{{ editingTaskId ? 'Edit Task' : 'New Task' }}</h2>
           </div>
           <form [formGroup]="taskForm" (ngSubmit)="submitTask()" class="space-y-5">
             
@@ -298,7 +330,7 @@ import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from 
               </button>
               <button type="submit" [disabled]="taskForm.invalid" 
                       class="premium-button flex-1 py-3 disabled:opacity-50 disabled:cursor-not-allowed">
-                Create Task
+                {{ editingTaskId ? 'Update Task' : 'Create Task' }}
               </button>
             </div>
           </form>
@@ -324,6 +356,9 @@ export class TasksListComponent implements OnInit {
   viewMode: 'LIST' | 'BOARD' = 'BOARD';
   selectedTaskId: string | null = null;
   isModalOpen = false;
+  isConfirmModalOpen = false;
+  taskToDelete: any = null;
+  editingTaskId: string | null = null;
   currentUserId: string | null = null;
   
   // Bulk Actions State
@@ -447,15 +482,8 @@ export class TasksListComponent implements OnInit {
   }
 
   bulkDelete() {
-    if (confirm(`Are you sure you want to delete ${this.selectedTasks.size} tasks?`)) {
-      const taskIds = Array.from(this.selectedTasks);
-      taskIds.forEach(id => {
-        // Assuming delete action exists
-        // this.store.dispatch(TasksActions.deleteTask({ taskId: id }));
-      });
-      this.clearSelection();
-      this.store.dispatch(ToastActions.showToast({ message: `Tasks deleted`, toastType: 'success' }));
-    }
+    this.taskToDelete = null;
+    this.isConfirmModalOpen = true;
   }
 
   // --- FILTERING ---
@@ -474,9 +502,14 @@ export class TasksListComponent implements OnInit {
 
   getAssigneeInitials(userId: string): string { return 'U'; }
 
-  openCreateModal() { this.isModalOpen = true; }
+  openCreateModal() { 
+    this.editingTaskId = null;
+    this.taskForm.reset({ priority: 'MEDIUM', status: 'TODO', assigneeId: '', contactId: '', dealId: '', dueDate: '' });
+    this.isModalOpen = true; 
+  }
   closeCreateModal() { 
     this.isModalOpen = false;
+    this.editingTaskId = null;
     this.taskForm.reset({ priority: 'MEDIUM', status: 'TODO', assigneeId: '', contactId: '', dealId: '', dueDate: '' });
   }
 
@@ -485,7 +518,12 @@ export class TasksListComponent implements OnInit {
       const taskData: any = { ...this.taskForm.getRawValue() };
       if (taskData.dueDate) taskData.dueDate = new Date(taskData.dueDate).toISOString();
       ['assigneeId', 'contactId', 'dealId', 'dueDate'].forEach(f => { if (!taskData[f]) taskData[f] = null; });
-      this.store.dispatch(TasksActions.createTask({ task: taskData }));
+      
+      if (this.editingTaskId) {
+        this.store.dispatch(TasksActions.updateTask({ id: this.editingTaskId, task: taskData }));
+      } else {
+        this.store.dispatch(TasksActions.createTask({ task: taskData }));
+      }
       this.closeCreateModal();
     }
   }
@@ -512,5 +550,49 @@ export class TasksListComponent implements OnInit {
       case 'LOW': return 'bg-slate-500/10 text-slate-400 border border-slate-500/20';
       default: return 'bg-slate-500/10 text-slate-400';
     }
+  }
+
+  editTask(task: any) {
+    this.editingTaskId = task.id;
+    this.taskForm.patchValue({
+      title: task.title,
+      description: task.description || '',
+      priority: task.priority,
+      status: task.status,
+      assigneeId: task.assigneeId || '',
+      contactId: task.contactId || '',
+      dealId: task.dealId || '',
+      dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : ''
+    });
+    this.isModalOpen = true;
+  }
+
+  deleteTask(task: any) {
+    this.taskToDelete = task;
+    this.isConfirmModalOpen = true;
+  }
+
+  confirmDelete() {
+    if (this.taskToDelete) {
+      this.store.dispatch(TasksActions.deleteTask({ id: this.taskToDelete.id }));
+    } else {
+      const taskIds = Array.from(this.selectedTasks);
+      taskIds.forEach(id => {
+        this.store.dispatch(TasksActions.deleteTask({ id }));
+      });
+      this.clearSelection();
+      this.store.dispatch(ToastActions.showToast({ message: `Tasks deleted`, toastType: 'success' }));
+    }
+    this.isConfirmModalOpen = false;
+    this.taskToDelete = null;
+  }
+
+  cancelDelete() {
+    this.isConfirmModalOpen = false;
+    this.taskToDelete = null;
+  }
+
+  exportTasks() {
+    this.store.dispatch(TasksActions.exportTasks({ filters: this.advancedFilters.value }));
   }
 }
