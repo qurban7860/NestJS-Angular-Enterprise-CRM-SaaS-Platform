@@ -36,7 +36,7 @@ import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.r
                 formControlName="email"
                 placeholder="admin@enterprise.com" 
                 [class.border-red-500]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
-                class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 focus:outline-none focus:border-brand-primary/50 transition-all duration-300">
+                class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
             </div>
 
             <div>
@@ -50,7 +50,7 @@ import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.r
                 formControlName="password"
                 placeholder="••••••••" 
                 [class.border-red-500]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-                class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 focus:outline-none focus:border-brand-primary/50 transition-all duration-300">
+                class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
             </div>
 
             @if (errorMessage$ | async; as error) {

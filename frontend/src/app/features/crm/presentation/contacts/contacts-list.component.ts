@@ -77,7 +77,7 @@ import { ButtonComponent } from '../../../tasks/presentation/button.component';
                     formControlName="firstName"
                     type="text"
                     placeholder="First Name"
-                    class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all"
+                    class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
                   />
                 </div>
                 <div>
@@ -89,7 +89,7 @@ import { ButtonComponent } from '../../../tasks/presentation/button.component';
                     formControlName="lastName"
                     type="text"
                     placeholder="Last Name"
-                    class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all"
+                    class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
                   />
                 </div>
               </div>
@@ -102,7 +102,7 @@ import { ButtonComponent } from '../../../tasks/presentation/button.component';
                   formControlName="email"
                   type="email"
                   placeholder="Email Address"
-                  class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all"
+                  class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
                 />
               </div>
               <div>
@@ -114,14 +114,14 @@ import { ButtonComponent } from '../../../tasks/presentation/button.component';
                   formControlName="phone"
                   type="text"
                   placeholder="Phone Number"
-                  class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all"
+                  class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
                 />
               </div>
               <app-button
                 type="submit"
                 [disabled]="contactForm.invalid"
                 variant="premium"
-                customClass="w-full mt-6 py-3"
+                customClass="w-full mt-6 py-3 justify-center"
                 >Save Contact</app-button
               >
             </form>

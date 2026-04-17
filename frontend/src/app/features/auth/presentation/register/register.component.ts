@@ -38,7 +38,7 @@ import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.r
                   type="text" 
                   formControlName="firstName"
                   placeholder="John" 
-                  class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 focus:outline-none focus:border-brand-primary/50 transition-all">
+                  class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
               </div>
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-2" for="lastName">Last Name</label>
@@ -47,7 +47,7 @@ import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.r
                   type="text" 
                   formControlName="lastName"
                   placeholder="Doe" 
-                  class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 focus:outline-none focus:border-brand-primary/50 transition-all">
+                  class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
               </div>
             </div>
 
@@ -58,7 +58,7 @@ import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.r
                 type="text" 
                 formControlName="orgName"
                 placeholder="Acme Corp" 
-                class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 focus:outline-none focus:border-brand-primary/50 transition-all">
+                class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
             </div>
 
             <div>
@@ -68,7 +68,7 @@ import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.r
                 type="email" 
                 formControlName="email"
                 placeholder="john.doe@enterprise.com" 
-                class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 focus:outline-none focus:border-brand-primary/50 transition-all">
+                class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
             </div>
 
             <div>
@@ -78,7 +78,7 @@ import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.r
                 type="password" 
                 formControlName="password"
                 placeholder="••••••••" 
-                class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 focus:outline-none focus:border-brand-primary/50 transition-all">
+                class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
             </div>
 
             @if (errorMessage$ | async; as error) {

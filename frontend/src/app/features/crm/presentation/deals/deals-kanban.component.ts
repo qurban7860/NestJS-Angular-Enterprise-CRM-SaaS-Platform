@@ -49,16 +49,16 @@ interface KanbanColumn {
             <form [formGroup]="dealForm" (ngSubmit)="submitDeal()" class="space-y-4">
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Deal Title</label>
-                <input formControlName="title" type="text" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all" placeholder="E.g. Enterprise License">
+                <input formControlName="title" type="text" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="Enter the deal title">
               </div>
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Value Amount</label>
-                <input formControlName="valueAmount" type="number" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all" placeholder="50000">
+                <input formControlName="valueAmount" type="number" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="Enter the deal value">
               </div>
               <div class="flex gap-4">
                 <div class="flex-1">
                   <label class="block text-sm font-medium text-brand-secondary mb-1">Currency</label>
-                  <select formControlName="valueCurrency" class="w-full bg-black/40 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all text-white">
+                  <select formControlName="valueCurrency" class="w-full bg-black/40 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
                     <option value="USD">USD</option>
                     <option value="EUR">EUR</option>
                     <option value="AUD">AUD</option>
@@ -66,7 +66,7 @@ interface KanbanColumn {
                 </div>
                 <div class="flex-1">
                   <label class="block text-sm font-medium text-brand-secondary mb-1">Stage</label>
-                  <select formControlName="stage" class="w-full bg-black/40 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all text-white">
+                  <select formControlName="stage" class="w-full bg-black/40 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
                     <option value="PROSPECTING">Prospecting</option>
                     <option value="QUALIFICATION">Qualification</option>
                     <option value="PROPOSAL">Proposal</option>

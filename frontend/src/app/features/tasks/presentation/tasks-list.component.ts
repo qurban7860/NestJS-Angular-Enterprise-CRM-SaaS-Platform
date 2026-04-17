@@ -230,20 +230,20 @@ import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from 
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Task Title</label>
                 <input formControlName="title" type="text" placeholder="e.g., Follow up on Q2 proposal" 
-                       class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all">
+                class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Description</label>
                 <textarea formControlName="description" rows="3" placeholder="Add context..." 
-                          class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all resize-none"></textarea>
+                class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 resize-none"></textarea>
               </div>
 
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-brand-secondary mb-1">Priority Level</label>
                   <select formControlName="priority" 
-                    class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all appearance-none cursor-pointer">
+                    class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 appearance-none cursor-pointer">
                       <option value="LOW" class="bg-[#0a0a0a]">Low</option>
                       <option value="MEDIUM" class="bg-[#0a0a0a]">Medium</option>
                       <option value="HIGH" class="bg-[#0a0a0a]">High</option>
@@ -253,7 +253,7 @@ import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from 
                 <div>
                   <label class="block text-sm font-medium text-brand-secondary mb-1">Due Date</label>
                   <input formControlName="dueDate" type="date" 
-                  class="cursor-pointer w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all [color-scheme:dark]">
+                  class="cursor-pointer w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 [color-scheme:dark]">
                 </div>
               </div>
             </div>
@@ -261,7 +261,7 @@ import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from 
             <div class="pt-4 border-t border-white/5 space-y-4">
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Assign To</label>
-                <select formControlName="assigneeId" class="cursor-pointer w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all appearance-none">
+                <select formControlName="assigneeId" class="cursor-pointer w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 appearance-none">
                   <option value="" class="bg-[#0a0a0a]">Unassigned</option>
                   @for (user of users$ | async; track user.id) {
                     <option [value]="user.id" class="bg-[#0a0a0a]">{{ user.firstName }} {{ user.lastName }}</option>
@@ -272,7 +272,7 @@ import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from 
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-brand-secondary mb-1">Link Contact</label>
-                  <select formControlName="contactId" class="cursor-pointer w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all appearance-none">
+                  <select formControlName="contactId" class="cursor-pointer w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 appearance-none">
                     <option value="" class="bg-[#0a0a0a]">None</option>
                     @for (c of contacts$ | async; track c.id) {
                       <option [value]="c.id" class="bg-[#0a0a0a]">{{ c.firstName }} {{ c.lastName }}</option>
@@ -281,7 +281,7 @@ import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from 
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-brand-secondary mb-1">Link Deal</label>
-                  <select formControlName="dealId" class="cursor-pointer w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 focus:outline-none focus:border-brand-primary/50 transition-all appearance-none">
+                  <select formControlName="dealId" class="cursor-pointer w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 appearance-none">
                     <option value="" class="bg-[#0a0a0a]">None</option>
                     @for (d of deals$ | async; track d.id) {
                       <option [value]="d.id" class="bg-[#0a0a0a]">{{ d.title }}</option>
