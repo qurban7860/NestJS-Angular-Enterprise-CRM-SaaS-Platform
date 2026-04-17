@@ -1,27 +1,74 @@
-# Frontend
+# Enterprise CRM & Tasks Platform - Frontend
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.17.
+![Angular](https://img.shields.io/badge/angular-%23DD0031.svg?style=for-the-badge&logo=angular&logoColor=white)
+![NgRx](https://img.shields.io/badge/NgRx-BA2BD2?style=for-the-badge&logo=NgRx&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 
-## Development server
+A high-performance, premium enterprise dashboard built with **Angular 17** and **NgRx**, featuring a modern glassmorphism design system.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## ✨ Highlights
 
-## Code scaffolding
+- **State Management**: Robust reactive architecture powered by NgRx (Store, Effects, Selectors).
+- **Premium UI**: Modern glassmorphism aesthetics with optimized dark mode support.
+- **Dynamic Kanban**: Fully interactive drag-and-drop pipeline for deals and tasks.
+- **Enterprise Components**: Reusable, atomic design components (Modals, Toasts, Charts).
+- **Real-time Validation**: Advanced reactive forms with deep validation logic.
+- **Optimized Performance**: Standalone components, lazy loading, and OnPush change detection.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## 🎨 UI/UX Features
 
-## Build
+- **Glassmorphism Panels**: Semi-transparent, blurred backgrounds for a premium feel.
+- **Micro-interactions**: Smooth transitions and hover effects using Tailwind CSS and Angular Animations.
+- **Responsive Layout**: Seamless experience across mobile, tablet, and desktop.
+- **Interactive Modals**: Custom confirmation and CRUD modals for enhanced safety and flow.
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+## 🛠️ Tech Stack
 
-## Running unit tests
+- **Framework**: [Angular 17+](https://angular.io/)
+- **State Management**: [NgRx](https://ngrx.io/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Drag & Drop**: [@angular/cdk/drag-drop](https://material.angular.io/cdk/drag-drop/overview)
+- **HTTP Client**: RxJS-based reactive services
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## 🏁 Getting Started
 
-## Running end-to-end tests
+### Prerequisites
+- Node.js (v18+)
+- Angular CLI (`npm install -g @angular/cli`)
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+### Installation
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-## Further help
+2. Run the application:
+   ```bash
+   # Development
+   ng serve
+   
+   # Production
+   ng build --configuration production
+   ```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+3. Open in browser:
+   Navigate to `http://localhost:4200`
+
+## 📂 Project Structure
+
+- `src/app/core`: Singleton services, NgRx state, and global components.
+- `src/app/features`: Feature-based modules (CRM, Tasks, Dashboard).
+- `src/app/shared`: Common UI components and utilities.
+- `src/assets`: Design tokens, fonts, and static resources.
+
+## 🧪 Testing
+
+```bash
+# Unit tests
+ng test
+```
+
+## 📜 License
+
+This project is [MIT licensed](LICENSE).
