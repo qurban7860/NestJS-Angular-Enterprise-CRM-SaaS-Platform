@@ -26,7 +26,7 @@ graph LR
     API --> DB[(PostgreSQL)]
 ```
 
-## 🚀 Quick Start (Monorepo Setup)
+## 🚀 Quick Start
 
 To get the entire platform running locally, follow these steps:
 
