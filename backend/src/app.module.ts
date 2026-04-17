@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
@@ -49,7 +51,9 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     FilesModule,
     SystemModule,
   ],
+  controllers: [AppController],
   providers: [
+    AppService,
     // Global Guards
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },

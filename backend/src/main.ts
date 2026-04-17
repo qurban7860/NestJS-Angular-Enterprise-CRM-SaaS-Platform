@@ -60,7 +60,7 @@ async function bootstrap() {
   );
 
   // ── Global Prefix ──────────────────────────────────────
-  const apiPrefix = config.get<string>('API_PREFIX', 'api/v1');
+  const apiPrefix = config.get<string>('API_PREFIX', 'api');
   app.setGlobalPrefix(apiPrefix);
 
   // ── Swagger (disable in production) ────────────────────
