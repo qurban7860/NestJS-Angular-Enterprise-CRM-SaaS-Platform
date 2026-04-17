@@ -2,13 +2,14 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
+import { RouterLink } from '@angular/router';
 import { AuthActions } from '../../../../core/state/auth/auth.actions';
 import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.reducer';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
     <div class="min-h-screen flex items-center justify-center p-6 bg-brand-dark relative overflow-hidden">
       <!-- Ambient Background Decoration -->
@@ -42,7 +43,7 @@ import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.r
             <div>
               <div class="flex justify-between mb-2">
                 <label class="block text-sm font-medium text-brand-secondary" for="password">Password</label>
-                <!-- <a href="auth/forgot-password" class="text-xs text-brand-primary hover:underline">Forgot?</a> -->
+                <a routerLink="/auth/forgot-password" (click)="forgotPassword($event)" class="text-xs text-brand-primary hover:underline">Forgot?</a>
               </div>
               <input 
                 id="password"
@@ -79,7 +80,7 @@ import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.r
           </form>
 
           <p class="text-sm text-brand-secondary mt-10">
-            Don't have an account? <a href="/auth/register" class="text-brand-primary font-medium hover:underline">Create One</a>
+            Don't have an account? <a routerLink="/auth/register" class="text-brand-primary font-medium hover:underline">Create One</a>
           </p>
         </div>
       </div>
@@ -102,5 +103,10 @@ export class LoginComponent {
     if (this.loginForm.valid) {
       this.store.dispatch(AuthActions.login({ credentials: this.loginForm.value }));
     }
+  }
+
+  forgotPassword(event: Event) {
+    event.preventDefault();
+    alert('Password reset link will be sent to your email.');
   }
 }

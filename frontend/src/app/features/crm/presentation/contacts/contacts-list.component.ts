@@ -158,8 +158,8 @@ import { ButtonComponent } from '../../../tasks/presentation/button.component';
         </div>
 
         <div class="flex gap-2">
-          <app-button variant="secondary">Export</app-button>
-          <app-button variant="secondary">Filters</app-button>
+          <app-button variant="secondary" (clicked)="exportContacts()">Export</app-button>
+          <app-button variant="secondary" (clicked)="toggleFilters()">Filters</app-button>
         </div>
       </div>
 
@@ -232,7 +232,7 @@ import { ButtonComponent } from '../../../tasks/presentation/button.component';
                     </td>
                     <td class="px-6 py-4 text-brand-secondary text-sm">--</td>
                     <td class="px-6 py-4 text-right">
-                      <app-button variant="ghost">
+                      <app-button variant="ghost" (clicked)="editContact(contact)">
                         <svg
                           class="w-5 h-5"
                           fill="none"
@@ -362,5 +362,17 @@ export class ContactsListComponent implements OnInit {
       default:
         return base + 'bg-gray-500/10 text-gray-400';
     }
+  }
+
+  exportContacts() {
+    alert('Export functionality will be integrated with the backend reporting service shortly.');
+  }
+
+  toggleFilters() {
+    alert('Advanced filter panel opening...');
+  }
+
+  editContact(contact: any) {
+    alert(`Opening edit modal for ${contact.fullName}...`);
   }
 }

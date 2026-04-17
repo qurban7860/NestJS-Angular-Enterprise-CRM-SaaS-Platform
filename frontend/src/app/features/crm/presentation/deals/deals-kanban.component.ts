@@ -91,7 +91,7 @@ interface KanbanColumn {
                   {{ column.name }}
                   <span class="ml-2 px-2 py-0.5 rounded-full bg-white/10 text-xs">{{ column.deals.length }}</span>
                 </h3>
-                <button class="text-brand-secondary hover:text-white transition-colors">
+                <button (click)="columnSettings(column.id)" class="text-brand-secondary hover:text-white transition-colors">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                 </button>
               </div>
@@ -112,7 +112,7 @@ interface KanbanColumn {
                     [style.border-left-color]="getPriorityColor(deal.valueAmount)"
                   >
                     <div class="flex justify-between items-start mb-2">
-                      <h4 class="font-medium text-sm group-hover:text-brand-primary transition-colors cursor-pointer">
+                      <h4 (click)="viewDeal(deal)" class="font-medium text-sm group-hover:text-brand-primary transition-colors cursor-pointer">
                         {{ deal.title }}
                       </h4>
                     </div>
@@ -236,5 +236,13 @@ export class DealsKanbanComponent implements OnInit {
     if (value > 50000) return '#fbbf24'; // High Value Gold
     if (value > 10000) return '#60a5fa'; // Mid Value Blue
     return '#94a3b8'; // Low Value Gray
+  }
+
+  columnSettings(columnId: string) {
+    alert(`Manage settings for ${columnId} stage`);
+  }
+
+  viewDeal(deal: any) {
+    alert(`Viewing details for deal: ${deal.title}`);
   }
 }
