@@ -21,7 +21,7 @@ async function bootstrap() {
   const corsOrigins = config
     .get<string>('CORS_ORIGIN', '')
     .split(',')
-    .map((origin) => origin.trim());
+    .map((origin) => origin.trim().replace(/\/$/, ''));
 
   app.use(
     helmet({
@@ -39,7 +39,13 @@ async function bootstrap() {
     origin: corsOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+      'Idempotency-Key',
+    ],
     exposedHeaders: ['X-RateLimit-Limit', 'X-RateLimit-Remaining'],
   });
 
