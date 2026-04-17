@@ -102,3 +102,45 @@ export class TaskResponseDto {
   @ApiProperty()
   createdAt!: Date;
 }
+
+export class UpdateTaskDto {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsEnum(['LOW', 'MEDIUM', 'HIGH', 'URGENT'])
+  priority?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  assigneeId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsDateString()
+  dueDate?: Date | null;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  contactId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  dealId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  status?: string;
+}

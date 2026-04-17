@@ -66,6 +66,19 @@ export class Contact extends Entity<ContactProps> {
     this.props.updatedAt = new Date();
   }
 
+  public update(props: Partial<ContactProps>): void {
+    if (props.firstName !== undefined) this.props.firstName = props.firstName;
+    if (props.lastName !== undefined) this.props.lastName = props.lastName;
+    if (props.email !== undefined) this.props.email = props.email;
+    if (props.phone !== undefined) this.props.phone = props.phone;
+    if (props.status !== undefined) this.props.status = props.status;
+    if (props.companyId !== undefined) this.props.companyId = props.companyId;
+    if (props.tags !== undefined) this.props.tags = props.tags;
+    if (props.notes !== undefined) this.props.notes = props.notes;
+    
+    this.props.updatedAt = new Date();
+  }
+
   public delete(): void {
     this.props.isDeleted = true;
     this.props.updatedAt = new Date();

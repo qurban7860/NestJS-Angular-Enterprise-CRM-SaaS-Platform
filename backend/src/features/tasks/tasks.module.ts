@@ -1,5 +1,8 @@
 import { CreateTaskUseCase } from './application/use-cases/create-task.use-case';
 import { ListTasksUseCase } from './application/use-cases/list-tasks.use-case';
+import { GetTaskUseCase } from './application/use-cases/get-task.use-case';
+import { UpdateTaskUseCase } from './application/use-cases/update-task.use-case';
+import { DeleteTaskUseCase } from './application/use-cases/delete-task.use-case';
 import { UpdateTaskStatusUseCase } from './application/use-cases/update-task-status.use-case';
 import { CreateTaskCommentUseCase } from './application/use-cases/create-comment.use-case';
 import { ListTaskCommentsUseCase } from './application/use-cases/list-comments.use-case';
@@ -16,6 +19,9 @@ import { Module } from '@nestjs/common';
   providers: [
     CreateTaskUseCase,
     ListTasksUseCase,
+    GetTaskUseCase,
+    UpdateTaskUseCase,
+    DeleteTaskUseCase,
     UpdateTaskStatusUseCase,
     CreateTaskCommentUseCase,
     ListTaskCommentsUseCase,
@@ -31,6 +37,9 @@ import { Module } from '@nestjs/common';
   exports: [
     CreateTaskUseCase, 
     ListTasksUseCase, 
+    GetTaskUseCase,
+    UpdateTaskUseCase,
+    DeleteTaskUseCase,
     UpdateTaskStatusUseCase, 
     'ITaskRepository',
     'ITaskCommentRepository'

@@ -75,4 +75,23 @@ export class Task extends Entity<TaskProps> {
     this.props.assigneeId = userId;
     this.props.updatedAt = new Date();
   }
+
+  public update(props: Partial<TaskProps>): void {
+    if (props.title !== undefined) this.props.title = props.title;
+    if (props.description !== undefined) this.props.description = props.description;
+    if (props.status !== undefined) this.updateStatus(props.status);
+    if (props.priority !== undefined) this.props.priority = props.priority;
+    if (props.assigneeId !== undefined) this.props.assigneeId = props.assigneeId;
+    if (props.dueDate !== undefined) this.props.dueDate = props.dueDate;
+    if (props.contactId !== undefined) this.props.contactId = props.contactId;
+    if (props.dealId !== undefined) this.props.dealId = props.dealId;
+    if (props.tags !== undefined) this.props.tags = props.tags;
+    
+    this.props.updatedAt = new Date();
+  }
+
+  public delete(): void {
+    this.props.isDeleted = true;
+    this.props.updatedAt = new Date();
+  }
 }

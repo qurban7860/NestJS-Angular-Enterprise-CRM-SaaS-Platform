@@ -1,5 +1,5 @@
 import { ApiProperty, ApiHideProperty } from '@nestjs/swagger';
-import { IsString, IsEmail, IsOptional, IsUUID } from 'class-validator';
+import { IsString, IsEmail, IsOptional } from 'class-validator';
 
 export class CreateContactDto {
   @ApiProperty({ example: 'Jane' })
@@ -45,4 +45,31 @@ export class ContactResponseDto {
 
   @ApiProperty({ enum: ['LEAD', 'QUALIFIED', 'CUSTOMER', 'CHURNED'] })
   status!: string;
+}
+
+export class UpdateContactDto {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  status?: string;
 }

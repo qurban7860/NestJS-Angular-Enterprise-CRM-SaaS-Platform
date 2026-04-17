@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Entity } from '../../../../core/domain/base/entity.base';
 import { Result } from '../../../../core/domain/base/result';
 
@@ -56,6 +57,22 @@ export class Deal extends Entity<DealProps> {
     if (nextStage === 'CLOSED_WON' || nextStage === 'CLOSED_LOST') {
       this.props.closedAt = new Date();
     }
+    this.props.updatedAt = new Date();
+  }
+
+  public update(props: Partial<DealProps>): void {
+    if (props.title !== undefined) this.props.title = props.title;
+    if (props.valueAmount !== undefined) this.props.valueAmount = props.valueAmount;
+    if (props.valueCurrency !== undefined) this.props.valueCurrency = props.valueCurrency;
+    if (props.stage !== undefined) this.props.stage = props.stage;
+    if (props.contactId !== undefined) this.props.contactId = props.contactId;
+    if (props.companyId !== undefined) this.props.companyId = props.companyId;
+
+    this.props.updatedAt = new Date();
+  }
+
+  public delete(): void {
+    this.props.isDeleted = true;
     this.props.updatedAt = new Date();
   }
 }

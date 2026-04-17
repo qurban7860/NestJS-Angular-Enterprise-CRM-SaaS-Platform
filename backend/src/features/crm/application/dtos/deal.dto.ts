@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsEnum, IsOptional, IsUUID } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsEnum,
+  IsOptional,
+  IsUUID,
+} from 'class-validator';
 
 export enum DealStage {
   PROSPECTING = 'PROSPECTING',
@@ -7,7 +13,7 @@ export enum DealStage {
   PROPOSAL = 'PROPOSAL',
   NEGOTIATION = 'NEGOTIATION',
   CLOSED_WON = 'CLOSED_WON',
-  CLOSED_LOST = 'CLOSED_LOST'
+  CLOSED_LOST = 'CLOSED_LOST',
 }
 
 export class CreateDealDto {
@@ -40,7 +46,7 @@ export class CreateDealDto {
   @IsOptional()
   @IsUUID()
   orgId?: string;
-  
+
   @IsOptional()
   @IsUUID()
   ownerId?: string;
@@ -82,4 +88,36 @@ export class UpdateDealStageDto {
   @ApiProperty({ enum: DealStage })
   @IsEnum(DealStage)
   stage!: DealStage;
+}
+
+export class UpdateDealDto {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  valueAmount?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  valueCurrency?: string;
+
+  @ApiProperty({ enum: DealStage, required: false })
+  @IsOptional()
+  @IsEnum(DealStage)
+  stage?: DealStage;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsUUID()
+  contactId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsUUID()
+  companyId?: string;
 }

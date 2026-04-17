@@ -1,9 +1,35 @@
-import { Controller, Post, Body, Get, Param, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+/* eslint-disable @typescript-eslint/only-throw-error */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Patch,
+  Delete,
+  Res,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { CreateContactUseCase } from '../../application/use-cases/create-contact.use-case';
 import { ListContactsUseCase } from '../../application/use-cases/list-contacts.use-case';
-import { CreateContactDto, ContactResponseDto } from '../../application/dtos/contact.dto';
+import { GetContactUseCase } from '../../application/use-cases/get-contact.use-case';
+import { UpdateContactUseCase } from '../../application/use-cases/update-contact.use-case';
+import { DeleteContactUseCase } from '../../application/use-cases/delete-contact.use-case';
+import {
+  CreateContactDto,
+  ContactResponseDto,
+  UpdateContactDto,
+} from '../../application/dtos/contact.dto';
 import { CurrentUser } from '../../../../core/presentation/decorators/current-user.decorator';
+import { CsvExportService } from '../../../../core/application/services/csv-export.service';
+import type { Response } from 'express';
 
 @ApiTags('CRM')
 @ApiBearerAuth()
@@ -12,13 +38,55 @@ export class ContactsController {
   constructor(
     private readonly createContactUseCase: CreateContactUseCase,
     private readonly listContactsUseCase: ListContactsUseCase,
+    private readonly getContactUseCase: GetContactUseCase,
+    private readonly updateContactUseCase: UpdateContactUseCase,
+    private readonly deleteContactUseCase: DeleteContactUseCase,
+    private readonly csvExportService: CsvExportService,
   ) {}
+
+  @Get('export')
+  @ApiOperation({ summary: 'Export contacts to CSV' })
+  async exportCsv(@CurrentUser() user: any, @Res() res: Response) {
+    const result = await this.listContactsUseCase.execute(user.orgId);
+    if (result.isFailure) {
+      throw result.error;
+    }
+    const contacts = result.getValue();
+
+    // Convert DTOs to plain objects for CSV
+    const csvData = contacts.map((c) => ({
+      ID: c.id,
+      Name: c.fullName,
+      Email: c.email,
+      Status: c.status,
+    }));
+
+    const csvString = this.csvExportService.generateCsv(csvData);
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=contacts.csv');
+    res.send(csvString);
+  }
 
   @Get()
   @ApiOperation({ summary: 'List all contacts for the current organization' })
   @ApiResponse({ status: 200, type: [ContactResponseDto] })
   async findAll(@CurrentUser() user: any) {
     const result = await this.listContactsUseCase.execute(user.orgId);
+    if (result.isFailure) {
+      throw result.error;
+    }
+    return result.getValue();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a specific contact' })
+  @ApiResponse({ status: 200, type: ContactResponseDto })
+  async findOne(@Param('id') id: string, @CurrentUser() user: any) {
+    const result = await this.getContactUseCase.execute({
+      id,
+      orgId: user.orgId,
+    });
     if (result.isFailure) {
       throw result.error;
     }
@@ -40,5 +108,41 @@ export class ContactsController {
       throw result.error;
     }
     return result.getValue();
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update an existing contact' })
+  @ApiResponse({ status: 200, type: ContactResponseDto })
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateContactDto,
+    @CurrentUser() user: any,
+  ) {
+    const result = await this.updateContactUseCase.execute({
+      ...dto,
+      id,
+      orgId: user.orgId,
+    });
+
+    if (result.isFailure) {
+      throw result.error;
+    }
+    return result.getValue();
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete a contact' })
+  @ApiResponse({ status: 204 })
+  async remove(@Param('id') id: string, @CurrentUser() user: any) {
+    const result = await this.deleteContactUseCase.execute({
+      id,
+      orgId: user.orgId,
+    });
+
+    if (result.isFailure) {
+      throw result.error;
+    }
+    // Return empty response for 204
+    return;
   }
 }
