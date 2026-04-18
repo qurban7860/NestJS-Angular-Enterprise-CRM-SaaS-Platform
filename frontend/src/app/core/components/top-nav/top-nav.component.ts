@@ -4,15 +4,27 @@ import { Store } from '@ngrx/store';
 import { selectUser } from '../../state/auth/auth.reducer';
 import { AuthActions } from '../../state/auth/auth.actions';
 import { selectUnreadCount } from '../../state/notifications/notifications.reducer';
+import { NavService } from '../../services/nav.service';
 
 @Component({
   selector: 'app-top-nav',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <header class="h-16 glass-panel !rounded-none border-x-0 border-t-0 flex items-center justify-between px-8">
-      <div class="flex items-center flex-1 max-w-md">
-        <div class="relative w-full group">
+    <header class="h-16 glass-panel !rounded-none border-x-0 border-t-0 flex items-center justify-between px-4 sm:px-8">
+      <div class="flex items-center gap-4 flex-1">
+        <!-- Sidebar Toggle (Mobile) -->
+        <button 
+          (click)="navService.toggleSidebar()"
+          class="lg:hidden p-2 text-brand-secondary hover:text-white transition-colors hover:bg-white/5 rounded-lg"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        <!-- Search -->
+        <div class="relative w-full max-w-md group hidden sm:block">
           <input 
             type="text" 
             placeholder="Search anything..." 
@@ -24,7 +36,7 @@ import { selectUnreadCount } from '../../state/notifications/notifications.reduc
         </div>
       </div>
 
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2 sm:gap-4">
         <!-- Notification Bell -->
         <button class="p-2 text-brand-secondary hover:text-white transition-colors relative group">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 group-hover:animate-swing" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -40,13 +52,13 @@ import { selectUnreadCount } from '../../state/notifications/notifications.reduc
           }
         </button>
 
-        <div class="w-px h-6 bg-brand-border mx-2"></div>
+        <div class="w-px h-6 bg-brand-border mx-1 sm:mx-2"></div>
 
-        <button (click)="logout()" class="text-sm font-medium text-brand-secondary hover:text-white transition-colors">
+        <button (click)="logout()" class="text-sm font-medium text-brand-secondary hover:text-white transition-colors hidden sm:block">
           Logout
         </button>
 
-        <button class="premium-button !py-1.5 !px-4 text-sm">
+        <button class="premium-button !py-1.5 !px-4 text-xs sm:text-sm whitespace-nowrap">
           Upgrade
         </button>
       </div>
@@ -55,6 +67,7 @@ import { selectUnreadCount } from '../../state/notifications/notifications.reduc
 })
 export class TopNavComponent {
   private store = inject(Store);
+  navService = inject(NavService);
   
   user$ = this.store.select(selectUser);
   unreadCount$ = this.store.select(selectUnreadCount);

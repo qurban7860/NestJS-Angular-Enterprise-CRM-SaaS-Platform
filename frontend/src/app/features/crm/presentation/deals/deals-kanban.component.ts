@@ -19,38 +19,38 @@ interface KanbanColumn {
   standalone: true,
   imports: [CommonModule, DragDropModule, ReactiveFormsModule, ConfirmModalComponent],
   template: `
-    <div class="h-[calc(100vh-12rem)] flex flex-col space-y-6 animate-in fade-in duration-500">
+    <div class="h-full flex flex-col space-y-4 sm:space-y-6 animate-in fade-in duration-500">
       <!-- Header -->
-      <div class="flex justify-between items-center">
+      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white/5 border border-white/10 p-4 sm:p-6 rounded-2xl glass-panel">
         <div>
-          <h1 class="text-2xl font-bold">Sales Pipeline</h1>
-          <p class="text-brand-secondary text-sm mt-1">Track and manage your value-based deals</p>
+          <h1 class="text-xl sm:text-2xl font-bold">Sales Pipeline</h1>
+          <p class="text-brand-secondary text-xs sm:text-sm mt-1">Track and manage your value-based deals</p>
         </div>
-        <div class="flex gap-3">
-          <div class="bg-white/5 border border-brand-border rounded-xl px-4 py-2 flex items-center gap-2">
-            <span class="text-brand-secondary text-sm">Total Value:</span>
-            <span class="font-bold text-brand-primary cursor-default" *ngIf="totalValue$ | async as total">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto">
+          <div class="bg-white/5 border border-brand-border rounded-xl px-3 sm:px-4 py-2 flex items-center gap-2 flex-1 sm:flex-none justify-center">
+            <span class="text-brand-secondary text-[10px] sm:text-sm uppercase tracking-wider font-medium">Pipeline:</span>
+            <span class="font-bold text-brand-primary text-sm sm:text-base cursor-default whitespace-nowrap" *ngIf="totalValue$ | async as total">
                {{ total | currency:'USD':'symbol':'1.0-0' }}
             </span>
           </div>
-          <button (click)="exportDeals()" class="premium-button flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary/80">
+          <button (click)="exportDeals()" class="premium-button !bg-brand-secondary hover:!bg-brand-secondary/80 flex items-center gap-2 text-xs sm:text-sm px-3 py-2 flex-1 sm:flex-none justify-center">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-            Export
+            <span class="hidden sm:inline">Export</span>
           </button>
-          <button (click)="openCreateModal()" class="premium-button flex items-center gap-2">
-            <span>+</span> New Deal
+          <button (click)="openCreateModal()" class="premium-button flex items-center gap-2 text-xs sm:text-sm px-4 py-2 flex-1 sm:flex-none justify-center">
+            <span>+</span> <span class="hidden sm:inline">New Deal</span>
           </button>
         </div>
       </div>
 
       <!-- Create Deal Modal Overlay -->
       @if (isModalOpen) {
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in zoom-in duration-200">
-          <div class="glass-panel w-full max-w-md p-8 relative">
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in zoom-in duration-200 p-4">
+          <div class="glass-panel w-full max-w-md p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
             <button (click)="closeCreateModal()" class="absolute top-4 right-4 text-brand-secondary hover:text-white transition-colors">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <h2 class="text-2xl font-bold mb-6">{{ editingDealId ? 'Edit Deal' : 'Create New Deal' }}</h2>
+            <h2 class="text-xl sm:text-2xl font-bold mb-6">{{ editingDealId ? 'Edit Deal' : 'Create New Deal' }}</h2>
             <form [formGroup]="dealForm" (ngSubmit)="submitDeal()" class="space-y-4">
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Deal Title</label>
@@ -60,8 +60,8 @@ interface KanbanColumn {
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Value Amount</label>
                 <input formControlName="valueAmount" type="number" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="Enter the deal value">
               </div>
-              <div class="flex gap-4">
-                <div class="flex-1">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
                   <label class="block text-sm font-medium text-brand-secondary mb-1">Currency</label>
                   <select formControlName="valueCurrency" class="w-full bg-black/40 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
                     <option value="USD">USD</option>
@@ -69,7 +69,7 @@ interface KanbanColumn {
                     <option value="AUD">AUD</option>
                   </select>
                 </div>
-                <div class="flex-1">
+                <div>
                   <label class="block text-sm font-medium text-brand-secondary mb-1">Stage</label>
                   <select formControlName="stage" class="w-full bg-black/40 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
                     <option value="PROSPECTING">Prospecting</option>
@@ -79,22 +79,22 @@ interface KanbanColumn {
                   </select>
                 </div>
               </div>
-              <button type="submit" [disabled]="dealForm.invalid" class="premium-button w-full mt-6 py-3 disabled:opacity-50">{{ editingDealId ? 'Update Pipeline Deal' : 'Create Pipeline Deal' }}</button>
+              <button type="submit" [disabled]="dealForm.invalid" class="premium-button w-full mt-6 py-3 disabled:opacity-50 text-sm">{{ editingDealId ? 'Update Pipeline Deal' : 'Create Pipeline Deal' }}</button>
             </form>
           </div>
         </div>
       }
 
       <!-- Kanban Board -->
-      <div class="flex-1 overflow-x-auto overflow-y-hidden">
-        <div class="flex h-full gap-6 min-w-max pb-4">
+      <div class="flex-1 overflow-x-auto overflow-y-hidden -mx-4 sm:mx-0 px-4 sm:px-0">
+        <div class="flex h-full gap-4 sm:gap-6 min-w-max pb-4">
           @for (column of columns$ | async; track column.id) {
-            <div class="w-80 flex flex-col h-full">
+            <div class="w-72 sm:w-80 flex flex-col h-full bg-black/10 rounded-2xl border border-white/5 overflow-hidden">
               <!-- Column Header -->
-              <div class="flex justify-between items-center mb-4 px-2">
-                <h3 class="font-semibold text-sm uppercase tracking-wider text-brand-secondary">
+              <div class="flex justify-between items-center p-4 border-b border-white/5 bg-white/[0.02]">
+                <h3 class="font-bold text-[10px] sm:text-xs uppercase tracking-widest text-brand-secondary flex items-center gap-2">
                   {{ column.name }}
-                  <span class="ml-2 px-2 py-0.5 rounded-full bg-white/10 text-xs">{{ column.deals.length }}</span>
+                  <span class="px-2 py-0.5 rounded-full bg-white/10 text-[10px]">{{ column.deals.length }}</span>
                 </h3>
                 <button (click)="columnSettings(column.id)" class="text-brand-secondary hover:text-white transition-colors">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
@@ -108,25 +108,25 @@ interface KanbanColumn {
                 [cdkDropListData]="column.deals"
                 [cdkDropListConnectedTo]="stageIds"
                 (cdkDropListDropped)="onDrop($event)"
-                class="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar"
+                class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 custom-scrollbar"
               >
                 @for (deal of column.deals; track deal.id) {
                   <div 
                     cdkDrag
-                    class="glass-panel p-4 cursor-grab active:cursor-grabbing hover:border-brand-primary/30 transition-all group border-l-4"
+                    class="glass-panel p-4 cursor-grab active:cursor-grabbing hover:border-brand-primary/40 transition-all group border-l-4 relative bg-brand-dark/40 shadow-sm"
                     [style.border-left-color]="getPriorityColor(deal.valueAmount)"
                   >
                     <div class="flex justify-between items-start mb-2">
-                      <h4 class="font-medium text-sm group-hover:text-brand-primary transition-colors cursor-pointer pr-10">
+                      <h4 class="font-bold text-xs sm:text-sm group-hover:text-brand-primary transition-colors cursor-pointer pr-8 leading-relaxed">
                         {{ deal.title }}
                       </h4>
-                      <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
-                        <button (click)="editDeal(deal)" class="p-1 text-brand-secondary hover:text-white bg-black/40 rounded">
+                      <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
+                        <button (click)="editDeal(deal)" class="p-1.5 text-brand-secondary hover:text-white bg-black/60 rounded-lg backdrop-blur-md">
                           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
                           </svg>
                         </button>
-                        <button (click)="deleteDeal(deal)" class="p-1 text-brand-secondary hover:text-red-400 bg-black/40 rounded">
+                        <button (click)="deleteDeal(deal)" class="p-1.5 text-brand-secondary hover:text-red-400 bg-black/60 rounded-lg backdrop-blur-md">
                           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                           </svg>
@@ -135,27 +135,27 @@ interface KanbanColumn {
                     </div>
                     
                     <div class="flex justify-between items-center mt-4">
-                      <span class="text-brand-primary font-bold text-sm">
+                      <span class="text-brand-primary font-black text-sm">
                         {{ deal.valueAmount | currency:deal.valueCurrency:'symbol':'1.0-0' }}
                       </span>
                       <div class="flex -space-x-2">
-                        <div class="w-6 h-6 rounded-full bg-brand-primary/20 border border-brand-border flex items-center justify-center text-[10px] font-bold">
+                        <div class="w-7 h-7 rounded-full bg-indigo-500/20 border-2 border-brand-dark flex items-center justify-center text-[10px] font-bold text-indigo-400">
                           {{ deal.ownerId ? 'U' : '?' }}
                         </div>
                       </div>
                     </div>
 
-                    <div class="mt-3 flex items-center justify-between opacity-50 text-[10px] uppercase tracking-tighter">
-                      <span>Ref: #{{ deal.id.substring(0,4) }}</span>
+                    <div class="mt-4 pt-3 flex items-center justify-between border-t border-white/5 opacity-40 text-[9px] uppercase tracking-tighter font-bold">
+                      <span>#{{ deal.id.substring(0,4) }}</span>
                       <span>{{ deal.createdAt | date:'MMM d' }}</span>
                     </div>
 
                     <!-- Drag Preview Placeholder -->
-                    <div *cdkDragPlaceholder class="bg-brand-primary/10 border-2 border-dashed border-brand-primary/30 rounded-2xl h-32 w-full"></div>
+                    <div *cdkDragPlaceholder class="bg-brand-primary/5 border-2 border-dashed border-brand-primary/20 rounded-2xl h-32 w-full"></div>
                   </div>
                 } @empty {
-                   <div class="flex flex-col items-center justify-center h-32 border-2 border-dashed border-brand-border rounded-2xl opacity-30">
-                     <span class="text-xs">No deals here</span>
+                   <div class="flex flex-col items-center justify-center h-32 border-2 border-dashed border-white/5 rounded-2xl opacity-20">
+                     <span class="text-[10px] uppercase font-bold tracking-widest">No deals</span>
                    </div>
                 }
               </div>

@@ -43,7 +43,7 @@ import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.r
             <div>
               <div class="flex justify-between mb-2">
                 <label class="block text-sm font-medium text-brand-secondary" for="password">Password</label>
-                <a routerLink="/auth/forgot-password" (click)="forgotPassword($event)" class="text-xs text-brand-primary hover:underline">Forgot?</a>
+                <!-- <a routerLink="/auth/forgot-password" (click)="forgotPassword($event)" class="text-xs text-brand-primary hover:underline">Forgot?</a> -->
               </div>
               <input 
                 id="password"

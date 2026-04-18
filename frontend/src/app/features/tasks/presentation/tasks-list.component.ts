@@ -18,42 +18,42 @@ import { ConfirmModalComponent } from '../../../core/components/confirm-modal/co
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FileUploadComponent, TaskCommentsComponent, DragDropModule, ConfirmModalComponent],
   template: `
-    <div class="space-y-6 animate-in fade-in duration-500 max-w-[1400px] mx-auto pb-20 px-4 md:px-8">
+    <div class="space-y-4 sm:space-y-6 animate-in fade-in duration-500 max-w-[1400px] mx-auto pb-20 px-4 md:px-8">
       
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white/5 border border-brand-border rounded-2xl p-6 glass-panel gap-4">
+      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white/5 border border-brand-border rounded-2xl p-4 sm:p-6 glass-panel gap-4">
         <div>
-          <h1 class="text-2xl font-bold">Tasks Pipeline</h1>
-          <p class="text-brand-secondary text-sm mt-1">Track your productivity and team assignments</p>
+          <h1 class="text-xl sm:text-2xl font-bold">Tasks Pipeline</h1>
+          <p class="text-brand-secondary text-xs sm:text-sm mt-1">Track your productivity and team assignments</p>
         </div>
-        <div class="flex items-center gap-3">
-          <div class="flex bg-white/5 p-1 rounded-xl border border-white/10">
-            <button (click)="viewMode = 'LIST'" [class.bg-brand-primary]="viewMode === 'LIST'" [class.text-black]="viewMode === 'LIST'" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all">
-              <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg> LIST
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto">
+          <div class="flex bg-white/5 p-1 rounded-xl border border-white/10 flex-1 sm:flex-none">
+            <button (click)="viewMode = 'LIST'" [class.bg-brand-primary]="viewMode === 'LIST'" [class.text-black]="viewMode === 'LIST'" class="flex-1 px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold transition-all whitespace-nowrap">
+              <svg class="w-3.5 h-3.5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg> LIST
             </button>
-            <button (click)="viewMode = 'BOARD'" [class.bg-brand-primary]="viewMode === 'BOARD'" [class.text-black]="viewMode === 'BOARD'" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all">
-              <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path></svg> BOARD
+            <button (click)="viewMode = 'BOARD'" [class.bg-brand-primary]="viewMode === 'BOARD'" [class.text-black]="viewMode === 'BOARD'" class="flex-1 px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold transition-all whitespace-nowrap">
+              <svg class="w-3.5 h-3.5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path></svg> BOARD
             </button>
           </div>
-          <button (click)="exportTasks()" class="premium-button flex items-center gap-2 bg-brand-secondary hover:bg-brand-secondary/80">
+          <button (click)="exportTasks()" class="premium-button !bg-brand-secondary hover:!bg-brand-secondary/80 flex items-center gap-2 text-xs px-3 py-2 flex-1 sm:flex-none justify-center">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-            Export
+            <span class="hidden sm:inline">Export</span>
           </button>
-          <button (click)="openCreateModal()" class="premium-button flex items-center gap-2">
-            <span>+</span> New Task
+          <button (click)="openCreateModal()" class="premium-button flex items-center gap-2 text-xs px-4 py-2 flex-1 sm:flex-none justify-center">
+            <span>+</span> <span class="whitespace-nowrap hidden sm:inline">New Task</span>
           </button>
         </div>
       </div>
 
       <div class="glass-panel p-4 rounded-xl flex flex-col lg:flex-row gap-4 items-center justify-between border border-white/5 relative z-20">
         <div class="flex flex-1 flex-wrap gap-3 items-center w-full" [formGroup]="advancedFilters">
-          <div class="relative w-full md:w-64">
+          <div class="relative w-full sm:w-64">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-secondary">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </span>
             <input formControlName="search" type="text" placeholder="Search tasks..." class="w-full bg-black/40 border border-white/10 rounded-lg py-2 pl-9 pr-3 text-sm focus:outline-none focus:border-brand-primary/50 transition-all">
           </div>
           
-          <select formControlName="priority" class="bg-black/40 border border-white/10 rounded-lg py-2 px-3 text-sm focus:outline-none focus:border-brand-primary/50 appearance-none cursor-pointer">
+          <select formControlName="priority" class="flex-1 sm:flex-none bg-black/40 border border-white/10 rounded-lg py-2 px-3 text-sm focus:outline-none focus:border-brand-primary/50 appearance-none cursor-pointer min-w-[120px]">
             <option value="">All Priorities</option>
             <option value="URGENT">Urgent</option>
             <option value="HIGH">High</option>
@@ -61,7 +61,7 @@ import { ConfirmModalComponent } from '../../../core/components/confirm-modal/co
             <option value="LOW">Low</option>
           </select>
 
-          <select formControlName="assigneeId" class="bg-black/40 border border-white/10 rounded-lg py-2 px-3 text-sm focus:outline-none focus:border-brand-primary/50 appearance-none cursor-pointer">
+          <select formControlName="assigneeId" class="flex-1 sm:flex-none bg-black/40 border border-white/10 rounded-lg py-2 px-3 text-sm focus:outline-none focus:border-brand-primary/50 appearance-none cursor-pointer min-w-[120px]">
             <option value="">All Assignees</option>
             <option [value]="currentUserId">My Tasks</option>
             @for (user of users$ | async; track user.id) {
@@ -70,49 +70,51 @@ import { ConfirmModalComponent } from '../../../core/components/confirm-modal/co
           </select>
           
           @if (hasActiveFilters) {
-            <button (click)="clearFilters()" class="text-xs text-brand-secondary hover:text-white transition-colors">Clear All</button>
+            <button (click)="clearFilters()" class="text-xs text-brand-secondary hover:text-white transition-colors w-full sm:w-auto text-center py-2 sm:py-0">Clear All</button>
           }
         </div>
       </div>
 
       @if (selectedTasks.size > 0) {
-        <div class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#0a0a0a] border border-brand-primary/50 shadow-[0_10px_40px_rgba(var(--brand-primary-rgb),0.2)] rounded-full px-6 py-3 flex items-center gap-6 z-50 animate-in slide-in-from-bottom-5">
-          <span class="text-sm font-bold text-white"><span class="text-brand-primary">{{selectedTasks.size}}</span> Tasks Selected</span>
-          <div class="w-px h-6 bg-white/10"></div>
-          <button (click)="bulkUpdateStatus('DONE')" class="text-xs font-semibold hover:text-emerald-400 transition-colors flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Mark Done
-          </button>
-          <button (click)="bulkDelete()" class="text-xs font-semibold hover:text-rose-400 transition-colors flex items-center gap-2 text-rose-500/80">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Delete
-          </button>
-          <button (click)="clearSelection()" class="text-xs text-brand-secondary ml-4 hover:text-white">Cancel</button>
+        <div class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#0a0a0a] border border-brand-primary/50 shadow-[0_10px_40px_rgba(var(--brand-primary-rgb),0.2)] rounded-2xl sm:rounded-full px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center gap-3 sm:gap-6 z-50 animate-in slide-in-from-bottom-5 w-[90%] sm:w-auto">
+          <span class="text-xs sm:text-sm font-bold text-white"><span class="text-brand-primary">{{selectedTasks.size}}</span> Tasks Selected</span>
+          <div class="hidden sm:block w-px h-6 bg-white/10"></div>
+          <div class="flex items-center gap-4">
+            <button (click)="bulkUpdateStatus('DONE')" class="text-[10px] sm:text-xs font-semibold hover:text-emerald-400 transition-colors flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Mark Done
+            </button>
+            <button (click)="bulkDelete()" class="text-[10px] sm:text-xs font-semibold hover:text-rose-400 transition-colors flex items-center gap-2 text-rose-500/80">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Delete
+            </button>
+            <button (click)="clearSelection()" class="text-[10px] sm:text-xs text-brand-secondary hover:text-white">Cancel</button>
+          </div>
         </div>
       }
 
       @if (isLoading$ | async) {
-        <div class="flex flex-col items-center justify-center p-20 space-y-4">
-            <div class="w-12 h-12 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-brand-secondary font-medium animate-pulse">Synchronizing tasks...</p>
+        <div class="flex flex-col items-center justify-center p-12 sm:p-20 space-y-4">
+            <div class="w-10 h-10 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-brand-secondary text-sm font-medium animate-pulse">Synchronizing tasks...</p>
         </div>
       } @else {
         
         @if (viewMode === 'BOARD') {
-          <div class="flex gap-6 overflow-x-auto pb-4 custom-scrollbar min-h-[600px] items-start" cdkDropListGroup>
+          <div class="flex gap-4 sm:gap-6 overflow-x-auto pb-4 custom-scrollbar min-h-[500px] items-start -mx-4 px-4" cdkDropListGroup>
             @for (column of boardColumns; track column.id) {
-              <div class="flex-shrink-0 w-80 glass-panel bg-black/20 flex flex-col rounded-xl overflow-hidden border border-white/5">
+              <div class="flex-shrink-0 w-72 sm:w-80 glass-panel bg-black/20 flex flex-col rounded-xl overflow-hidden border border-white/5">
                 <div class="p-4 border-b border-white/5 flex justify-between items-center" [style.border-top-color]="column.color" style="border-top-width: 3px;">
-                  <h3 class="font-bold text-sm tracking-wide uppercase">{{ column.title }}</h3>
-                  <span class="bg-white/10 text-xs px-2 py-0.5 rounded-full font-medium">{{ getTasksByStatus(column.id).length }}</span>
+                  <h3 class="font-bold text-[10px] sm:text-xs tracking-widest uppercase">{{ column.title }}</h3>
+                  <span class="bg-white/10 text-[10px] px-2 py-0.5 rounded-full font-bold">{{ getTasksByStatus(column.id).length }}</span>
                 </div>
                 
                 <div 
                   cdkDropList 
                   [cdkDropListData]="getTasksByStatus(column.id)" 
                   (cdkDropListDropped)="onDrop($event, column.id)"
-                  class="flex-1 p-3 space-y-3 min-h-[150px] custom-scrollbar overflow-y-auto"
+                  class="flex-1 p-3 space-y-3 min-h-[150px] custom-scrollbar overflow-y-auto max-h-[60vh]"
                 >
                   @for (task of getTasksByStatus(column.id); track task.id) {
-                    <div cdkDrag class="glass-panel p-4 rounded-lg border border-white/10 hover:border-brand-primary/40 cursor-grab active:cursor-grabbing bg-[#121212] group relative shadow-lg">
+                    <div cdkDrag class="glass-panel p-3 sm:p-4 rounded-lg border border-white/10 hover:border-brand-primary/40 cursor-grab active:cursor-grabbing bg-[#121212] group relative shadow-lg">
                       
                       <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-10" [class.opacity-100]="selectedTasks.has(task.id)">
                         <input type="checkbox" [checked]="selectedTasks.has(task.id)" (change)="toggleTaskSelection(task.id, $event)" class="w-4 h-4 rounded bg-black/50 border-white/20 accent-brand-primary cursor-pointer">
@@ -120,23 +122,23 @@ import { ConfirmModalComponent } from '../../../core/components/confirm-modal/co
 
                       <div class="flex flex-col gap-2" (click)="selectedTaskId = (selectedTaskId === task.id ? null : task.id)">
                         <div class="flex items-center gap-2 pr-6">
-                           <span [class]="getPriorityClass(task.priority)" class="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-tighter">
+                           <span [class]="getPriorityClass(task.priority)" class="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter">
                              {{ task.priority }}
                            </span>
                         </div>
-                        <h4 class="font-semibold text-sm leading-tight group-hover:text-brand-primary transition-colors">{{ task.title }}</h4>
+                        <h4 class="font-bold text-xs sm:text-sm leading-tight group-hover:text-brand-primary transition-colors">{{ task.title }}</h4>
                         
                         <div class="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
-                          <div class="flex items-center gap-2 text-xs text-brand-secondary">
+                          <div class="flex items-center gap-2 text-[10px] text-brand-secondary">
                             @if (task.dueDate) {
-                              <span [class]="getDueDateClass(task.dueDate)" class="flex items-center gap-1 rounded bg-transparent p-0 text-[10px]">
+                              <span [class]="getDueDateClass(task.dueDate)" class="flex items-center gap-1 font-bold">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                 {{ task.dueDate | date:'MMM d' }}
                               </span>
                             }
                           </div>
                           @if (task.assigneeId) {
-                            <div class="w-6 h-6 rounded-full bg-brand-primary/20 flex items-center justify-center text-[10px] font-bold text-brand-primary border border-brand-primary/30" title="Assigned">
+                            <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-brand-primary/20 flex items-center justify-center text-[8px] sm:text-[10px] font-bold text-brand-primary border border-brand-primary/30" title="Assigned">
                               {{ getAssigneeInitials(task.assigneeId) }}
                             </div>
                           }
@@ -144,10 +146,10 @@ import { ConfirmModalComponent } from '../../../core/components/confirm-modal/co
                       </div>
 
                       <div class="absolute top-12 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex space-x-1">
-                        <button (click)="$event.stopPropagation(); editTask(task)" class="p-1 text-brand-secondary hover:text-white bg-black/40 rounded">
+                        <button (click)="$event.stopPropagation(); editTask(task)" class="p-1.5 text-brand-secondary hover:text-white bg-black/60 rounded-lg">
                           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                         </button>
-                        <button (click)="$event.stopPropagation(); deleteTask(task)" class="p-1 text-brand-secondary hover:text-red-400 bg-black/40 rounded">
+                        <button (click)="$event.stopPropagation(); deleteTask(task)" class="p-1.5 text-brand-secondary hover:text-red-400 bg-black/60 rounded-lg">
                           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
                       </div>
@@ -169,43 +171,39 @@ import { ConfirmModalComponent } from '../../../core/components/confirm-modal/co
           <div class="space-y-3">
             @for (task of filteredTasks; track task.id) {
               <div class="flex flex-col gap-2 group">
-                <div class="glass-panel p-4 flex items-center gap-5 group hover:border-brand-primary/30 transition-all border-l-4 relative overflow-hidden"
+                <div class="glass-panel p-3 sm:p-4 flex items-center gap-3 sm:gap-5 group hover:border-brand-primary/30 transition-all border-l-4 relative overflow-hidden"
                   [style.border-left-color]="getPriorityColor(task.priority)"
                   [class.border-brand-primary]="selectedTaskId === task.id">
                   
                   <div class="flex-shrink-0 z-10">
                     <input type="checkbox" [checked]="selectedTasks.has(task.id)" (change)="toggleTaskSelection(task.id, $event)"
-                      class="w-5 h-5 rounded border-white/20 bg-black/50 text-brand-primary focus:ring-brand-primary/50 transition-all cursor-pointer accent-brand-primary">
+                      class="w-4 h-4 sm:w-5 sm:h-5 rounded border-white/20 bg-black/50 text-brand-primary cursor-pointer accent-brand-primary">
                   </div>
 
                   <div class="flex-1 min-w-0 z-10 cursor-pointer" (click)="selectedTaskId = (selectedTaskId === task.id ? null : task.id)">
-                    <div class="flex items-center gap-3">
-                      <h4 [class.line-through]="task.status === 'DONE'" [class.opacity-40]="task.status === 'DONE'" class="font-semibold text-[15px] truncate transition-all">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                      <h4 [class.line-through]="task.status === 'DONE'" [class.opacity-40]="task.status === 'DONE'" class="font-bold text-sm sm:text-[15px] truncate transition-all">
                         {{ task.title }}
                       </h4>
-                      <span [class]="getPriorityClass(task.priority)" class="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest">{{ task.priority }}</span>
-                      <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest bg-white/10 border border-white/5">{{ task.status.replace('_', ' ') }}</span>
+                      <div class="flex gap-2">
+                        <span [class]="getPriorityClass(task.priority)" class="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest whitespace-nowrap">{{ task.priority }}</span>
+                        <span class="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest bg-white/10 border border-white/5 whitespace-nowrap">{{ task.status.replace('_', ' ') }}</span>
+                      </div>
                     </div>
                     <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-1.5">
                       @if (task.dueDate) {
-                        <span class="text-[11px] font-medium flex items-center gap-1" [class]="getDueDateClass(task.dueDate)">
+                        <span class="text-[10px] sm:text-[11px] font-bold flex items-center gap-1" [class]="getDueDateClass(task.dueDate)">
                           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                          Due {{ task.dueDate | date:'MMM d, yyyy' }}
+                          {{ task.dueDate | date:'MMM d, yyyy' }}
                         </span>
-                      }
-                      @if (task.assigneeId) {
-                        <div class="flex items-center gap-1.5 text-[11px] text-brand-secondary">
-                          <div class="w-4 h-4 rounded-full bg-brand-primary/20 flex items-center justify-center text-[8px] font-bold text-brand-primary">{{ getAssigneeInitials(task.assigneeId) }}</div>
-                          Assigned
-                        </div>
                       }
                     </div>
                   </div>
-                  <div class="flex items-center opacity-0 group-hover:opacity-100 transition-opacity z-10 space-x-2 mr-4">
-                    <button (click)="$event.stopPropagation(); editTask(task)" class="p-1.5 text-brand-secondary hover:text-white bg-black/40 rounded">
+                  <div class="flex items-center opacity-0 group-hover:opacity-100 transition-opacity z-10 space-x-1 sm:space-x-2 mr-0 sm:mr-4">
+                    <button (click)="$event.stopPropagation(); editTask(task)" class="p-1.5 text-brand-secondary hover:text-white bg-black/60 rounded-lg">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                     </button>
-                    <button (click)="$event.stopPropagation(); deleteTask(task)" class="p-1.5 text-brand-secondary hover:text-red-400 bg-black/40 rounded">
+                    <button (click)="$event.stopPropagation(); deleteTask(task)" class="p-1.5 text-brand-secondary hover:text-red-400 bg-black/60 rounded-lg">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
                   </div>

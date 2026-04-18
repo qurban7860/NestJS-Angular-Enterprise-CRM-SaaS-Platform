@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { selectUser } from '../../state/auth/auth.reducer';
 import { AuthActions } from '../../state/auth/auth.actions';
+import { NavService } from '../../services/nav.service';
 
 @Component({
   selector: 'app-side-nav',
@@ -11,12 +12,23 @@ import { AuthActions } from '../../state/auth/auth.actions';
   imports: [CommonModule, RouterModule],
   template: `
     <aside
-      class="w-64 h-full glass-panel !rounded-none border-y-0 border-l-0 flex flex-col"
+      class="w-64 h-full glass-panel !rounded-none border-y-0 border-l-0 flex flex-col relative"
     >
+      <!-- Close Button for Mobile -->
+      <button 
+        (click)="navService.closeSidebar()"
+        class="lg:hidden absolute top-5 right-1 p-2 text-brand-secondary hover:text-white transition-colors"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
       <div class="p-6">
         <div
           class="flex items-center gap-3 cursor-pointer"
           routerLink="/dashboard"
+          (click)="navService.closeSidebar()"
         >
           <div
             class="w-8 h-8 rounded-lg bg-gradient-premium flex items-center justify-center font-bold text-white shadow-lg"
@@ -43,6 +55,7 @@ import { AuthActions } from '../../state/auth/auth.actions';
               routerLinkActive="active"
               [routerLinkActiveOptions]="{ exact: true }"
               class="nav-link"
+              (click)="navService.closeSidebar()"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -75,6 +88,7 @@ import { AuthActions } from '../../state/auth/auth.actions';
               routerLink="/crm/contacts"
               routerLinkActive="active"
               class="nav-link"
+              (click)="navService.closeSidebar()"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -96,6 +110,7 @@ import { AuthActions } from '../../state/auth/auth.actions';
               routerLink="/crm/deals"
               routerLinkActive="active"
               class="nav-link"
+              (click)="navService.closeSidebar()"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -124,7 +139,7 @@ import { AuthActions } from '../../state/auth/auth.actions';
             Work
           </p>
           <div class="space-y-1">
-            <a routerLink="/tasks" routerLinkActive="active" class="nav-link">
+            <a routerLink="/tasks" routerLinkActive="active" class="nav-link" (click)="navService.closeSidebar()">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="w-5 h-5 mr-3"
@@ -156,6 +171,7 @@ import { AuthActions } from '../../state/auth/auth.actions';
               routerLink="/system/audit-logs"
               routerLinkActive="active"
               class="nav-link"
+              (click)="navService.closeSidebar()"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -232,6 +248,7 @@ import { AuthActions } from '../../state/auth/auth.actions';
 })
 export class SideNavComponent {
   private store = inject(Store);
+  navService = inject(NavService);
   user$ = this.store.select(selectUser);
 
   logout() {
