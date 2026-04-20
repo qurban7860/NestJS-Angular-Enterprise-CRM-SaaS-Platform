@@ -22,6 +22,10 @@ export const routes: Routes = [
       {
         path: 'system',
         loadChildren: () => import('./features/system/system.routes').then(r => r.systemRoutes)
+      },
+      {
+        path: 'billing',
+        loadChildren: () => import('./features/billing/billing.routes').then(r => r.BILLING_ROUTES)
       }
     ]
   },

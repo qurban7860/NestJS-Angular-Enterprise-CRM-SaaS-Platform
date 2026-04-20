@@ -127,6 +127,22 @@ model User {
   @@map("users")
 }
 
+enum SubscriptionPlan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+}
+
 // ─────────────────────────────────────────────
 // ORGANIZATION
 // ─────────────────────────────────────────────
@@ -137,6 +153,13 @@ model Organization {
   slug      String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Billing (Stripe)
+  stripeCustomerId     String?             @unique
+  stripeSubscriptionId String?             @unique
+  plan                 SubscriptionPlan    @default(FREE)
+  subscriptionStatus   SubscriptionStatus?
+  currentPeriodEnd     DateTime?
 
   users     User[]
   contacts  Contact[]
