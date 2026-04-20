@@ -12,7 +12,7 @@ import { CurrentUser } from '../../../../core/presentation/decorators/current-us
 
 @ApiTags('Users')
 @ApiBearerAuth()
-@Controller('users')
+@Controller('auth/users')
 export class UsersController {
   constructor(private readonly listUsersUseCase: ListUsersUseCase) {}
 

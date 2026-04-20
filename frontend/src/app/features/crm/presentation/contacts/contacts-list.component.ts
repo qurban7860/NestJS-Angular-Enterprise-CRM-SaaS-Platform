@@ -154,7 +154,7 @@ import { ConfirmModalComponent } from '../../../../core/components/confirm-modal
             [formControl]="searchControl"
             type="text"
             placeholder="Search contacts..."
-            class="w-full bg-white/5 border border-brand-border rounded-xl py-2.5 pl-11 pr-4 focus:outline-none focus:border-brand-primary/50 transition-all text-sm"
+            class="w-full bg-white/5 border border-brand-border rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-brand-primary/50 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
           />
         </div>
 

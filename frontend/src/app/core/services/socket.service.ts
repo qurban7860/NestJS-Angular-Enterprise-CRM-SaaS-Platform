@@ -33,7 +33,7 @@ export class SocketService {
   private connect(token: string) {
     if (this.socket?.connected) return;
 
-    this.socket = io(`${environment.apiUrl}/notifications`, {
+    this.socket = io(`${environment.socketUrl}/notifications`, {
       auth: { token }
     });
 
