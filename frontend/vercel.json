@@ -4,20 +4,16 @@
     {
       "src": "dist/frontend/browser",
       "use": "@vercel/static"
-    },
-    {
-      "src": "backend/dist/main.js",
-      "use": "@vercel/node"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "backend/dist/main.js"
+      "source": "/(.*)",
+      "destination": "/browser/$1"
     },
     {
-      "src": "/(.*)",
-      "dest": "dist/frontend/browser/$1"
+      "source": "/(.*)",
+      "destination": "/browser/index.html"
     }
   ]
 }
