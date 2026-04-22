@@ -1,6 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BillingService } from '../../../core/services/billing.service';
+import { BillingService, SubscriptionStatus } from '../../../core/services/billing.service';
 
 @Component({
   selector: 'app-pricing',
@@ -16,6 +16,23 @@ import { BillingService } from '../../../core/services/billing.service';
           <p class="mt-4 text-xl text-brand-secondary max-w-2xl mx-auto">
             Scale your organization with our premium features and unlimited potential.
           </p>
+        </div>
+
+        <!-- Current Plan Banner -->
+        <div *ngIf="subscription" class="mb-8 glass-panel p-4 rounded-xl border border-brand-primary/30 max-w-3xl mx-auto">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="text-sm text-brand-secondary">Current Plan:</div>
+              <span class="text-lg font-bold text-brand-primary">{{ subscription.plan }}</span>
+              <span *ngIf="subscription.status" class="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400">{{ subscription.status }}</span>
+            </div>
+            <button (click)="syncStatus()" class="text-sm text-brand-secondary hover:text-white transition-colors">
+              Refresh Status
+            </button>
+          </div>
+          <div *ngIf="subscription.currentPeriodEnd" class="text-sm text-brand-secondary mt-1">
+            Next billing: {{ subscription.currentPeriodEnd | date:'mediumDate' }}
+          </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -103,8 +120,36 @@ import { BillingService } from '../../../core/services/billing.service';
     </div>
   `
 })
-export class PricingComponent {
+export class PricingComponent implements OnInit {
   private billing = inject(BillingService);
+  subscription: SubscriptionStatus | null = null;
+
+  ngOnInit() {
+    this.loadSubscriptionStatus();
+  }
+
+  loadSubscriptionStatus() {
+    this.billing.getSubscriptionStatus().subscribe({
+      next: (status) => {
+        this.subscription = status;
+      },
+      error: (err) => {
+        console.error('Failed to load subscription:', err);
+      }
+    });
+  }
+
+  syncStatus() {
+    this.billing.syncSubscriptionStatus().subscribe({
+      next: (status) => {
+        this.subscription = status;
+        console.log('Subscription synced:', status);
+      },
+      error: (err) => {
+        console.error('Failed to sync subscription:', err);
+      }
+    });
+  }
 
   upgrade(plan: 'PRO' | 'ENTERPRISE') {
     this.billing.createCheckoutSession(plan).subscribe({

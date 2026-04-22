@@ -39,8 +39,9 @@ export const loginSuccessEffect = createEffect(
   (actions$ = inject(Actions), router = inject(Router)) => {
     return actions$.pipe(
       ofType(AuthActions.loginSuccess),
-      tap(({ accessToken }) => {
+      tap(({ user, accessToken }) => {
         localStorage.setItem('access_token', accessToken);
+        localStorage.setItem('user', JSON.stringify(user));
         router.navigate(['/dashboard']);
       })
     );
@@ -68,6 +69,7 @@ export const logoutEffect = createEffect(
       ofType(AuthActions.logout),
       tap(() => {
         localStorage.removeItem('access_token');
+        localStorage.removeItem('user');
         router.navigate(['/auth/login']);
       })
     );

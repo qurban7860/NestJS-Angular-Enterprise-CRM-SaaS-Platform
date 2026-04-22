@@ -13,9 +13,11 @@ export class StripeService {
   private readonly logger = new Logger(StripeService.name);
 
   constructor(private readonly config: ConfigService) {
-    this.stripe = new Stripe(this.config.get<string>('STRIPE_SECRET_KEY')!, {
-      apiVersion: '2026-03-25.dahlia' as any,
-    });
+    const stripeSecretKey = this.config.get<string>('STRIPE_SECRET_KEY');
+    if (!stripeSecretKey) {
+      throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+    }
+    this.stripe = new Stripe(stripeSecretKey);
   }
 
   async createCheckoutSession(params: {
@@ -57,5 +59,17 @@ export class StripeService {
       signature,
       webhookSecret!,
     );
+  }
+
+  async getSubscription(subscriptionId: string) {
+    return this.stripe.subscriptions.retrieve(subscriptionId);
+  }
+
+  async listSubscriptions(customerId: string) {
+    return this.stripe.subscriptions.list({ customer: customerId, limit: 10 });
+  }
+
+  getStripeInstance() {
+    return this.stripe;
   }
 }

@@ -2,6 +2,18 @@ import { createFeature, createReducer, on } from '@ngrx/store';
 import { AuthActions } from './auth.actions';
 import { User } from '../../services/auth.service';
 
+function loadUserFromStorage(): User | null {
+  const userStr = localStorage.getItem('user');
+  if (userStr) {
+    try {
+      return JSON.parse(userStr);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
 export interface AuthState {
   user: User | null;
   accessToken: string | null;
@@ -10,7 +22,7 @@ export interface AuthState {
 }
 
 export const initialState: AuthState = {
-  user: null,
+  user: loadUserFromStorage(),
   accessToken: localStorage.getItem('access_token'),
   isLoading: false,
   error: null,
