@@ -31,34 +31,49 @@ export class WebhookController {
     @Headers('stripe-signature') sig: string,
     @Req() req: RawBodyRequest<Request>,
   ) {
-    this.logger.log('Webhook received');
+    this.logger.log('Webhook received - Processing Stripe event');
 
+    // Validate signature header
     if (!sig) {
       this.logger.warn('Missing stripe-signature header');
       throw new BadRequestException('Missing stripe-signature header');
     }
 
+    // Validate raw body exists
+    const rawBody = req.rawBody;
+    if (!rawBody) {
+      this.logger.error('Missing raw body - body parser may not be configured');
+      throw new BadRequestException(
+        'Missing raw body. Ensure raw body parsing is enabled.',
+      );
+    }
+
     try {
-      const rawBody = req.rawBody;
-      if (!rawBody) {
-        throw new BadRequestException('Missing raw body');
-      }
-
+      // Construct and verify the Stripe event
       const event = await this.stripeService.constructEvent(rawBody, sig);
-      this.logger.log(`Processing event: ${event.type}`);
+      this.logger.log(
+        `Event constructed successfully: type=${event.type}, id=${event.id}`,
+      );
 
+      // Process the event through the use case
       const result = await this.handleWebhook.execute(event);
+
       if (result.isFailure) {
-        this.logger.error(`Handler failed: ${result.error}`);
+        this.logger.error(`Webhook processing failed: ${result.error}`);
+        // Still return 200 to Stripe to prevent retries for non-recoverable errors
+        return { received: true, error: result.error };
       }
+
+      this.logger.log(`Webhook processed successfully: type=${event.type}`);
 
       return { received: true };
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      this.logger.error(
-        `Webhook error: ${errorMessage}`,
-        err instanceof Error ? err.stack : undefined,
-      );
+      const errorStack = err instanceof Error ? err.stack : undefined;
+
+      this.logger.error(`Webhook error: ${errorMessage}`, errorStack);
+
+      // Return BadRequest to trigger Stripe retry
       throw new BadRequestException(`Webhook Error: ${errorMessage}`);
     }
   }

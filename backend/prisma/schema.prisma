@@ -92,6 +92,23 @@ enum AuditAction {
 }
 
 // ─────────────────────────────────────────────
+// WEBHOOK IDEMPOTENCY
+// ─────────────────────────────────────────────
+
+model WebhookEvent {
+  id          String   @id @default(uuid())
+  stripeEventId String @unique
+  eventType   String
+  processedAt DateTime @default(now())
+  success     Boolean  @default(true)
+  error       String?
+
+  @@index([stripeEventId])
+  @@index([eventType])
+  @@map("webhook_events")
+}
+
+// ─────────────────────────────────────────────
 // USER
 // ─────────────────────────────────────────────
 
