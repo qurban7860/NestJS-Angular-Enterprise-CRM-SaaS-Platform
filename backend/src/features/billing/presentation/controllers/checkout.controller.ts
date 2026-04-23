@@ -87,21 +87,26 @@ export class CheckoutController {
         );
         if (subs.data.length > 0) {
           const sub = subs.data[0];
+          const periodEnd =
+            typeof sub.current_period_end === 'number'
+              ? new Date(sub.current_period_end * 1000)
+              : null;
+          const plan = this.mapPriceToPlan(sub.items.data[0]?.price?.id);
+          const status = this.mapStripeStatus(sub.status);
+
           await this.prisma.organization.update({
             where: { id: user.orgId },
             data: {
               stripeSubscriptionId: sub.id,
-              subscriptionStatus: this.mapStripeStatus(sub.status),
-              currentPeriodEnd: new Date(sub.current_period_end * 1000),
-              plan: this.mapPriceToPlan(sub.items.data[0]?.price?.id),
+              subscriptionStatus: status,
+              currentPeriodEnd: periodEnd,
+              plan: plan,
             } as any,
           });
           return {
-            plan: this.mapPriceToPlan(sub.items.data[0]?.price?.id),
-            status: this.mapStripeStatus(sub.status),
-            currentPeriodEnd: new Date(
-              sub.current_period_end * 1000,
-            ).toISOString(),
+            plan: plan,
+            status: status,
+            currentPeriodEnd: periodEnd?.toISOString() || null,
           };
         }
       } catch {
@@ -115,20 +120,25 @@ export class CheckoutController {
         const sub = await this.stripeService.getSubscription(
           org.stripeSubscriptionId,
         );
+        const periodEnd =
+          typeof sub.current_period_end === 'number'
+            ? new Date(sub.current_period_end * 1000)
+            : null;
+        const status = this.mapStripeStatus(sub.status);
+        const plan = this.mapPriceToPlan(sub.items.data[0]?.price?.id);
+
         await this.prisma.organization.update({
           where: { id: user.orgId },
           data: {
-            subscriptionStatus: this.mapStripeStatus(sub.status),
-            currentPeriodEnd: new Date(sub.current_period_end * 1000),
-            plan: this.mapPriceToPlan(sub.items.data[0]?.price?.id),
+            subscriptionStatus: status,
+            currentPeriodEnd: periodEnd,
+            plan: plan,
           } as any,
         });
         return {
-          plan: this.mapPriceToPlan(sub.items.data[0]?.price?.id),
-          status: this.mapStripeStatus(sub.status),
-          currentPeriodEnd: new Date(
-            sub.current_period_end * 1000,
-          ).toISOString(),
+          plan: plan,
+          status: status,
+          currentPeriodEnd: periodEnd?.toISOString() || null,
         };
       } catch {
         // Subscription might be canceled/deleted
@@ -186,13 +196,18 @@ export class CheckoutController {
       expand: ['data.latest_invoice.payment_intent'],
     });
 
+    const periodEnd =
+      typeof subscription.current_period_end === 'number'
+        ? new Date(subscription.current_period_end * 1000)
+        : null;
+
     // Update org with subscription
     await this.prisma.organization.update({
       where: { id: user.orgId },
       data: {
         stripeSubscriptionId: subscription.id,
         subscriptionStatus: this.mapStripeStatus(subscription.status),
-        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        currentPeriodEnd: periodEnd,
         plan: 'PREMIUM',
       } as any,
     });

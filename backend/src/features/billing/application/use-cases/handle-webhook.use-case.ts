@@ -75,16 +75,35 @@ export class HandleWebhookUseCase {
 
     // Fetch subscription details to get the current period end
     let periodEnd: Date | null = null;
+    let plan: 'PREMIUM' | 'ENTERPRISE' = 'PREMIUM';
+
     if (subscriptionId) {
       try {
         const sub = await this.stripeService.getSubscription(subscriptionId);
-        periodEnd = new Date(sub.current_period_end * 1000);
+        if (sub && typeof sub.current_period_end === 'number') {
+          periodEnd = new Date(sub.current_period_end * 1000);
+        }
+
+        // Determine plan from subscription items if available
+        const priceId = sub.items?.data?.[0]?.price?.id;
+        if (priceId) {
+          plan = this.mapPriceToPlan(priceId) as 'PREMIUM' | 'ENTERPRISE';
+        }
       } catch (e) {
         this.logger.warn(
-          `Failed to fetch subscription ${subscriptionId} details`,
-          e instanceof Error ? e.message : String(e),
+          `Failed to fetch subscription ${subscriptionId} details: ${e instanceof Error ? e.message : String(e)}`,
         );
       }
+    }
+
+    const updateData: any = {
+      stripeSubscriptionId: subscriptionId,
+      subscriptionStatus: 'ACTIVE',
+      plan: plan,
+    };
+
+    if (periodEnd && !isNaN(periodEnd.getTime())) {
+      updateData.currentPeriodEnd = periodEnd;
     }
 
     // Strategy 1: Use orgId from metadata (most reliable)
@@ -92,14 +111,9 @@ export class HandleWebhookUseCase {
       try {
         await this.prisma.organization.update({
           where: { id: orgId },
-          data: {
-            stripeSubscriptionId: subscriptionId,
-            subscriptionStatus: 'ACTIVE',
-            plan: 'PREMIUM',
-            currentPeriodEnd: periodEnd,
-          },
+          data: updateData,
         });
-        this.logger.log(`Updated org ${orgId} with PREMIUM plan from metadata`);
+        this.logger.log(`Updated org ${orgId} with ${plan} plan from metadata`);
         return;
       } catch (e) {
         this.logger.warn(
@@ -118,12 +132,7 @@ export class HandleWebhookUseCase {
         if (org) {
           await this.prisma.organization.update({
             where: { id: org.id },
-            data: {
-              stripeSubscriptionId: subscriptionId,
-              subscriptionStatus: 'ACTIVE',
-              plan: 'PREMIUM',
-              currentPeriodEnd: periodEnd,
-            },
+            data: updateData,
           });
           this.logger.log(`Updated org ${org.id} by customerId lookup`);
           return;
@@ -151,11 +160,8 @@ export class HandleWebhookUseCase {
           await this.prisma.organization.update({
             where: { id: user.org.id },
             data: {
+              ...updateData,
               stripeCustomerId: customerId,
-              stripeSubscriptionId: subscriptionId,
-              subscriptionStatus: 'ACTIVE',
-              plan: 'PREMIUM',
-              currentPeriodEnd: periodEnd,
             },
           });
           this.logger.log(
@@ -215,9 +221,10 @@ export class HandleWebhookUseCase {
       where: { id: org.id },
       data: {
         subscriptionStatus,
-        currentPeriodEnd: currentPeriodEnd
-          ? new Date(currentPeriodEnd * 1000)
-          : null,
+        currentPeriodEnd:
+          typeof currentPeriodEnd === 'number'
+            ? new Date(currentPeriodEnd * 1000)
+            : null,
         plan,
       },
     });
@@ -292,17 +299,30 @@ export class HandleWebhookUseCase {
 
   private mapStatus(
     status: string,
-  ): 'ACTIVE' | 'PAST_DUE' | 'CANCELED' | 'UNPAID' | 'TRIALING' | 'INCOMPLETE' {
+  ):
+    | 'ACTIVE'
+    | 'PAST_DUE'
+    | 'CANCELED'
+    | 'UNPAID'
+    | 'TRIALING'
+    | 'INCOMPLETE'
+    | 'INCOMPLETE_EXPIRED' {
     const map: Record<
       string,
-      'ACTIVE' | 'PAST_DUE' | 'CANCELED' | 'UNPAID' | 'TRIALING' | 'INCOMPLETE'
+      | 'ACTIVE'
+      | 'PAST_DUE'
+      | 'CANCELED'
+      | 'UNPAID'
+      | 'TRIALING'
+      | 'INCOMPLETE'
+      | 'INCOMPLETE_EXPIRED'
     > = {
       active: 'ACTIVE',
       past_due: 'PAST_DUE',
       canceled: 'CANCELED',
       unpaid: 'UNPAID',
       incomplete: 'INCOMPLETE',
-      incomplete_expired: 'INCOMPLETE',
+      incomplete_expired: 'INCOMPLETE_EXPIRED',
       trialing: 'TRIALING',
     };
     return map[status] || 'INCOMPLETE';
