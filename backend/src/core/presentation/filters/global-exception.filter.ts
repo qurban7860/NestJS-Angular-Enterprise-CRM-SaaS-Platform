@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   ExceptionFilter,
   Catch,
@@ -26,15 +29,23 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     let code: string | undefined = 'INTERNAL_ERROR';
 
     // ── HttpException (NestJS) ────────────────────────────────
-    if (exception instanceof HttpException) {
-      status = exception.getStatus();
-      const res = exception.getResponse();
+    if (
+      exception instanceof HttpException ||
+      (exception && typeof (exception as any).getStatus === 'function')
+    ) {
+      status = (exception as any).getStatus();
+      const res = (exception as any).getResponse();
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       message = typeof res === 'string' ? res : (res as any).message || message;
       code = this.getHttpErrorCode(status);
     }
 
     // ── Prisma Known Request Error ────────────────────────────
-    else if (Prisma && exception instanceof Prisma.PrismaClientKnownRequestError) {
+    else if (
+      Prisma &&
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      exception instanceof Prisma.PrismaClientKnownRequestError
+    ) {
       const prismaError = exception as { code: string };
       switch (prismaError.code) {
         case 'P2002':
@@ -59,6 +70,20 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       }
     }
 
+    // ── Result.fail (String exceptions) ───────────────────────
+    else if (typeof exception === 'string') {
+      status = HttpStatus.BAD_REQUEST;
+      message = exception;
+      code = 'BUSINESS_RULE_VIOLATION';
+    }
+
+    // ── Generic Error objects ─────────────────────────────────
+    else if (exception instanceof Error) {
+      status = (exception as any).status || HttpStatus.INTERNAL_SERVER_ERROR;
+      message = exception.message;
+      code = (exception as any).code || 'ERROR';
+    }
+
     // ── Prisma Validation Error ───────────────────────────────
     else if (exception instanceof Prisma.PrismaClientValidationError) {
       status = HttpStatus.BAD_REQUEST;
@@ -67,17 +92,18 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     // ── Log with context ──────────────────────────────────────
-    const logPayload = {
-      statusCode: status,
-      method: request.method,
-      path: request.url,
-      code,
-    };
 
-    if (status >= 500) {
-      this.logger.error(`${message} | Route: ${request.path} | Code: ${code}`, exception instanceof Error ? exception.stack : String(exception), GlobalExceptionFilter.name);
+    if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+      this.logger.error(
+        `${message} | Route: ${request.path} | Code: ${code}`,
+        exception instanceof Error ? exception.stack : String(exception),
+        GlobalExceptionFilter.name,
+      );
     } else {
-      this.logger.warn(`${message} | Route: ${request.path} | Code: ${code}`, GlobalExceptionFilter.name);
+      this.logger.warn(
+        `${message} | Route: ${request.path} | Code: ${code}`,
+        GlobalExceptionFilter.name,
+      );
     }
 
     // ── Safe user-facing response ─────────────────────────────
@@ -96,7 +122,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
   private sanitizeMessage(message: string, status: number): string {
     // Never expose internal details in production 500s
-    if (status >= 500 && process.env.NODE_ENV === 'production') {
+    // In development, always show the real message
+    if (status >= 500 && process.env['NODE_ENV'] === 'production') {
       return 'An internal error occurred. Please try again later.';
     }
     return message;

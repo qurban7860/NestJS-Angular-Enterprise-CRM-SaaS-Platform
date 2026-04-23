@@ -26,6 +26,10 @@ export const routes: Routes = [
       {
         path: 'billing',
         loadChildren: () => import('./features/billing/billing.routes').then(r => r.BILLING_ROUTES)
+      },
+      {
+        path: 'premium',
+        loadComponent: () => import('./features/premium/pages/premium-dashboard.component').then(c => c.PremiumDashboardComponent)
       }
     ]
   },

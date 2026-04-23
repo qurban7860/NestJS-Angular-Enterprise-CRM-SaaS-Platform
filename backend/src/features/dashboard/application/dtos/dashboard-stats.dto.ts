@@ -8,10 +8,16 @@ export class DashboardStatsDto {
   activeDealsCount!: number;
 
   @ApiProperty()
+  totalDealsCount!: number;
+
+  @ApiProperty()
   totalDealValue!: number;
 
   @ApiProperty()
   taskCompletionRate!: number;
+
+  @ApiProperty()
+  totalTasks!: number;
 
   @ApiProperty()
   recentActivity!: ActivityItemDto[];

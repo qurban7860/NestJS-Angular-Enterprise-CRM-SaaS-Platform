@@ -40,9 +40,12 @@ export class WebhookController {
     }
 
     // Validate raw body exists
-    const rawBody = req.rawBody;
+    const rawBody = req.body instanceof Buffer ? req.body : req.rawBody;
+
     if (!rawBody) {
-      this.logger.error('Missing raw body - body parser may not be configured');
+      this.logger.error(
+        'Missing raw body - body parser may not be configured correctly',
+      );
       throw new BadRequestException(
         'Missing raw body. Ensure raw body parsing is enabled.',
       );

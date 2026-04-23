@@ -20,14 +20,25 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       // Handle specific status codes
+      const isLoginRequest = req.url.includes('/auth/login');
+
       if (error.status === 401) {
-        // Unauthorized - session likely expired
-        store.dispatch(ToastActions.showToast({ id: 'auth-err', message: 'Session expired. Please login again.', toastType: 'error' }));
+        // Unauthorized
+        if (!isLoginRequest) {
+          store.dispatch(ToastActions.showToast({ id: 'auth-err', message: 'Session expired. Please login again.', toastType: 'error' }));
+        }
+      } else if (error.status === 403) {
+        // Forbidden - usually plan limit or permission issue
+        store.dispatch(ToastActions.showToast({ 
+          id: 'limit-err', 
+          message: error.error?.error?.message || 'Action restricted by your current plan.', 
+          toastType: 'info' 
+        }));
       } else if (error.status === 0) {
         // Connection error
         store.dispatch(ToastActions.showToast({ id: 'net-err', message: 'Network error. Cannot reach server.', toastType: 'error' }));
       } else if (error.status >= 500) {
-        store.dispatch(ToastActions.showToast({ id: 'server-err', message: 'Internal server error. Please try later.', toastType: 'error' }));
+        store.dispatch(ToastActions.showToast({ id: 'server-err', message: 'Service temporarily unavailable. Please try again.', toastType: 'error' }));
       }
 
       return throwError(() => error);

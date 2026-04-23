@@ -6,6 +6,8 @@ import { environment } from '../../../environments/environment';
 export interface DashboardStats {
   totalContacts: number;
   activeDealsCount: number;
+  totalDealsCount: number;
+  totalTasks: number;
   totalDealValue: number;
   taskCompletionRate: number;
   recentActivity: Array<{

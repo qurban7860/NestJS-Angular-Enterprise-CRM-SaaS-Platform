@@ -10,6 +10,7 @@ export interface User {
   lastName?: string;
   role: string;
   orgId: string;
+  plan?: string;
 }
 
 export interface AuthResponse {

@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BillingService, SubscriptionStatus } from '../../../core/services/billing.service';
+import { SubscriptionService } from '../../../core/services/subscription.service';
 
 @Component({
   selector: 'app-pricing',
@@ -47,15 +48,15 @@ import { BillingService, SubscriptionStatus } from '../../../core/services/billi
             <ul class="mt-8 space-y-4 flex-1">
               <li class="flex items-center gap-3 text-sm">
                 <svg class="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                Up to 5 team members
+                Up to 50 Contacts
               </li>
               <li class="flex items-center gap-3 text-sm">
                 <svg class="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                Basic CRM features
+                10 Active Deals
               </li>
               <li class="flex items-center gap-3 text-sm opacity-40">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                Advanced Analytics
+                CSV Data Export
               </li>
             </ul>
             <button disabled class="mt-8 w-full py-3 px-4 rounded-xl border border-brand-border text-brand-secondary font-bold text-sm">Current Plan</button>
@@ -73,18 +74,22 @@ import { BillingService, SubscriptionStatus } from '../../../core/services/billi
             <ul class="mt-8 space-y-4 flex-1">
               <li class="flex items-center gap-3 text-sm">
                 <svg class="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                Unlimited members
+                1000 Contacts
               </li>
               <li class="flex items-center gap-3 text-sm">
                 <svg class="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                Advanced CRM & Deals
+                100 Active Deals
               </li>
               <li class="flex items-center gap-3 text-sm">
                 <svg class="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                Task Automation
+                Advanced Analytics & Export
+              </li>
+              <li class="flex items-center gap-3 text-sm">
+                <svg class="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                Custom Workflows
               </li>
             </ul>
-            <button (click)="upgrade('PRO')" class="premium-button mt-8 w-full py-3 px-4 rounded-xl font-bold text-sm shadow-lg shadow-brand-primary/20">Upgrade Now</button>
+            <button (click)="upgrade('PREMIUM')" class="premium-button mt-8 w-full py-3 px-4 rounded-xl font-bold text-sm shadow-lg shadow-brand-primary/20">Upgrade Now</button>
           </div>
 
           <!-- Enterprise Plan -->
@@ -98,7 +103,7 @@ import { BillingService, SubscriptionStatus } from '../../../core/services/billi
             <ul class="mt-8 space-y-4 flex-1">
               <li class="flex items-center gap-3 text-sm">
                 <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                Everything in Pro
+                Unlimited Contacts
               </li>
               <li class="flex items-center gap-3 text-sm">
                 <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -106,7 +111,7 @@ import { BillingService, SubscriptionStatus } from '../../../core/services/billi
               </li>
               <li class="flex items-center gap-3 text-sm">
                 <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                24/7 Priority Support
+                Custom Roles & Permissions
               </li>
             </ul>
             <button (click)="upgrade('ENTERPRISE')" class="mt-8 w-full py-3 px-4 rounded-xl border border-indigo-500/30 text-indigo-400 font-bold text-sm hover:bg-indigo-500/10 transition-colors">Contact Sales</button>
@@ -122,27 +127,18 @@ import { BillingService, SubscriptionStatus } from '../../../core/services/billi
 })
 export class PricingComponent implements OnInit {
   private billing = inject(BillingService);
+  private subscriptionService = inject(SubscriptionService);
   subscription: SubscriptionStatus | null = null;
 
   ngOnInit() {
-    this.loadSubscriptionStatus();
-  }
-
-  loadSubscriptionStatus() {
-    this.billing.getSubscriptionStatus().subscribe({
-      next: (status) => {
-        this.subscription = status;
-      },
-      error: (err) => {
-        console.error('Failed to load subscription:', err);
-      }
+    this.subscriptionService.subscription$.subscribe(status => {
+      this.subscription = status;
     });
   }
 
   syncStatus() {
-    this.billing.syncSubscriptionStatus().subscribe({
+    this.subscriptionService.refreshStatus().subscribe({
       next: (status) => {
-        this.subscription = status;
         console.log('Subscription synced:', status);
       },
       error: (err) => {
@@ -151,7 +147,7 @@ export class PricingComponent implements OnInit {
     });
   }
 
-  upgrade(plan: 'PRO' | 'ENTERPRISE') {
+  upgrade(plan: 'PREMIUM' | 'ENTERPRISE') {
     this.billing.createCheckoutSession(plan).subscribe({
       next: (url) => {
         window.location.href = url;

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/only-throw-error */
 import {
   Controller,
   Post,
@@ -34,6 +33,9 @@ import { CurrentUser } from '../../../../core/presentation/decorators/current-us
 import { CsvExportService } from '../../../../core/application/services/csv-export.service';
 import type { Response } from 'express';
 
+import { PlanLimitsService } from '../../../../core/infrastructure/billing/plan-limits.service';
+import { BusinessException } from '../../../../core/application/exceptions/business.exception';
+
 @ApiTags('Tasks')
 @ApiBearerAuth()
 @Controller('tasks')
@@ -46,6 +48,7 @@ export class TasksController {
     private readonly deleteTaskUseCase: DeleteTaskUseCase,
     private readonly updateTaskStatusUseCase: UpdateTaskStatusUseCase,
     private readonly csvExportService: CsvExportService,
+    private readonly limitsService: PlanLimitsService,
   ) {}
 
   @Get('export')
@@ -55,12 +58,13 @@ export class TasksController {
     @Query() filters: TaskFiltersDto,
     @Res() res: Response,
   ) {
+    await this.limitsService.checkLimit(user.orgId, 'hasExport');
     const result = await this.listTasksUseCase.execute({
       orgId: user.orgId,
       filters,
     });
     if (result.isFailure) {
-      throw result.error;
+      throw new BusinessException(result.error!);
     }
     const tasks = result.getValue();
 
@@ -92,7 +96,7 @@ export class TasksController {
       filters,
     });
     if (result.isFailure) {
-      throw result.error;
+      throw new BusinessException(result.error!);
     }
     return result.getValue();
   }
@@ -103,7 +107,7 @@ export class TasksController {
   async findOne(@Param('id') id: string, @CurrentUser() user: any) {
     const result = await this.getTaskUseCase.execute({ id, orgId: user.orgId });
     if (result.isFailure) {
-      throw result.error;
+      throw new BusinessException(result.error!);
     }
     return result.getValue();
   }
@@ -112,6 +116,7 @@ export class TasksController {
   @ApiOperation({ summary: 'Create a new task' })
   @ApiResponse({ status: 201, type: TaskResponseDto })
   async create(@Body() dto: CreateTaskDto, @CurrentUser() user: any) {
+    await this.limitsService.checkLimit(user.orgId, 'maxTasks');
     const result = await this.createTaskUseCase.execute({
       ...dto,
       creatorId: user.id,
@@ -119,7 +124,7 @@ export class TasksController {
     });
 
     if (result.isFailure) {
-      throw result.error;
+      throw new BusinessException(result.error!);
     }
     return result.getValue();
   }
@@ -139,7 +144,7 @@ export class TasksController {
     });
 
     if (result.isFailure) {
-      throw result.error;
+      throw new BusinessException(result.error!);
     }
     return result.getValue();
   }
@@ -159,7 +164,7 @@ export class TasksController {
     });
 
     if (result.isFailure) {
-      throw result.error;
+      throw new BusinessException(result.error!);
     }
     return result.getValue();
   }

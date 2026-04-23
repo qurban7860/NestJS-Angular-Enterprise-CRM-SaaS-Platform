@@ -3,12 +3,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../core/infrastructure/prisma/prisma.service';
 import { Result } from '../../../../core/domain/base/result';
+import { StripeService } from '../../infrastructure/services/stripe.service';
 
 @Injectable()
 export class HandleWebhookUseCase {
   private readonly logger = new Logger(HandleWebhookUseCase.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly stripeService: StripeService,
+  ) {}
 
   async execute(event: any): Promise<Result<void>> {
     const eventId = event.id;
@@ -69,6 +73,20 @@ export class HandleWebhookUseCase {
       `Checkout completed: session=${sessionId}, orgId=${orgId}, subscription=${subscriptionId}, customer=${customerId}, email=${customerEmail}, amount=${amountTotal}`,
     );
 
+    // Fetch subscription details to get the current period end
+    let periodEnd: Date | null = null;
+    if (subscriptionId) {
+      try {
+        const sub = await this.stripeService.getSubscription(subscriptionId);
+        periodEnd = new Date(sub.current_period_end * 1000);
+      } catch (e) {
+        this.logger.warn(
+          `Failed to fetch subscription ${subscriptionId} details`,
+          e instanceof Error ? e.message : String(e),
+        );
+      }
+    }
+
     // Strategy 1: Use orgId from metadata (most reliable)
     if (orgId) {
       try {
@@ -77,15 +95,15 @@ export class HandleWebhookUseCase {
           data: {
             stripeSubscriptionId: subscriptionId,
             subscriptionStatus: 'ACTIVE',
-            plan: 'PRO',
+            plan: 'PREMIUM',
+            currentPeriodEnd: periodEnd,
           },
         });
-        this.logger.log(`Updated org ${orgId} with PRO plan from metadata`);
+        this.logger.log(`Updated org ${orgId} with PREMIUM plan from metadata`);
         return;
       } catch (e) {
-        const error = e as Error;
         this.logger.warn(
-          `Failed to update org ${orgId} by metadata: ${error.message}`,
+          `Failed to update org ${orgId} by metadata: ${e instanceof Error ? e.message : String(e)}`,
         );
         // Continue to fallback strategies
       }
@@ -103,16 +121,16 @@ export class HandleWebhookUseCase {
             data: {
               stripeSubscriptionId: subscriptionId,
               subscriptionStatus: 'ACTIVE',
-              plan: 'PRO',
+              plan: 'PREMIUM',
+              currentPeriodEnd: periodEnd,
             },
           });
           this.logger.log(`Updated org ${org.id} by customerId lookup`);
           return;
         }
       } catch (e) {
-        const error = e as Error;
         this.logger.warn(
-          `Failed to find org by customerId ${customerId}: ${error.message}`,
+          `Failed to find org by customerId ${customerId}: ${e instanceof Error ? e.message : String(e)}`,
         );
       }
     }
@@ -136,7 +154,8 @@ export class HandleWebhookUseCase {
               stripeCustomerId: customerId,
               stripeSubscriptionId: subscriptionId,
               subscriptionStatus: 'ACTIVE',
-              plan: 'PRO',
+              plan: 'PREMIUM',
+              currentPeriodEnd: periodEnd,
             },
           });
           this.logger.log(
@@ -145,9 +164,8 @@ export class HandleWebhookUseCase {
           return;
         }
       } catch (e) {
-        const error = e as Error;
         this.logger.warn(
-          `Failed to find org by email ${customerEmail}: ${error.message}`,
+          `Failed to find org by email ${customerEmail}: ${e instanceof Error ? e.message : String(e)}`,
         );
       }
     }
@@ -292,11 +310,11 @@ export class HandleWebhookUseCase {
 
   private mapPriceToPlan(
     priceId: string | undefined,
-  ): 'FREE' | 'PRO' | 'ENTERPRISE' {
-    if (!priceId) return 'PRO';
-    if (priceId === process.env['STRIPE_PRO_PRICE_ID']) return 'PRO';
+  ): 'FREE' | 'PREMIUM' | 'ENTERPRISE' {
+    if (!priceId) return 'PREMIUM';
+    if (priceId === process.env['STRIPE_PREMIUM_PRICE_ID']) return 'PREMIUM';
     if (priceId === process.env['STRIPE_ENTERPRISE_PRICE_ID'])
       return 'ENTERPRISE';
-    return 'PRO';
+    return 'PREMIUM';
   }
 }

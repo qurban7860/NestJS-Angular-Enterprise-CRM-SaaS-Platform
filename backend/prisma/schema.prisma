@@ -138,6 +138,9 @@ model User {
   widgets          Widget[]
 
   auditLogs        AuditLog[]       @relation("UserAuditLogs")
+  customRole       CustomRole?      @relation(fields: [customRoleId], references: [id])
+  customRoleId     String?
+  reports          CustomReport[]
 
   @@index([email])
   @@index([orgId])
@@ -146,7 +149,7 @@ model User {
 
 enum SubscriptionPlan {
   FREE
-  PRO
+  PREMIUM
   ENTERPRISE
 }
 
@@ -182,7 +185,10 @@ model Organization {
   contacts  Contact[]
   companies Company[]
   deals     Deal[]
-  tasks     Task[]
+  tasks         Task[]
+  customRoles   CustomRole[]
+  workflowRules WorkflowRule[]
+  reports       CustomReport[]
 
   @@map("organizations")
 }
@@ -429,4 +435,96 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ─────────────────────────────────────────────
+// PREMIUM: CUSTOM RBAC
+// ─────────────────────────────────────────────
+
+model CustomRole {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  orgId       String
+  permissions String[] 
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  org         Organization @relation(fields: [orgId], references: [id])
+  users       User[]
+
+  @@unique([name, orgId])
+  @@index([orgId])
+  @@map("custom_roles")
+}
+
+// ─────────────────────────────────────────────
+// PREMIUM: AUTOMATED WORKFLOWS
+// ─────────────────────────────────────────────
+
+enum WorkflowTrigger {
+  CONTACT_CREATED
+  DEAL_STAGE_CHANGED
+  TASK_COMPLETED
+  VALUE_THRESHOLD_REACHED
+}
+
+enum WorkflowActionType {
+  CREATE_TASK
+  SEND_NOTIFICATION
+  UPDATE_FIELD
+  EXTERNAL_WEBHOOK
+}
+
+model WorkflowRule {
+  id          String          @id @default(uuid())
+  name        String
+  description String?
+  trigger     WorkflowTrigger
+  conditions  Json            @default("{}")
+  isActive    Boolean         @default(true)
+  orgId       String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  org         Organization     @relation(fields: [orgId], references: [id])
+  actions     WorkflowAction[]
+
+  @@index([orgId])
+  @@map("workflow_rules")
+}
+
+model WorkflowAction {
+  id          String             @id @default(uuid())
+  ruleId      String
+  type        WorkflowActionType
+  config      Json               @default("{}")
+  order       Int                @default(0)
+
+  rule        WorkflowRule       @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@index([ruleId])
+  @@map("workflow_actions")
+}
+
+// ─────────────────────────────────────────────
+// PREMIUM: CUSTOM REPORTING
+// ─────────────────────────────────────────────
+
+model CustomReport {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  config      Json     @default("{}")
+  ownerId     String
+  orgId       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner       User         @relation(fields: [ownerId], references: [id])
+  org         Organization @relation(fields: [orgId], references: [id])
+
+  @@index([orgId])
+  @@index([ownerId])
+  @@map("custom_reports")
 }

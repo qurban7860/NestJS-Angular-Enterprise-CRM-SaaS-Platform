@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { User } from '../../domain/entities/user.entity';
 import { Mapper } from '../../../../core/application/base/mapper.base';
 import { Email } from '../../domain/value-objects/email.vo';
@@ -5,19 +7,23 @@ import { Password } from '../../domain/value-objects/password.vo';
 
 export class UserMapper extends Mapper<User, any, any> {
   public toDomain(raw: any): User {
-    const userOrError = User.create({
-      email: Email.create(raw.email).getValue(),
-      passwordHash: Password.createHashed(raw.passwordHash).getValue(),
-      firstName: raw.firstName,
-      lastName: raw.lastName,
-      role: raw.role,
-      orgId: raw.orgId,
-      isActive: raw.isActive,
-      avatarUrl: raw.avatarUrl,
-      refreshToken: raw.refreshToken,
-      createdAt: raw.createdAt,
-      updatedAt: raw.updatedAt,
-    }, raw.id);
+    const userOrError = User.create(
+      {
+        email: Email.create(raw.email).getValue(),
+        passwordHash: Password.createHashed(raw.passwordHash).getValue(),
+        firstName: raw.firstName,
+        lastName: raw.lastName,
+        role: raw.role,
+        orgId: raw.orgId,
+        isActive: raw.isActive,
+        avatarUrl: raw.avatarUrl,
+        refreshToken: raw.refreshToken,
+        plan: raw.org?.plan || raw.plan,
+        createdAt: raw.createdAt,
+        updatedAt: raw.updatedAt,
+      },
+      raw.id,
+    );
 
     return userOrError.getValue();
   }
@@ -30,6 +36,7 @@ export class UserMapper extends Mapper<User, any, any> {
       lastName: user.lastName,
       role: user.role,
       orgId: user.orgId,
+      plan: user.plan,
     };
   }
 

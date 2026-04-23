@@ -4,6 +4,7 @@ import { TasksService } from '../../services/tasks.service';
 import { TasksActions } from './tasks.actions';
 import { catchError, map, mergeMap, of, switchMap, tap } from 'rxjs';
 import { ToastActions } from '../toast/toast.actions';
+import { DashboardActions } from '../dashboard/dashboard.actions';
 
 @Injectable()
 export class TasksEffects {
@@ -44,7 +45,8 @@ export class TasksEffects {
             ToastActions.showToast({ 
               message: 'New task added successfully', 
               toastType: 'success' 
-            })
+            }),
+            DashboardActions.loadStats()
           ]),
           catchError(error => of(TasksActions.createTaskFailure({ error: error.message })))
         )
@@ -92,7 +94,8 @@ export class TasksEffects {
             ToastActions.showToast({ 
               message: 'Task deleted successfully', 
               toastType: 'success' 
-            })
+            }),
+            DashboardActions.loadStats()
           ]),
           catchError(error => of(TasksActions.deleteTaskFailure({ error: error.message })))
         )

@@ -15,6 +15,7 @@ import { StripeService } from '../../infrastructure/services/stripe.service';
 import { PrismaService } from '../../../../core/infrastructure/prisma/prisma.service';
 import { CurrentUser } from '../../../../core/presentation/decorators/current-user.decorator';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { PlanLimitsService } from '../../../../core/infrastructure/billing/plan-limits.service';
 
 @ApiTags('Billing')
 @ApiBearerAuth()
@@ -24,13 +25,20 @@ export class CheckoutController {
     private readonly createSession: CreateCheckoutSessionUseCase,
     private readonly stripeService: StripeService,
     private readonly prisma: PrismaService,
+    private readonly limitsService: PlanLimitsService,
   ) {}
+
+  @Get('limits')
+  @ApiOperation({ summary: 'Get organization plan limits' })
+  async getLimits(@CurrentUser() user: any) {
+    return this.limitsService.getLimits(user.orgId);
+  }
 
   @Post('session')
   @ApiOperation({ summary: 'Create a Stripe Checkout session' })
   async create(
     @CurrentUser() user: any,
-    @Body() body: { plan: 'PRO' | 'ENTERPRISE' },
+    @Body() body: { plan: 'PREMIUM' | 'ENTERPRISE' },
   ) {
     const baseUrls = (process.env['CORS_ORIGIN'] || '').split(',');
     const baseUrl = baseUrls[0].trim();
@@ -165,9 +173,9 @@ export class CheckoutController {
     }
 
     // Create a subscription in Stripe using the price
-    const priceId = process.env['STRIPE_PRO_PRICE_ID'];
+    const priceId = process.env['STRIPE_PREMIUM_PRICE_ID'];
     if (!priceId) {
-      throw new InternalServerErrorException('STRIPE_PRO_PRICE_ID not set');
+      throw new InternalServerErrorException('STRIPE_PREMIUM_PRICE_ID not set');
     }
 
     // Create subscription
@@ -185,7 +193,7 @@ export class CheckoutController {
         stripeSubscriptionId: subscription.id,
         subscriptionStatus: this.mapStripeStatus(subscription.status),
         currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-        plan: 'PRO',
+        plan: 'PREMIUM',
       } as any,
     });
 
@@ -193,7 +201,7 @@ export class CheckoutController {
       subscriptionId: subscription.id,
       status: this.mapStripeStatus(subscription.status),
       customerId,
-      plan: 'PRO',
+      plan: 'PREMIUM',
     };
   }
 
@@ -215,10 +223,10 @@ export class CheckoutController {
   }
 
   private mapPriceToPlan(priceId: string | undefined): any {
-    if (!priceId) return 'PRO';
-    if (priceId === process.env['STRIPE_PRO_PRICE_ID']) return 'PRO';
+    if (!priceId) return 'PREMIUM';
+    if (priceId === process.env['STRIPE_PREMIUM_PRICE_ID']) return 'PREMIUM';
     if (priceId === process.env['STRIPE_ENTERPRISE_PRICE_ID'])
       return 'ENTERPRISE';
-    return 'PRO';
+    return 'PREMIUM';
   }
 }

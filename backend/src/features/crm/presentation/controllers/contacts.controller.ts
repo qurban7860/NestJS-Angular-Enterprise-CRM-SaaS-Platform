@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/only-throw-error */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
@@ -31,6 +30,9 @@ import { CurrentUser } from '../../../../core/presentation/decorators/current-us
 import { CsvExportService } from '../../../../core/application/services/csv-export.service';
 import type { Response } from 'express';
 
+import { PlanLimitsService } from '../../../../core/infrastructure/billing/plan-limits.service';
+import { BusinessException } from '../../../../core/application/exceptions/business.exception';
+
 @ApiTags('CRM')
 @ApiBearerAuth()
 @Controller('crm/contacts')
@@ -42,14 +44,17 @@ export class ContactsController {
     private readonly updateContactUseCase: UpdateContactUseCase,
     private readonly deleteContactUseCase: DeleteContactUseCase,
     private readonly csvExportService: CsvExportService,
+    private readonly limitsService: PlanLimitsService,
   ) {}
 
   @Get('export')
   @ApiOperation({ summary: 'Export contacts to CSV' })
   async exportCsv(@CurrentUser() user: any, @Res() res: Response) {
+    await this.limitsService.checkLimit(user.orgId, 'hasExport');
+
     const result = await this.listContactsUseCase.execute(user.orgId);
     if (result.isFailure) {
-      throw result.error;
+      throw new BusinessException(result.error!);
     }
     const contacts = result.getValue();
 
@@ -74,7 +79,7 @@ export class ContactsController {
   async findAll(@CurrentUser() user: any) {
     const result = await this.listContactsUseCase.execute(user.orgId);
     if (result.isFailure) {
-      throw result.error;
+      throw new BusinessException(result.error!);
     }
     return result.getValue();
   }
@@ -88,7 +93,7 @@ export class ContactsController {
       orgId: user.orgId,
     });
     if (result.isFailure) {
-      throw result.error;
+      throw new BusinessException(result.error!);
     }
     return result.getValue();
   }
@@ -97,6 +102,8 @@ export class ContactsController {
   @ApiOperation({ summary: 'Create a new contact in the CRM' })
   @ApiResponse({ status: 201, type: ContactResponseDto })
   async create(@Body() dto: CreateContactDto, @CurrentUser() user: any) {
+    await this.limitsService.checkLimit(user.orgId, 'maxContacts');
+
     // Force the correct orgId and ownerId from the authenticated user
     const result = await this.createContactUseCase.execute({
       ...dto,
@@ -105,7 +112,7 @@ export class ContactsController {
     });
 
     if (result.isFailure) {
-      throw result.error;
+      throw new BusinessException(result.error!);
     }
     return result.getValue();
   }
@@ -125,7 +132,7 @@ export class ContactsController {
     });
 
     if (result.isFailure) {
-      throw result.error;
+      throw new BusinessException(result.error!);
     }
     return result.getValue();
   }
@@ -140,6 +147,7 @@ export class ContactsController {
     });
 
     if (result.isFailure) {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
       throw result.error;
     }
     // Return empty response for 204

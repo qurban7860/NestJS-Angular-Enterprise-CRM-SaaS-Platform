@@ -4,6 +4,9 @@ import { AuthService } from '../../services/auth.service';
 import { AuthActions } from './auth.actions';
 import { catchError, map, mergeMap, of, tap } from 'rxjs';
 import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { DashboardActions } from '../dashboard/dashboard.actions';
+import { SubscriptionService } from '../../services/subscription.service';
 
 export const loginEffect = createEffect(
   (actions$ = inject(Actions), authService = inject(AuthService)) => {
@@ -12,7 +15,9 @@ export const loginEffect = createEffect(
       mergeMap(({ credentials }) =>
         authService.login(credentials).pipe(
           map((response) => AuthActions.loginSuccess(response)),
-          catchError((error) => of(AuthActions.loginFailure({ error: error.error?.message || 'Login failed' })))
+          catchError((error) => of(AuthActions.loginFailure({ 
+            error: error.error?.error?.message || error.error?.message || 'Login failed' 
+          })))
         )
       )
     );
@@ -27,7 +32,9 @@ export const registerEffect = createEffect(
       mergeMap(({ data }) =>
         authService.register(data).pipe(
           map((response) => AuthActions.registerSuccess(response)),
-          catchError((error) => of(AuthActions.registerFailure({ error: error.error?.message || 'Registration failed' })))
+          catchError((error) => of(AuthActions.registerFailure({ 
+            error: error.error?.error?.message || error.error?.message || 'Registration failed' 
+          })))
         )
       )
     );
@@ -36,12 +43,14 @@ export const registerEffect = createEffect(
 );
 
 export const loginSuccessEffect = createEffect(
-  (actions$ = inject(Actions), router = inject(Router)) => {
+  (actions$ = inject(Actions), router = inject(Router), store = inject(Store), subService = inject(SubscriptionService)) => {
     return actions$.pipe(
       ofType(AuthActions.loginSuccess),
       tap(({ user, accessToken }) => {
         localStorage.setItem('access_token', accessToken);
         localStorage.setItem('user', JSON.stringify(user));
+        subService.refreshStatus().subscribe();
+        store.dispatch(DashboardActions.loadStats());
         router.navigate(['/dashboard']);
       })
     );

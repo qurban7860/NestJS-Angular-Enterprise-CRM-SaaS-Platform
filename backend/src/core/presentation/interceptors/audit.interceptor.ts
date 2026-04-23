@@ -10,11 +10,10 @@ import {
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Request } from 'express';
-import { AuditService } from '../../infrastructure/audit/audit.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 const MUTATION_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];
 
-// Map HTTP methods to audit actions
 const METHOD_TO_ACTION: Record<string, 'CREATE' | 'UPDATE' | 'DELETE'> = {
   POST: 'CREATE',
   PUT: 'UPDATE',
@@ -22,7 +21,6 @@ const METHOD_TO_ACTION: Record<string, 'CREATE' | 'UPDATE' | 'DELETE'> = {
   DELETE: 'DELETE',
 };
 
-// Extract entity type from URL paths like /api/v1/contacts/abc-123
 function extractEntityType(url: string): {
   entityType: string;
   entityId: string;
@@ -38,7 +36,7 @@ function extractEntityType(url: string): {
 
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
-  constructor(private readonly auditService: AuditService) {}
+  constructor(private readonly eventEmitter: EventEmitter2) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const req = context.switchToHttp().getRequest<Request>();
@@ -50,7 +48,6 @@ export class AuditInterceptor implements NestInterceptor {
 
     const user = (req as any).user;
     if (!user?.id || !user?.orgId) {
-      // Skip unauthenticated routes (e.g., /auth/login)
       return next.handle();
     }
 
@@ -61,7 +58,8 @@ export class AuditInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap({
         next: (responseBody) => {
-          this.auditService.log({
+          // Emit event instead of direct service call to keep core logic clean
+          this.eventEmitter.emit('audit.log', {
             userId: user.id,
             orgId: user.orgId,
             action,

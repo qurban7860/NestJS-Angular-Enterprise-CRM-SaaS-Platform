@@ -6,11 +6,13 @@ import { selectStats, selectIsLoading } from '../../core/state/dashboard/dashboa
 import { selectUser } from '../../core/state/auth/auth.reducer';
 
 import { RouterModule } from '@angular/router';
+import { RequiresPremiumDirective } from '../../core/directives/premium-gate.directive';
+import { SubscriptionService } from '../../core/services/subscription.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, RequiresPremiumDirective],
   template: `
     <div class="space-y-6 sm:y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <!-- Welcome Header -->
@@ -43,9 +45,9 @@ import { RouterModule } from '@angular/router';
             </div>
 
             <div routerLink="/crm/deals" class="glass-panel p-5 sm:p-6 hover:border-brand-primary/30 transition-colors cursor-pointer group">
-              <p class="text-[10px] sm:text-sm text-brand-secondary font-medium uppercase tracking-wider">Active Deals</p>
+              <p class="text-[10px] sm:text-sm text-brand-secondary font-medium uppercase tracking-wider">Total Deals</p>
               <div class="flex items-end justify-between mt-2">
-                <h3 class="text-2xl sm:text-3xl font-bold">{{ stats.activeDealsCount }}</h3>
+                <h3 class="text-2xl sm:text-3xl font-bold">{{ stats.totalDealsCount }}</h3>
                 <span class="text-brand-primary text-[10px] sm:text-sm font-medium flex items-center bg-brand-primary/10 px-2 py-0.5 rounded">In Pipeline</span>
               </div>
             </div>
@@ -79,7 +81,7 @@ import { RouterModule } from '@angular/router';
                   <p class="text-brand-secondary text-xs sm:text-sm mt-1">Real-time CRM and Task metrics</p>
                 </div>
                 <div class="flex flex-wrap gap-2 sm:gap-3">
-                   <button routerLink="/crm/deals" class="premium-button text-xs sm:text-sm px-3 sm:px-4 py-2 whitespace-nowrap">CRM Reports</button>
+                   <button *appRequiresPremium routerLink="/crm/deals" class="premium-button text-xs sm:text-sm px-3 sm:px-4 py-2 whitespace-nowrap">CRM Reports</button>
                    <button routerLink="/tasks" class="secondary-button text-xs sm:text-sm px-3 sm:px-4 py-2 !border-white/10 !bg-white/5 whitespace-nowrap">Task Board</button>
                 </div>
               </div>
@@ -179,6 +181,116 @@ import { RouterModule } from '@angular/router';
               </div>
             </div>
 
+            <div class="glass-panel p-5 sm:p-6 flex flex-col min-h-[400px] border-brand-primary/10 relative overflow-hidden group">
+              <!-- Background Glow -->
+              <div class="absolute -top-24 -right-24 w-48 h-48 bg-brand-primary/5 blur-3xl group-hover:bg-brand-primary/10 transition-colors duration-700"></div>
+              
+              <div class="flex items-center justify-between mb-6 relative z-10">
+                <div class="flex items-center gap-2">
+                  <div class="p-2 rounded-lg bg-brand-primary/10 text-brand-primary">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                  </div>
+                  <h4 class="font-bold text-sm tracking-tight">Plan Usage</h4>
+                </div>
+                <div *ngIf="subscription$ | async as sub" class="text-[9px] px-2.5 py-1 rounded-lg bg-brand-primary/10 text-brand-primary font-black uppercase tracking-widest border border-brand-primary/20">
+                  {{ sub.plan }}
+                </div>
+              </div>
+
+              @if (limits$ | async; as limits) {
+                <div class="space-y-6 relative z-10 flex-1">
+                  <!-- Usage Progress Bars -->
+                  @if (stats$ | async; as stats) {
+                    <div class="space-y-5">
+                      <!-- Contacts -->
+                      <div class="space-y-2 group/item">
+                        <div class="flex justify-between text-[10px] sm:text-xs">
+                          <span class="text-brand-secondary group-hover/item:text-white transition-colors">Contacts</span>
+                          <span class="text-white font-bold">{{ stats.totalContacts }} / {{ limits.maxContacts }}</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden p-[1px] border border-white/5">
+                          <div class="h-full rounded-full bg-gradient-to-r from-brand-primary/60 to-brand-primary shadow-[0_0_8px_rgba(59,130,246,0.3)] transition-all duration-1000 ease-out" 
+                               [style.width.%]="Math.min((stats.totalContacts / limits.maxContacts) * 100, 100)"
+                               [class.from-rose-500]="(stats.totalContacts / limits.maxContacts) >= 0.9"
+                               [class.to-rose-400]="(stats.totalContacts / limits.maxContacts) >= 0.9"></div>
+                        </div>
+                      </div>
+
+                      <!-- Deals -->
+                      <div class="space-y-2 group/item">
+                        <div class="flex justify-between text-[10px] sm:text-xs">
+                          <span class="text-brand-secondary group-hover/item:text-white transition-colors">Total Deals</span>
+                          <span class="text-white font-bold">{{ stats.totalDealsCount }} / {{ limits.maxDeals }}</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden p-[1px] border border-white/5">
+                          <div class="h-full rounded-full bg-gradient-to-r from-emerald-500/60 to-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.3)] transition-all duration-1000 ease-out" 
+                               [style.width.%]="Math.min((stats.totalDealsCount / limits.maxDeals) * 100, 100)"
+                               [class.from-rose-500]="(stats.totalDealsCount / limits.maxDeals) >= 0.9"
+                               [class.to-rose-400]="(stats.totalDealsCount / limits.maxDeals) >= 0.9"></div>
+                        </div>
+                      </div>
+
+                      <!-- Tasks -->
+                      <div class="space-y-2 group/item">
+                        <div class="flex justify-between text-[10px] sm:text-xs">
+                          <span class="text-brand-secondary group-hover/item:text-white transition-colors">Total Tasks</span>
+                          <span class="text-white font-bold">{{ stats.totalTasks }} / {{ limits.maxTasks }}</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden p-[1px] border border-white/5">
+                          <div class="h-full rounded-full bg-gradient-to-r from-amber-500/60 to-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.3)] transition-all duration-1000 ease-out" 
+                               [style.width.%]="Math.min((stats.totalTasks / limits.maxTasks) * 100, 100)"
+                               [class.from-rose-500]="(stats.totalTasks / limits.maxTasks) >= 0.9"
+                               [class.to-rose-400]="(stats.totalTasks / limits.maxTasks) >= 0.9"></div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+
+                  <!-- Features Status -->
+                  <div class="pt-6 mt-6 border-t border-white/5 space-y-4">
+                    <p class="text-[9px] font-black uppercase tracking-[0.2em] text-brand-secondary/40">Capability Matrix</p>
+                    <div class="grid grid-cols-1 gap-3">
+                      <div class="flex items-center justify-between group/feat">
+                        <span class="text-[11px] text-brand-secondary group-hover/feat:text-white transition-colors">Advanced Export</span>
+                        <div class="flex items-center gap-2">
+                           <span *ngIf="!limits.hasExport" class="text-[8px] font-bold text-white/20 uppercase tracking-tighter">Locked</span>
+                           <div [class]="limits.hasExport ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-white/5 text-white/20 border-white/10'" 
+                                class="w-5 h-5 rounded flex items-center justify-center border transition-all">
+                             <svg *ngIf="limits.hasExport" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                             <svg *ngIf="!limits.hasExport" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-11V7a4 4 0 00-8 0v4h8z"></path></svg>
+                           </div>
+                        </div>
+                      </div>
+                      <div class="flex items-center justify-between group/feat">
+                        <span class="text-[11px] text-brand-secondary group-hover/feat:text-white transition-colors">Team Automations</span>
+                        <div class="flex items-center gap-2">
+                           <span *ngIf="!limits.hasAutomations" class="text-[8px] font-bold text-white/20 uppercase tracking-tighter">Locked</span>
+                           <div [class]="limits.hasAutomations ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-white/5 text-white/20 border-white/10'" 
+                                class="w-5 h-5 rounded flex items-center justify-center border transition-all">
+                             <svg *ngIf="limits.hasAutomations" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                             <svg *ngIf="!limits.hasAutomations" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-11V7a4 4 0 00-8 0v4h8z"></path></svg>
+                           </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mt-auto pt-6">
+                    <button *appRequiresPremium="'PREMIUM'; else upgradeBtn" routerLink="/premium" 
+                            class="w-full py-3 text-[11px] font-black uppercase tracking-widest text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-300">
+                      Premium Suite
+                    </button>
+                    <ng-template #upgradeBtn>
+                      <button routerLink="/billing/pricing" 
+                              class="w-full py-3 text-[11px] font-black uppercase tracking-widest text-black bg-brand-primary hover:scale-[1.02] active:scale-[0.98] rounded-xl transition-all duration-300 shadow-[0_10px_20px_rgba(59,130,246,0.3)]">
+                        Unlock Full Power
+                      </button>
+                    </ng-template>
+                  </div>
+                </div>
+              }
+            </div>
+
             <div class="glass-panel p-5 sm:p-6 flex flex-col min-h-[400px]">
               <h4 class="font-bold mb-6">Recent Activity</h4>
               <div class="space-y-6 flex-1 overflow-y-auto max-h-[500px] pr-2 custom-scrollbar">
@@ -209,10 +321,14 @@ import { RouterModule } from '@angular/router';
 })
 export class DashboardComponent implements OnInit {
   private store = inject(Store);
+  private subscriptionService = inject(SubscriptionService);
   
   stats$ = this.store.select(selectStats);
   isLoading$ = this.store.select(selectIsLoading);
   user$ = this.store.select(selectUser);
+  limits$ = this.subscriptionService.limits$;
+  subscription$ = this.subscriptionService.subscription$;
+  Math = Math;
 
   ngOnInit() {
     this.store.dispatch(DashboardActions.loadStats());

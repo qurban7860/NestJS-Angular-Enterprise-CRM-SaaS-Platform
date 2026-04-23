@@ -15,6 +15,10 @@ import {
 import { map, startWith, combineLatest } from 'rxjs';
 import { ButtonComponent } from '../../../tasks/presentation/button.component';
 import { ConfirmModalComponent } from '../../../../core/components/confirm-modal/confirm-modal.component';
+import { SubscriptionService } from '../../../../core/services/subscription.service';
+import { selectStats } from '../../../../core/state/dashboard/dashboard.reducer';
+import { DashboardActions } from '../../../../core/state/dashboard/dashboard.actions';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-contacts-list',
@@ -319,8 +323,10 @@ import { ConfirmModalComponent } from '../../../../core/components/confirm-modal
 export class ContactsListComponent implements OnInit {
   private store = inject(Store);
   private fb = inject(FormBuilder);
+  private subService = inject(SubscriptionService);
 
   contacts$ = this.store.select(selectContacts);
+  stats$ = this.store.select(selectStats);
   isLoading$ = this.store.select(selectIsLoading);
   searchControl = new FormControl('', { nonNullable: true });
 
@@ -353,12 +359,25 @@ export class ContactsListComponent implements OnInit {
 
   ngOnInit() {
     this.store.dispatch(CRMActions.loadContacts());
+    this.store.dispatch(DashboardActions.loadStats());
   }
 
   openCreateModal() {
-    this.editingContactId = null;
-    this.contactForm.reset();
-    this.isModalOpen = true;
+    combineLatest([this.subService.limits$, this.stats$]).pipe(take(1)).subscribe((data: any) => {
+      const [limits, stats] = data;
+      if (stats.totalContacts >= limits.maxContacts) {
+        this.store.dispatch({ 
+          type: '[Toast] Show Toast', 
+          id: 'limit-reached', 
+          message: `Contact limit reached (${limits.maxContacts}). Please upgrade your plan to add more.`, 
+          toastType: 'warning' 
+        });
+        return;
+      }
+      this.editingContactId = null;
+      this.contactForm.reset();
+      this.isModalOpen = true;
+    });
   }
   closeCreateModal() {
     this.isModalOpen = false;

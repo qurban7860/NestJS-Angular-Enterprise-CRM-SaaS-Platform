@@ -12,6 +12,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { LoginUseCase } from '../../application/use-cases/login.use-case';
 import { RegisterUseCase } from '../../application/use-cases/register.use-case';
 import {
@@ -44,7 +45,13 @@ export class AuthController {
   async login(@Body() dto: LoginDto) {
     const result = await this.loginUseCase.execute(dto);
     if (result.isFailure) {
-      throw result.error; // Global exception filter will catch this
+      if (
+        result.error?.includes('Invalid') ||
+        result.error?.includes('deactivated')
+      ) {
+        throw new UnauthorizedException(result.error);
+      }
+      throw new BadRequestException(result.error);
     }
     return result.getValue();
   }
@@ -60,6 +67,7 @@ export class AuthController {
   async register(@Body() dto: RegisterDto) {
     const result = await this.registerUseCase.execute(dto);
     if (result.isFailure) {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
       throw result.error;
     }
     return result.getValue();
@@ -74,6 +82,7 @@ export class AuthController {
     type: UserResponseDto,
   })
   getProfile(@CurrentUser() user: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return user;
   }
 }

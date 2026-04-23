@@ -7,6 +7,10 @@ import { selectDeals, selectIsLoading } from '../../../../core/state/crm/crm.red
 import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { map } from 'rxjs';
 import { ConfirmModalComponent } from '../../../../core/components/confirm-modal/confirm-modal.component';
+import { SubscriptionService } from '../../../../core/services/subscription.service';
+import { selectStats } from '../../../../core/state/dashboard/dashboard.reducer';
+import { DashboardActions } from '../../../../core/state/dashboard/dashboard.actions';
+import { combineLatest, take, Observable } from 'rxjs';
 
 interface KanbanColumn {
   id: string;
@@ -185,8 +189,10 @@ interface KanbanColumn {
 export class DealsKanbanComponent implements OnInit {
   private store = inject(Store);
   private fb = inject(FormBuilder);
+  private subService = inject(SubscriptionService);
   
   deals$ = this.store.select(selectDeals);
+  stats$ = this.store.select(selectStats);
   isLoading$ = this.store.select(selectIsLoading);
 
   isModalOpen = false;
@@ -220,12 +226,25 @@ export class DealsKanbanComponent implements OnInit {
 
   ngOnInit() {
     this.store.dispatch(CRMActions.loadDeals());
+    this.store.dispatch(DashboardActions.loadStats());
   }
 
   openCreateModal() { 
-    this.editingDealId = null;
-    this.dealForm.reset({ valueCurrency: 'USD', stage: 'PROSPECTING', contactId: '00000000-0000-0000-0000-000000000000', companyId: '00000000-0000-0000-0000-000000000000' });
-    this.isModalOpen = true; 
+    (combineLatest([this.subService.limits$, this.stats$]).pipe(take(1)) as Observable<any>).subscribe((data: any) => {
+      const [limits, stats] = data;
+      if (stats.totalDealsCount >= limits.maxDeals) {
+        this.store.dispatch({ 
+          type: '[Toast] Show Toast', 
+          id: 'limit-reached', 
+          message: `Deal limit reached (${limits.maxDeals}). Please upgrade your plan to add more.`, 
+          toastType: 'warning' 
+        });
+        return;
+      }
+      this.editingDealId = null;
+      this.dealForm.reset({ valueCurrency: 'USD', stage: 'PROSPECTING', contactId: '00000000-0000-0000-0000-000000000000', companyId: '00000000-0000-0000-0000-000000000000' });
+      this.isModalOpen = true; 
+    });
   }
   closeCreateModal() { 
     this.isModalOpen = false;

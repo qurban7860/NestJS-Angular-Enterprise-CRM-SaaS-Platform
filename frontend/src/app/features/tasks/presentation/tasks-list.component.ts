@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { TasksActions } from '../../../core/state/tasks/tasks.actions';
 import { selectTasks, selectIsLoading } from '../../../core/state/tasks/tasks.reducer';
 import { FormControl, ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
-import { map, startWith, combineLatest, Observable } from 'rxjs';
+import { map, startWith, combineLatest, Observable, take } from 'rxjs';
 import { FileUploadComponent } from '../../../core/components/file-upload/file-upload.component';
 import { TaskCommentsComponent } from '../../../core/components/task-comments/task-comments.component';
 import { ToastActions } from '../../../core/state/toast/toast.actions';
@@ -12,11 +12,15 @@ import { CrmService } from '../../../core/services/crm.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { ConfirmModalComponent } from '../../../core/components/confirm-modal/confirm-modal.component';
+import { RequiresPremiumDirective } from '../../../core/directives/premium-gate.directive';
+import { SubscriptionService } from '../../../core/services/subscription.service';
+import { selectStats } from '../../../core/state/dashboard/dashboard.reducer';
+import { DashboardActions } from '../../../core/state/dashboard/dashboard.actions';
 
 @Component({
   selector: 'app-tasks-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent, TaskCommentsComponent, DragDropModule, ConfirmModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent, TaskCommentsComponent, DragDropModule, ConfirmModalComponent, RequiresPremiumDirective],
   template: `
     <div class="space-y-4 sm:space-y-6 animate-in fade-in duration-500 max-w-[1400px] mx-auto pb-20 px-4 md:px-8">
       
@@ -34,7 +38,7 @@ import { ConfirmModalComponent } from '../../../core/components/confirm-modal/co
               <svg class="w-3.5 h-3.5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path></svg> BOARD
             </button>
           </div>
-          <button (click)="exportTasks()" class="premium-button !bg-brand-secondary hover:!bg-brand-secondary/80 flex items-center gap-2 text-xs px-3 py-2 flex-1 sm:flex-none justify-center">
+          <button *appRequiresPremium (click)="exportTasks()" class="premium-button !bg-brand-secondary hover:!bg-brand-secondary/80 flex items-center gap-2 text-xs px-3 py-2 flex-1 sm:flex-none justify-center">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             <span class="hidden sm:inline">Export</span>
           </button>
@@ -343,9 +347,11 @@ export class TasksListComponent implements OnInit {
   private fb = inject(FormBuilder);
   private crmService = inject(CrmService);
   private authService = inject(AuthService);
+  private subService = inject(SubscriptionService);
   
   // Data Streams
   tasks$ = this.store.select(selectTasks);
+  stats$ = this.store.select(selectStats);
   isLoading$ = this.store.select(selectIsLoading);
   users$: Observable<any[]> = this.authService.getUsers();
   contacts$: Observable<any[]> = this.crmService.getContacts();
@@ -403,6 +409,7 @@ export class TasksListComponent implements OnInit {
     this.authService.getProfile().subscribe(user => {
       this.currentUserId = user.id;
       this.store.dispatch(TasksActions.loadTasks({ filters: {} }));
+      this.store.dispatch(DashboardActions.loadStats());
     });
 
     // Reactive Pipeline for Filtering
@@ -502,9 +509,19 @@ export class TasksListComponent implements OnInit {
   getAssigneeInitials(userId: string): string { return 'U'; }
 
   openCreateModal() { 
-    this.editingTaskId = null;
-    this.taskForm.reset({ priority: 'MEDIUM', status: 'TODO', assigneeId: '', contactId: '', dealId: '', dueDate: '' });
-    this.isModalOpen = true; 
+    combineLatest([this.subService.limits$, this.stats$]).pipe(take(1)).subscribe((data: any) => {
+      const [limits, stats] = data;
+      if (stats.totalTasks >= limits.maxTasks) {
+        this.store.dispatch(ToastActions.showToast({ 
+          message: `Task limit reached (${limits.maxTasks}). Please upgrade your plan to add more.`, 
+          toastType: 'error' 
+        }));
+        return;
+      }
+      this.editingTaskId = null;
+      this.taskForm.reset({ priority: 'MEDIUM', status: 'TODO', assigneeId: '', contactId: '', dealId: '', dueDate: '' });
+      this.isModalOpen = true; 
+    });
   }
   closeCreateModal() { 
     this.isModalOpen = false;

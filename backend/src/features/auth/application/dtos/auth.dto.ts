@@ -46,6 +46,7 @@ export class AuthResponseDto {
     lastName: string;
     role: string;
     orgId: string;
+    plan: string;
   };
 
   @ApiProperty({ description: 'JWT Access Token' })

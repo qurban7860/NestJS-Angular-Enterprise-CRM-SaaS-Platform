@@ -4,6 +4,7 @@ import { CrmService } from '../../services/crm.service';
 import { CRMActions } from './crm.actions';
 import { catchError, map, mergeMap, of, switchMap, tap } from 'rxjs';
 import { ToastActions } from '../toast/toast.actions';
+import { DashboardActions } from '../dashboard/dashboard.actions';
 
 @Injectable()
 export class CRMEffects {
@@ -44,7 +45,8 @@ export class CRMEffects {
             ToastActions.showToast({ 
               message: 'New contact added successfully', 
               toastType: 'success' 
-            })
+            }),
+            DashboardActions.loadStats()
           ]),
           catchError(error => of(CRMActions.createContactFailure({ error: error.message })))
         )
@@ -80,7 +82,8 @@ export class CRMEffects {
             ToastActions.showToast({ 
               message: 'Contact deleted successfully', 
               toastType: 'success' 
-            })
+            }),
+            DashboardActions.loadStats()
           ]),
           catchError(error => of(CRMActions.deleteContactFailure({ error: error.message })))
         )
@@ -144,7 +147,8 @@ export class CRMEffects {
             ToastActions.showToast({ 
               message: 'Pipeline deal created successfully', 
               toastType: 'success' 
-            })
+            }),
+            DashboardActions.loadStats()
           ]),
           catchError(error => of(CRMActions.createDealFailure({ error: error.message })))
         )
@@ -198,7 +202,8 @@ export class CRMEffects {
             ToastActions.showToast({ 
               message: 'Deal deleted successfully', 
               toastType: 'success' 
-            })
+            }),
+            DashboardActions.loadStats()
           ]),
           catchError(error => of(CRMActions.deleteDealFailure({ error: error.message })))
         )

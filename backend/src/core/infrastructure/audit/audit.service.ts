@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 
 export interface AuditLogEntry {
@@ -16,33 +18,26 @@ export interface AuditLogEntry {
 export class AuditService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * Records a business event to the audit log asynchronously.
-   * Fire-and-forget: errors here should never block the main request.
-   */
-  log(entry: AuditLogEntry): void {
+  @OnEvent('audit.log')
+  handleAuditLog(entry: AuditLogEntry): void {
     const { changes, ...rest } = entry;
     this.prisma.auditLog
       .create({
         data: {
           ...rest,
-          changes: changes ?? {},
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          changes: (changes as any) ?? {},
         },
       })
       .catch((err) => {
-        console.error('[AuditService] Failed to write audit log:', err?.message);
+        console.error(
+          '[AuditService] Failed to write audit log:',
+          err?.message,
+        );
       });
   }
 
-  /**
-   * Paginated retrieval of audit logs for a given organization.
-   * Restricted to ADMIN users only (enforced at controller level).
-   */
-  async findByOrg(
-    orgId: string,
-    page = 1,
-    limit = 25,
-  ) {
+  async findByOrg(orgId: string, page = 1, limit = 25) {
     const skip = (page - 1) * limit;
     const [data, total] = await this.prisma.$transaction([
       this.prisma.auditLog.findMany({

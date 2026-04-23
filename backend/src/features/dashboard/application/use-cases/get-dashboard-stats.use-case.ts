@@ -62,9 +62,11 @@ export class GetDashboardStatsUseCase implements UseCase<string, DashboardStatsD
 
     return Result.ok<DashboardStatsDto>({
       totalContacts: contacts.length,
+      totalDealsCount: deals.length,
       activeDealsCount: activeDeals.length,
       totalDealValue: totalValue,
       taskCompletionRate: Math.round(taskCompletionRate),
+      totalTasks: totalTasks,
       recentActivity,
     });
   }

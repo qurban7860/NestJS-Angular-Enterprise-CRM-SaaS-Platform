@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { CoreModule } from './core/core.module';
 import { AuthModule } from './features/auth/auth.module';
@@ -13,11 +14,13 @@ import { NotificationsModule } from './features/notifications/notifications.modu
 import { FilesModule } from './features/files/files.module';
 import { SystemModule } from './features/system/system.module';
 import { BillingModule } from './features/billing/billing.module';
+import { PremiumFeaturesModule } from './features/premium/premium-features.module';
 import { GlobalExceptionFilter } from './core/presentation/filters/global-exception.filter';
 import { LoggingInterceptor } from './core/presentation/interceptors/logging.interceptor';
 import { TransformInterceptor } from './core/presentation/interceptors/transform.interceptor';
 import { AuditInterceptor } from './core/presentation/interceptors/audit.interceptor';
 import { JwtAuthGuard } from './features/auth/presentation/guards/jwt-auth.guard';
+import { PlanGuard } from './core/presentation/guards/plan.guard';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Module({
@@ -39,6 +42,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
         },
       ],
     }),
+    EventEmitterModule.forRoot(),
 
     // ── Core (Prisma, Redis, Logger, Audit) ─────────────────
     CoreModule,
@@ -52,6 +56,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     FilesModule,
     SystemModule,
     BillingModule,
+    PremiumFeaturesModule,
   ],
   controllers: [AppController],
   providers: [
@@ -59,6 +64,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     // Global Guards
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: PlanGuard },
 
     // Global Filters
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },

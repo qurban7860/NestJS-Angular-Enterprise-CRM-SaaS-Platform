@@ -13,6 +13,7 @@ interface UserProps {
   role: UserRole;
   orgId: string;
   isActive: boolean;
+  plan?: string;
   avatarUrl?: string;
   refreshToken?: string;
   createdAt?: Date;
@@ -24,27 +25,47 @@ export class User extends Entity<UserProps> {
     super(props, id);
   }
 
-  get email(): Email { return this.props.email; }
-  get firstName(): string { return this.props.firstName; }
-  get lastName(): string { return this.props.lastName; }
-  get role(): UserRole { return this.props.role; }
-  get orgId(): string { return this.props.orgId; }
-  get isActive(): boolean { return this.props.isActive; }
-  get passwordHash(): Password { return this.props.passwordHash; }
+  get email(): Email {
+    return this.props.email;
+  }
+  get firstName(): string {
+    return this.props.firstName;
+  }
+  get lastName(): string {
+    return this.props.lastName;
+  }
+  get role(): UserRole {
+    return this.props.role;
+  }
+  get orgId(): string {
+    return this.props.orgId;
+  }
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+  get passwordHash(): Password {
+    return this.props.passwordHash;
+  }
+  get plan(): string {
+    return this.props.plan || 'FREE';
+  }
 
   public static create(props: UserProps, id?: string): Result<User> {
     // Domain validation logic here
     if (!props.orgId) {
-      return Result.fail<User>("User must belong to an organization");
+      return Result.fail<User>('User must belong to an organization');
     }
 
-    const user = new User({
-      ...props,
-      isActive: props.isActive ?? true,
-      role: props.role ?? 'MEMBER',
-      createdAt: props.createdAt ?? new Date(),
-      updatedAt: props.updatedAt ?? new Date(),
-    }, id);
+    const user = new User(
+      {
+        ...props,
+        isActive: props.isActive ?? true,
+        role: props.role ?? 'MEMBER',
+        createdAt: props.createdAt ?? new Date(),
+        updatedAt: props.updatedAt ?? new Date(),
+      },
+      id,
+    );
 
     return Result.ok<User>(user);
   }
@@ -65,7 +86,11 @@ export class User extends Entity<UserProps> {
     return Result.ok();
   }
 
-  public updateProfile(firstName: string, lastName: string, avatarUrl?: string): void {
+  public updateProfile(
+    firstName: string,
+    lastName: string,
+    avatarUrl?: string,
+  ): void {
     this.props.firstName = firstName;
     this.props.lastName = lastName;
     this.props.avatarUrl = avatarUrl;

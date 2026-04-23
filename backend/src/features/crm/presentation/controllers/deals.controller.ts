@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/only-throw-error */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/only-throw-error */
 /* eslint-disable prettier/prettier */
 import { Controller, Post, Body, Get, Param, Patch, Delete, Res } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
@@ -15,6 +15,9 @@ import { CurrentUser } from '../../../../core/presentation/decorators/current-us
 import { CsvExportService } from '../../../../core/application/services/csv-export.service';
 import type { Response } from 'express';
 
+import { PlanLimitsService } from '../../../../core/infrastructure/billing/plan-limits.service';
+import { BusinessException } from '../../../../core/application/exceptions/business.exception';
+
 @ApiTags('CRM')
 @ApiBearerAuth()
 @Controller('crm/deals')
@@ -27,14 +30,16 @@ export class DealsController {
     private readonly updateDealUseCase: UpdateDealUseCase,
     private readonly deleteDealUseCase: DeleteDealUseCase,
     private readonly csvExportService: CsvExportService,
+    private readonly limitsService: PlanLimitsService,
   ) {}
 
   @Get('export')
   @ApiOperation({ summary: 'Export deals to CSV' })
   async exportCsv(@CurrentUser() user: any, @Res() res: Response) {
+    await this.limitsService.checkLimit(user.orgId, 'hasExport');
     const result = await this.listDealsUseCase.execute(user.orgId);
     if (result.isFailure) {
-      throw result.error;
+      throw new BusinessException(result.error!);
     }
     const deals = result.getValue();
     
@@ -60,7 +65,7 @@ export class DealsController {
   async findAll(@CurrentUser() user: any) {
     const result = await this.listDealsUseCase.execute(user.orgId);
     if (result.isFailure) {
-      throw result.error;
+      throw new BusinessException(result.error!);
     }
     return result.getValue();
   }
@@ -71,7 +76,7 @@ export class DealsController {
   async findOne(@Param('id') id: string, @CurrentUser() user: any) {
     const result = await this.getDealUseCase.execute({ id, orgId: user.orgId });
     if (result.isFailure) {
-      throw result.error;
+      throw new BusinessException(result.error!);
     }
     return result.getValue();
   }
@@ -80,6 +85,7 @@ export class DealsController {
   @ApiOperation({ summary: 'Create a new deal in the pipeline' })
   @ApiResponse({ status: 201, type: DealResponseDto })
   async create(@Body() dto: CreateDealDto, @CurrentUser() user: any) {
+    await this.limitsService.checkLimit(user.orgId, 'maxDeals');
     const result = await this.createDealUseCase.execute({
       ...dto,
       orgId: user.orgId,
@@ -121,7 +127,7 @@ export class DealsController {
     });
 
     if (result.isFailure) {
-      throw result.error;
+      throw new BusinessException(result.error!);
     }
     return result.getValue();
   }

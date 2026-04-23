@@ -5,7 +5,7 @@ import { Observable, map } from 'rxjs';
 import { ApiResponse } from './auth.service';
 
 export interface SubscriptionStatus {
-  plan: 'FREE' | 'PRO' | 'ENTERPRISE';
+  plan: 'FREE' | 'PREMIUM' | 'ENTERPRISE';
   status: string | null;
   currentPeriodEnd: string | null;
 }
@@ -17,7 +17,7 @@ export class BillingService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/billing`;
 
-  createCheckoutSession(plan: 'PRO' | 'ENTERPRISE'): Observable<string> {
+  createCheckoutSession(plan: 'PREMIUM' | 'ENTERPRISE'): Observable<string> {
     return this.http
       .post<ApiResponse<{ url: string }>>(`${this.apiUrl}/checkout/session`, { plan })
       .pipe(map(res => res.data.url));

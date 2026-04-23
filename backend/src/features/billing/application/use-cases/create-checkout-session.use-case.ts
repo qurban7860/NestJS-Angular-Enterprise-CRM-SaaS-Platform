@@ -7,7 +7,7 @@ import { Result } from '../../../../core/domain/base/result';
 
 export interface CreateCheckoutSessionDto {
   orgId: string;
-  plan: 'PRO' | 'ENTERPRISE';
+  plan: 'PREMIUM' | 'ENTERPRISE';
   successUrl: string;
   cancelUrl: string;
   userEmail?: string;
@@ -78,8 +78,8 @@ export class CreateCheckoutSessionUseCase {
 
   private getPriceId(plan: string): string {
     const priceId =
-      plan === 'PRO'
-        ? process.env['STRIPE_PRO_PRICE_ID']
+      plan === 'PREMIUM'
+        ? process.env['STRIPE_PREMIUM_PRICE_ID']
         : process.env['STRIPE_ENTERPRISE_PRICE_ID'];
 
     if (!priceId) {
