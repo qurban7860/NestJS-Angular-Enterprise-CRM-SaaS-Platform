@@ -4,7 +4,7 @@ import { ToastActions } from './toast.actions';
 export interface Toast {
   id: string;
   message: string;
-  toastType: 'success' | 'error' | 'info';
+  toastType: 'success' | 'error' | 'info' | 'warning';
 }
 
 export interface ToastState {

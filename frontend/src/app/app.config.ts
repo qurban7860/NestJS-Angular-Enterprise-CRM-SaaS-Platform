@@ -14,6 +14,7 @@ import * as toastEffects from './core/state/toast/toast.effects';
 import { CRMEffects } from './core/state/crm/crm.effects';
 import { TasksEffects } from './core/state/tasks/tasks.effects';
 import { DashboardEffects } from './core/state/dashboard/dashboard.effects';
+import { PremiumEffects } from './core/state/premium/premium.effects';
 
 import { authReducer, authFeatureKey } from './core/state/auth/auth.reducer';
 import { notificationsReducer, notificationsFeatureKey } from './core/state/notifications/notifications.reducer';
@@ -21,6 +22,7 @@ import { toastReducer, toastFeatureKey } from './core/state/toast/toast.reducer'
 import { reducer as crmReducer, name as crmFeatureKey } from './core/state/crm/crm.reducer';
 import { tasksReducer, tasksFeatureKey } from './core/state/tasks/tasks.reducer';
 import { dashboardReducer, dashboardFeatureKey } from './core/state/dashboard/dashboard.reducer';
+import { premiumReducer, premiumFeatureKey } from './core/state/premium/premium.reducer';
 
 import { jwtInterceptor } from './core/interceptors/jwt.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
@@ -49,9 +51,10 @@ export const appConfig: ApplicationConfig = {
       [toastFeatureKey]: toastReducer,
       [crmFeatureKey]: crmReducer,
       [tasksFeatureKey]: tasksReducer,
-      [dashboardFeatureKey]: dashboardReducer
+      [dashboardFeatureKey]: dashboardReducer,
+      [premiumFeatureKey]: premiumReducer
     }),
-    provideEffects([authEffects, notificationEffects, toastEffects, CRMEffects, TasksEffects, DashboardEffects]),
+    provideEffects([authEffects, notificationEffects, toastEffects, CRMEffects, TasksEffects, DashboardEffects, PremiumEffects]),
     provideRouterStore(),
     provideStoreDevtools({
       maxAge: 25,

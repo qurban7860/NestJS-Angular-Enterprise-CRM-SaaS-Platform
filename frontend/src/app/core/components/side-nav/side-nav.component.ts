@@ -6,22 +6,38 @@ import { selectUser } from '../../state/auth/auth.reducer';
 import { AuthActions } from '../../state/auth/auth.actions';
 import { NavService } from '../../services/nav.service';
 import { RequiresPremiumDirective } from '../../directives/premium-gate.directive';
+import { HasPermissionDirective } from '../../directives/has-permission.directive';
 
 @Component({
   selector: 'app-side-nav',
   standalone: true,
-  imports: [CommonModule, RouterModule, RequiresPremiumDirective],
+  imports: [
+    CommonModule,
+    RouterModule,
+    RequiresPremiumDirective,
+    HasPermissionDirective,
+  ],
   template: `
     <aside
       class="w-64 h-full glass-panel !rounded-none border-y-0 border-l-0 flex flex-col relative"
     >
       <!-- Close Button for Mobile -->
-      <button 
+      <button
         (click)="navService.closeSidebar()"
         class="lg:hidden absolute top-5 right-1 p-2 text-brand-secondary hover:text-white transition-colors"
       >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
 
@@ -34,12 +50,37 @@ import { RequiresPremiumDirective } from '../../directives/premium-gate.directiv
           <div
             class="w-8 h-8 rounded-lg bg-gradient-premium flex items-center justify-center font-bold text-white shadow-lg overflow-hidden"
           >
-            <img src="assets/astraeus_logo_3d.png" alt="A" class="w-full h-full object-cover">
+            <img
+              src="assets/astraeus_logo_3d.png"
+              alt="A"
+              class="w-full h-full object-cover"
+            />
           </div>
           <span class="text-xl font-bold tracking-tight"
             >Astraeus <span class="text-brand-primary">CRM</span></span
           >
         </div>
+        @if (user$ | async; as user) {
+          @if (user.orgName) {
+            <div
+              class="mt-4 px-3 py-1.5 rounded-lg bg-brand-primary/10 border border-brand-primary/20 flex items-center gap-2"
+            >
+              <svg
+                class="w-3 h-3 text-brand-primary"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5"
+                />
+              </svg>
+              <span
+                class="text-[10px] font-bold uppercase tracking-widest text-brand-primary truncate"
+                >{{ user.orgName }}</span
+              >
+            </div>
+          }
+        }
       </div>
 
       <nav class="flex-1 px-4 py-4 space-y-6 overflow-y-auto">
@@ -86,6 +127,7 @@ import { RequiresPremiumDirective } from '../../directives/premium-gate.directiv
           </p>
           <div class="space-y-1">
             <a
+              *hasPermission="'contacts:read'"
               routerLink="/crm/contacts"
               routerLinkActive="active"
               class="nav-link"
@@ -108,6 +150,7 @@ import { RequiresPremiumDirective } from '../../directives/premium-gate.directiv
               Contacts
             </a>
             <a
+              *hasPermission="'deals:read'"
               routerLink="/crm/deals"
               routerLinkActive="active"
               class="nav-link"
@@ -140,7 +183,13 @@ import { RequiresPremiumDirective } from '../../directives/premium-gate.directiv
             Work
           </p>
           <div class="space-y-1">
-            <a routerLink="/tasks" routerLinkActive="active" class="nav-link" (click)="navService.closeSidebar()">
+            <a
+              *hasPermission="'tasks:read'"
+              routerLink="/tasks"
+              routerLinkActive="active"
+              class="nav-link"
+              (click)="navService.closeSidebar()"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="w-5 h-5 mr-3"
@@ -169,6 +218,7 @@ import { RequiresPremiumDirective } from '../../directives/premium-gate.directiv
           </p>
           <div class="space-y-1">
             <a
+              *hasPermission="'system:audit'"
               routerLink="/system/audit-logs"
               routerLinkActive="active"
               class="nav-link"
@@ -193,24 +243,112 @@ import { RequiresPremiumDirective } from '../../directives/premium-gate.directiv
           </div>
         </div>
 
-        <!-- Premium Features -->
-        <div *appRequiresPremium>
+        <!-- Administration -->
+        <div>
           <p
             class="text-[10px] font-bold uppercase tracking-widest text-brand-secondary/60 px-3 mb-2"
           >
-            Premium
+            Administration
           </p>
           <div class="space-y-1">
             <a
-              routerLink="/premium"
+              *ngIf="(user$ | async)?.role === 'ADMIN'"
+              routerLink="/premium/team"
               routerLinkActive="active"
               class="nav-link"
               (click)="navService.closeSidebar()"
             >
-              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.175 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              <svg
+                class="w-5 h-5 mr-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                />
               </svg>
-              Enterprise Controls
+              Team Members
+            </a>
+            <a
+              *hasPermission="'roles:read'"
+              routerLink="/premium/roles"
+              routerLinkActive="active"
+              class="nav-link"
+              (click)="navService.closeSidebar()"
+            >
+              <svg
+                class="w-5 h-5 mr-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                />
+              </svg>
+              Custom Roles
+            </a>
+          </div>
+        </div>
+
+        <!-- Automation & Insights -->
+        <div>
+          <p
+            class="text-[10px] font-bold uppercase tracking-widest text-brand-secondary/60 px-3 mb-2"
+          >
+            Intelligence
+          </p>
+          <div class="space-y-1">
+            <a
+              *hasPermission="'workflows:read'"
+              routerLink="/premium/workflows"
+              routerLinkActive="active"
+              class="nav-link"
+              (click)="navService.closeSidebar()"
+            >
+              <svg
+                class="w-5 h-5 mr-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+              Workflows
+            </a>
+            <a
+              *hasPermission="'reports:read'"
+              routerLink="/premium/reports"
+              routerLinkActive="active"
+              class="nav-link"
+              (click)="navService.closeSidebar()"
+            >
+              <svg
+                class="w-5 h-5 mr-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              Reports
             </a>
           </div>
         </div>
@@ -262,10 +400,27 @@ import { RequiresPremiumDirective } from '../../directives/premium-gate.directiv
               >
             </div>
             <div class="flex-1 overflow-hidden">
-              <p class="text-sm font-medium truncate">
-                {{ user.firstName }} {{ user.lastName }}
-              </p>
-              <p class="text-xs text-brand-secondary truncate">
+              <div class="flex items-center gap-2 min-w-0">
+                <p class="text-sm font-medium truncate">
+                  {{ user.firstName }} {{ user.lastName }}
+                </p>
+
+                <span
+                  class="text-[9px] font-black uppercase tracking-tighter px-1.5 py-0.5 rounded bg-brand-primary/20 text-brand-primary border border-brand-primary/20 shrink-0"
+                >
+                  {{ user.customRole?.name || user.role }}
+                </span>
+
+                @if (user.customRole) {
+                  <span
+                    class="text-[9px] text-brand-secondary/60 italic font-medium shrink-0"
+                  >
+                    Custom Role
+                  </span>
+                }
+              </div>
+
+              <p class="text-xs text-brand-secondary truncate mt-1">
                 {{ user.email }}
               </p>
             </div>

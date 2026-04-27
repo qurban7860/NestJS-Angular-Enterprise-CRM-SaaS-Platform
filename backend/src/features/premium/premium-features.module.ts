@@ -6,8 +6,10 @@ import { WorkflowEngineService } from './application/services/workflow-engine.se
 import { CustomRolesController } from './presentation/controllers/custom-roles.controller';
 import { WorkflowsController } from './presentation/controllers/workflows.controller';
 import { ReportsController } from './presentation/controllers/reports.controller';
+import { RbacModule } from '../rbac/rbac.module';
 
 @Module({
+  imports: [RbacModule],
   controllers: [CustomRolesController, WorkflowsController, ReportsController],
   providers: [
     CustomRolesService,

@@ -9,6 +9,7 @@ import {
   Patch,
   Delete,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -28,6 +29,8 @@ import {
 } from '../../application/dtos/contact.dto';
 import { CurrentUser } from '../../../../core/presentation/decorators/current-user.decorator';
 import { CsvExportService } from '../../../../core/application/services/csv-export.service';
+import { PermissionsGuard } from '../../../rbac/presentation/guards/permissions.guard';
+import { RequirePermissions } from '../../../rbac/presentation/decorators/require-permissions.decorator';
 import type { Response } from 'express';
 
 import { PlanLimitsService } from '../../../../core/infrastructure/billing/plan-limits.service';
@@ -35,6 +38,7 @@ import { BusinessException } from '../../../../core/application/exceptions/busin
 
 @ApiTags('CRM')
 @ApiBearerAuth()
+@UseGuards(PermissionsGuard)
 @Controller('crm/contacts')
 export class ContactsController {
   constructor(
@@ -48,6 +52,7 @@ export class ContactsController {
   ) {}
 
   @Get('export')
+  @RequirePermissions('contacts:read')
   @ApiOperation({ summary: 'Export contacts to CSV' })
   async exportCsv(@CurrentUser() user: any, @Res() res: Response) {
     await this.limitsService.checkLimit(user.orgId, 'hasExport');
@@ -74,6 +79,7 @@ export class ContactsController {
   }
 
   @Get()
+  @RequirePermissions('contacts:read')
   @ApiOperation({ summary: 'List all contacts for the current organization' })
   @ApiResponse({ status: 200, type: [ContactResponseDto] })
   async findAll(@CurrentUser() user: any) {
@@ -85,6 +91,7 @@ export class ContactsController {
   }
 
   @Get(':id')
+  @RequirePermissions('contacts:read')
   @ApiOperation({ summary: 'Get a specific contact' })
   @ApiResponse({ status: 200, type: ContactResponseDto })
   async findOne(@Param('id') id: string, @CurrentUser() user: any) {
@@ -99,6 +106,7 @@ export class ContactsController {
   }
 
   @Post()
+  @RequirePermissions('contacts:write')
   @ApiOperation({ summary: 'Create a new contact in the CRM' })
   @ApiResponse({ status: 201, type: ContactResponseDto })
   async create(@Body() dto: CreateContactDto, @CurrentUser() user: any) {
@@ -118,6 +126,7 @@ export class ContactsController {
   }
 
   @Patch(':id')
+  @RequirePermissions('contacts:write')
   @ApiOperation({ summary: 'Update an existing contact' })
   @ApiResponse({ status: 200, type: ContactResponseDto })
   async update(
@@ -138,6 +147,7 @@ export class ContactsController {
   }
 
   @Delete(':id')
+  @RequirePermissions('contacts:delete')
   @ApiOperation({ summary: 'Delete a contact' })
   @ApiResponse({ status: 204 })
   async remove(@Param('id') id: string, @CurrentUser() user: any) {

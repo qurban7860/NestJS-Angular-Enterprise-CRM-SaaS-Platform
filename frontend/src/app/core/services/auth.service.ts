@@ -8,9 +8,16 @@ export interface User {
   email: string;
   firstName?: string;
   lastName?: string;
-  role: string;
+  role: 'ADMIN' | 'MANAGER' | 'MEMBER';
   orgId: string;
+  orgName: string;
   plan?: string;
+  customRoleId?: string | null;
+  customRole?: {
+    id: string;
+    name: string;
+    permissions: string[];
+  } | null;
 }
 
 export interface AuthResponse {

@@ -16,7 +16,8 @@ import { ToastActions } from '../../state/toast/toast.actions';
           [ngClass]="{
             'border-emerald-500/50': toast.toastType === 'success',
             'border-red-500/50': toast.toastType === 'error',
-            'border-brand-primary/50': toast.toastType === 'info'
+            'border-brand-primary/50': toast.toastType === 'info',
+            'border-amber-500/50': toast.toastType === 'warning'
           }"
         >
           <!-- Accent Line -->
@@ -24,7 +25,8 @@ import { ToastActions } from '../../state/toast/toast.actions';
             [ngClass]="{
               'bg-emerald-500': toast.toastType === 'success',
               'bg-red-500': toast.toastType === 'error',
-              'bg-brand-primary': toast.toastType === 'info'
+              'bg-brand-primary': toast.toastType === 'info',
+              'bg-amber-500': toast.toastType === 'warning'
             }"
           ></div>
 
@@ -40,6 +42,12 @@ import { ToastActions } from '../../state/toast/toast.actions';
               <div class="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+            } @else if (toast.toastType === 'warning') {
+              <div class="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
             } @else {

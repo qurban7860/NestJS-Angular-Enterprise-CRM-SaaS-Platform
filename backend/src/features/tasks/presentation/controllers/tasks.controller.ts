@@ -10,6 +10,7 @@ import {
   Query,
   Delete,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -31,6 +32,8 @@ import {
 } from '../../application/dtos/task.dto';
 import { CurrentUser } from '../../../../core/presentation/decorators/current-user.decorator';
 import { CsvExportService } from '../../../../core/application/services/csv-export.service';
+import { PermissionsGuard } from '../../../rbac/presentation/guards/permissions.guard';
+import { RequirePermissions } from '../../../rbac/presentation/decorators/require-permissions.decorator';
 import type { Response } from 'express';
 
 import { PlanLimitsService } from '../../../../core/infrastructure/billing/plan-limits.service';
@@ -38,6 +41,7 @@ import { BusinessException } from '../../../../core/application/exceptions/busin
 
 @ApiTags('Tasks')
 @ApiBearerAuth()
+@UseGuards(PermissionsGuard)
 @Controller('tasks')
 export class TasksController {
   constructor(
@@ -52,6 +56,7 @@ export class TasksController {
   ) {}
 
   @Get('export')
+  @RequirePermissions('tasks:read')
   @ApiOperation({ summary: 'Export tasks to CSV' })
   async exportCsv(
     @CurrentUser() user: any,
@@ -85,6 +90,7 @@ export class TasksController {
   }
 
   @Get()
+  @RequirePermissions('tasks:read')
   @ApiOperation({
     summary:
       'List all tasks for the current organization with optional filters',
@@ -102,6 +108,7 @@ export class TasksController {
   }
 
   @Get(':id')
+  @RequirePermissions('tasks:read')
   @ApiOperation({ summary: 'Get a specific task' })
   @ApiResponse({ status: 200, type: TaskResponseDto })
   async findOne(@Param('id') id: string, @CurrentUser() user: any) {
@@ -113,6 +120,7 @@ export class TasksController {
   }
 
   @Post()
+  @RequirePermissions('tasks:write')
   @ApiOperation({ summary: 'Create a new task' })
   @ApiResponse({ status: 201, type: TaskResponseDto })
   async create(@Body() dto: CreateTaskDto, @CurrentUser() user: any) {
@@ -130,6 +138,7 @@ export class TasksController {
   }
 
   @Patch(':id/status')
+  @RequirePermissions('tasks:write')
   @ApiOperation({ summary: 'Update a task status' })
   @ApiResponse({ status: 200, type: TaskResponseDto })
   async updateStatus(
@@ -150,6 +159,7 @@ export class TasksController {
   }
 
   @Patch(':id')
+  @RequirePermissions('tasks:write')
   @ApiOperation({ summary: 'Update an existing task' })
   @ApiResponse({ status: 200, type: TaskResponseDto })
   async update(
@@ -170,6 +180,7 @@ export class TasksController {
   }
 
   @Delete(':id')
+  @RequirePermissions('tasks:delete')
   @ApiOperation({ summary: 'Delete a task' })
   @ApiResponse({ status: 204 })
   async remove(@Param('id') id: string, @CurrentUser() user: any) {

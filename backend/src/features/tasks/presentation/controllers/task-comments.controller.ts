@@ -1,12 +1,15 @@
-import { Controller, Post, Body, Get, Param, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, ParseUUIDPipe, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateTaskCommentUseCase } from '../../application/use-cases/create-comment.use-case';
 import { ListTaskCommentsUseCase } from '../../application/use-cases/list-comments.use-case';
 import { CreateCommentDto, CommentResponseDto } from '../../application/dtos/comment.dto';
 import { CurrentUser } from '../../../../core/presentation/decorators/current-user.decorator';
+import { PermissionsGuard } from '../../../rbac/presentation/guards/permissions.guard';
+import { RequirePermissions } from '../../../rbac/presentation/decorators/require-permissions.decorator';
 
 @ApiTags('Task Comments')
 @ApiBearerAuth()
+@UseGuards(PermissionsGuard)
 @Controller('tasks/:taskId/comments')
 export class TaskCommentsController {
   constructor(
@@ -15,6 +18,7 @@ export class TaskCommentsController {
   ) {}
 
   @Get()
+  @RequirePermissions('tasks:read')
   @ApiOperation({ summary: 'List all comments for a task' })
   @ApiResponse({ status: 200, type: [CommentResponseDto] })
   async findAll(@Param('taskId', ParseUUIDPipe) taskId: string) {
@@ -26,6 +30,7 @@ export class TaskCommentsController {
   }
 
   @Post()
+  @RequirePermissions('tasks:write')
   @ApiOperation({ summary: 'Add a comment to a task' })
   @ApiResponse({ status: 201, type: CommentResponseDto })
   async create(

@@ -29,7 +29,7 @@ export const routes: Routes = [
       },
       {
         path: 'premium',
-        loadComponent: () => import('./features/premium/pages/premium-dashboard.component').then(c => c.PremiumDashboardComponent)
+        loadChildren: () => import('./features/premium/premium.routes').then(r => r.PREMIUM_ROUTES)
       }
     ]
   },

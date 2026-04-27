@@ -2,11 +2,12 @@ import { Component, Input, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TasksService } from '../../services/tasks.service';
+import { HasPermissionDirective } from '../../directives/has-permission.directive';
 
 @Component({
   selector: 'app-task-comments',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HasPermissionDirective],
   template: `
     <div class="space-y-4">
       <!-- Comment List -->
@@ -30,7 +31,7 @@ import { TasksService } from '../../services/tasks.service';
       </div>
 
       <!-- Input Area -->
-      <div class="flex gap-2">
+      <div *hasPermission="'tasks:write'" class="flex gap-2">
         <input 
           [(ngModel)]="newCommentText" 
           (keyup.enter)="postComment()"

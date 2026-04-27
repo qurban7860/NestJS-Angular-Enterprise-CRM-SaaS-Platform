@@ -2,7 +2,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable prettier/prettier */
-import { Controller, Post, Body, Get, Param, Patch, Delete, Res } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Patch, Delete, Res, UseGuards } from '@nestjs/common';
+import { PermissionsGuard } from '../../../rbac/presentation/guards/permissions.guard';
+import { RequirePermissions } from '../../../rbac/presentation/decorators/require-permissions.decorator';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ListDealsUseCase } from '../../application/use-cases/list-deals.use-case';
 import { CreateDealUseCase } from '../../application/use-cases/create-deal.use-case';
@@ -20,6 +22,7 @@ import { BusinessException } from '../../../../core/application/exceptions/busin
 
 @ApiTags('CRM')
 @ApiBearerAuth()
+@UseGuards(PermissionsGuard)
 @Controller('crm/deals')
 export class DealsController {
   constructor(
@@ -34,6 +37,7 @@ export class DealsController {
   ) {}
 
   @Get('export')
+  @RequirePermissions('deals:read')
   @ApiOperation({ summary: 'Export deals to CSV' })
   async exportCsv(@CurrentUser() user: any, @Res() res: Response) {
     await this.limitsService.checkLimit(user.orgId, 'hasExport');
@@ -60,6 +64,7 @@ export class DealsController {
   }
 
   @Get()
+  @RequirePermissions('deals:read')
   @ApiOperation({ summary: 'List all deals for the current organization' })
   @ApiResponse({ status: 200, type: [DealResponseDto] })
   async findAll(@CurrentUser() user: any) {
@@ -71,6 +76,7 @@ export class DealsController {
   }
 
   @Get(':id')
+  @RequirePermissions('deals:read')
   @ApiOperation({ summary: 'Get a specific deal' })
   @ApiResponse({ status: 200, type: DealResponseDto })
   async findOne(@Param('id') id: string, @CurrentUser() user: any) {
@@ -82,6 +88,7 @@ export class DealsController {
   }
 
   @Post()
+  @RequirePermissions('deals:write')
   @ApiOperation({ summary: 'Create a new deal in the pipeline' })
   @ApiResponse({ status: 201, type: DealResponseDto })
   async create(@Body() dto: CreateDealDto, @CurrentUser() user: any) {
@@ -96,6 +103,7 @@ export class DealsController {
   }
 
   @Patch(':id/stage')
+  @RequirePermissions('deals:write')
   @ApiOperation({ summary: 'Update a deal pipeline stage (drag and drop)' })
   @ApiResponse({ status: 200, type: DealResponseDto })
   async updateStage(
@@ -113,6 +121,7 @@ export class DealsController {
   }
 
   @Patch(':id')
+  @RequirePermissions('deals:write')
   @ApiOperation({ summary: 'Update an existing deal' })
   @ApiResponse({ status: 200, type: DealResponseDto })
   async update(
@@ -133,6 +142,7 @@ export class DealsController {
   }
 
   @Delete(':id')
+  @RequirePermissions('deals:delete')
   @ApiOperation({ summary: 'Delete a deal' })
   @ApiResponse({ status: 204 })
   async remove(@Param('id') id: string, @CurrentUser() user: any) {

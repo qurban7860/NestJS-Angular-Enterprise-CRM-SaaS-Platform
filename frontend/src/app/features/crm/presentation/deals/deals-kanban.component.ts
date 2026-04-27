@@ -11,6 +11,7 @@ import { SubscriptionService } from '../../../../core/services/subscription.serv
 import { selectStats } from '../../../../core/state/dashboard/dashboard.reducer';
 import { DashboardActions } from '../../../../core/state/dashboard/dashboard.actions';
 import { combineLatest, take, Observable } from 'rxjs';
+import { HasPermissionDirective } from '../../../../core/directives/has-permission.directive';
 
 interface KanbanColumn {
   id: string;
@@ -21,7 +22,7 @@ interface KanbanColumn {
 @Component({
   selector: 'app-deals-kanban',
   standalone: true,
-  imports: [CommonModule, DragDropModule, ReactiveFormsModule, ConfirmModalComponent],
+  imports: [CommonModule, DragDropModule, ReactiveFormsModule, ConfirmModalComponent, HasPermissionDirective],
   template: `
     <div class="h-full flex flex-col space-y-4 sm:space-y-6 animate-in fade-in duration-500">
       <!-- Header -->
@@ -41,7 +42,7 @@ interface KanbanColumn {
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             <span class="hidden sm:inline">Export</span>
           </button>
-          <button (click)="openCreateModal()" class="premium-button flex items-center gap-2 text-xs sm:text-sm px-4 py-2 flex-1 sm:flex-none justify-center">
+          <button *hasPermission="'deals:write'" (click)="openCreateModal()" class="premium-button flex items-center gap-2 text-xs sm:text-sm px-4 py-2 flex-1 sm:flex-none justify-center">
             <span>+</span> <span class="hidden sm:inline">New Deal</span>
           </button>
         </div>
@@ -125,16 +126,20 @@ interface KanbanColumn {
                         {{ deal.title }}
                       </h4>
                       <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1">
-                        <button (click)="editDeal(deal)" class="p-1.5 text-brand-secondary hover:text-white bg-black/60 rounded-lg backdrop-blur-md">
-                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-                          </svg>
-                        </button>
-                        <button (click)="deleteDeal(deal)" class="p-1.5 text-brand-secondary hover:text-red-400 bg-black/60 rounded-lg backdrop-blur-md">
-                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                          </svg>
-                        </button>
+                        <ng-container *hasPermission="'deals:write'">
+                          <button (click)="editDeal(deal)" class="p-1.5 text-brand-secondary hover:text-white bg-black/60 rounded-lg backdrop-blur-md">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                            </svg>
+                          </button>
+                        </ng-container>
+                        <ng-container *hasPermission="'deals:delete'">
+                          <button (click)="deleteDeal(deal)" class="p-1.5 text-brand-secondary hover:text-red-400 bg-black/60 rounded-lg backdrop-blur-md">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                          </button>
+                        </ng-container>
                       </div>
                     </div>
                     

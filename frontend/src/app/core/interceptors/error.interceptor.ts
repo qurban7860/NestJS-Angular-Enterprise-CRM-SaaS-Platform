@@ -3,6 +3,7 @@ import { inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { catchError, throwError } from 'rxjs';
 import { ToastActions } from '../state/toast/toast.actions';
+import { PremiumActions } from '../state/premium/premium.actions';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const store = inject(Store);
@@ -27,11 +28,20 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         if (!isLoginRequest) {
           store.dispatch(ToastActions.showToast({ id: 'auth-err', message: 'Session expired. Please login again.', toastType: 'error' }));
         }
+      } else if (error.status === 402) {
+        // Payment Required - Quota Exceeded
+        const payload = error.error;
+        store.dispatch(PremiumActions.quotaExceeded({ payload }));
+        store.dispatch(ToastActions.showToast({ 
+          id: 'quota-err', 
+          message: `Quota exceeded: You have reached the limit for ${payload.feature} on your current plan.`, 
+          toastType: 'warning' 
+        }));
       } else if (error.status === 403) {
-        // Forbidden - usually plan limit or permission issue
+        // Forbidden - usually permission issue
         store.dispatch(ToastActions.showToast({ 
           id: 'limit-err', 
-          message: error.error?.error?.message || 'Action restricted by your current plan.', 
+          message: error.error?.error?.message || 'Action restricted. You do not have the required permissions.', 
           toastType: 'info' 
         }));
       } else if (error.status === 0) {

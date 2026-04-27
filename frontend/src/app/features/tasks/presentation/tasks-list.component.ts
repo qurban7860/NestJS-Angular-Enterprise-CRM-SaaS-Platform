@@ -16,11 +16,12 @@ import { RequiresPremiumDirective } from '../../../core/directives/premium-gate.
 import { SubscriptionService } from '../../../core/services/subscription.service';
 import { selectStats } from '../../../core/state/dashboard/dashboard.reducer';
 import { DashboardActions } from '../../../core/state/dashboard/dashboard.actions';
+import { HasPermissionDirective } from '../../../core/directives/has-permission.directive';
 
 @Component({
   selector: 'app-tasks-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent, TaskCommentsComponent, DragDropModule, ConfirmModalComponent, RequiresPremiumDirective],
+  imports: [CommonModule, ReactiveFormsModule, FileUploadComponent, TaskCommentsComponent, DragDropModule, ConfirmModalComponent, RequiresPremiumDirective, HasPermissionDirective],
   template: `
     <div class="space-y-4 sm:space-y-6 animate-in fade-in duration-500 max-w-[1400px] mx-auto pb-20 px-4 md:px-8">
       
@@ -42,7 +43,7 @@ import { DashboardActions } from '../../../core/state/dashboard/dashboard.action
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             <span class="hidden sm:inline">Export</span>
           </button>
-          <button (click)="openCreateModal()" class="premium-button flex items-center gap-2 text-xs px-4 py-2 flex-1 sm:flex-none justify-center">
+          <button *hasPermission="'tasks:write'" (click)="openCreateModal()" class="premium-button flex items-center gap-2 text-xs px-4 py-2 flex-1 sm:flex-none justify-center">
             <span>+</span> <span class="whitespace-nowrap hidden sm:inline">New Task</span>
           </button>
         </div>
@@ -85,10 +86,10 @@ import { DashboardActions } from '../../../core/state/dashboard/dashboard.action
           <span class="text-xs sm:text-sm font-bold text-white"><span class="text-brand-primary">{{selectedTasks.size}}</span> Tasks Selected</span>
           <div class="hidden sm:block w-px h-6 bg-white/10"></div>
           <div class="flex items-center gap-4">
-            <button (click)="bulkUpdateStatus('DONE')" class="text-[10px] sm:text-xs font-semibold hover:text-emerald-400 transition-colors flex items-center gap-2">
+            <button *hasPermission="'tasks:write'" (click)="bulkUpdateStatus('DONE')" class="text-[10px] sm:text-xs font-semibold hover:text-emerald-400 transition-colors flex items-center gap-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Mark Done
             </button>
-            <button (click)="bulkDelete()" class="text-[10px] sm:text-xs font-semibold hover:text-rose-400 transition-colors flex items-center gap-2 text-rose-500/80">
+            <button *hasPermission="'tasks:delete'" (click)="bulkDelete()" class="text-[10px] sm:text-xs font-semibold hover:text-rose-400 transition-colors flex items-center gap-2 text-rose-500/80">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Delete
             </button>
             <button (click)="clearSelection()" class="text-[10px] sm:text-xs text-brand-secondary hover:text-white">Cancel</button>
@@ -151,10 +152,10 @@ import { DashboardActions } from '../../../core/state/dashboard/dashboard.action
                       </div>
 
                       <div class="absolute top-12 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex space-x-1">
-                        <button (click)="$event.stopPropagation(); editTask(task)" class="p-1.5 text-brand-secondary hover:text-white bg-black/60 rounded-lg">
+                        <button *hasPermission="'tasks:write'" (click)="$event.stopPropagation(); editTask(task)" class="p-1.5 text-brand-secondary hover:text-white bg-black/60 rounded-lg">
                           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                         </button>
-                        <button (click)="$event.stopPropagation(); deleteTask(task)" class="p-1.5 text-brand-secondary hover:text-red-400 bg-black/60 rounded-lg">
+                        <button *hasPermission="'tasks:delete'" (click)="$event.stopPropagation(); deleteTask(task)" class="p-1.5 text-brand-secondary hover:text-red-400 bg-black/60 rounded-lg">
                           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
                       </div>
@@ -205,10 +206,10 @@ import { DashboardActions } from '../../../core/state/dashboard/dashboard.action
                     </div>
                   </div>
                   <div class="flex items-center opacity-0 group-hover:opacity-100 transition-opacity z-10 space-x-1 sm:space-x-2 mr-0 sm:mr-4">
-                    <button (click)="$event.stopPropagation(); editTask(task)" class="p-1.5 text-brand-secondary hover:text-white bg-black/60 rounded-lg">
+                    <button *hasPermission="'tasks:write'" (click)="$event.stopPropagation(); editTask(task)" class="p-1.5 text-brand-secondary hover:text-white bg-black/60 rounded-lg">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                     </button>
-                    <button (click)="$event.stopPropagation(); deleteTask(task)" class="p-1.5 text-brand-secondary hover:text-red-400 bg-black/60 rounded-lg">
+                    <button *hasPermission="'tasks:delete'" (click)="$event.stopPropagation(); deleteTask(task)" class="p-1.5 text-brand-secondary hover:text-red-400 bg-black/60 rounded-lg">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
                   </div>
