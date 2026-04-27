@@ -16,5 +16,6 @@ export const AuthActions = createActionGroup({
     'Load Profile': emptyProps(),
     'Load Profile Success': props<{ user: User }>(),
     'Load Profile Failure': emptyProps(),
+    'Clear Auth Errors': emptyProps(),
   }
 });

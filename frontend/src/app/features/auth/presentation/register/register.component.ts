@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -22,10 +22,10 @@ import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.r
         <div class="glass-panel p-10">
           <div class="flex flex-col items-center mb-10">
             <!-- Logo -->
-            <div class="w-16 h-16 rounded-2xl bg-gradient-premium flex items-center justify-center text-3xl font-bold text-white shadow-2xl mb-8">
-              E
+            <div class="w-16 h-16 rounded-2xl bg-gradient-premium flex items-center justify-center text-3xl font-bold text-white shadow-2xl mb-8 overflow-hidden">
+              <img src="assets/astraeus_logo_3d.png" alt="A" class="w-full h-full object-cover">
             </div>
-            <h1 class="text-3xl font-bold tracking-tight text-center">Create Your Account</h1>
+            <h1 class="text-3xl font-bold tracking-tight text-center">Astraeus</h1>
             <p class="text-brand-secondary text-center mt-2">Start your enterprise transformation journey</p>
           </div>
 
@@ -114,12 +114,16 @@ import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.r
     </div>
   `,
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
   private fb = inject(FormBuilder);
   private store = inject(Store);
 
   isLoading$ = this.store.select(selectIsLoading);
   errorMessage$ = this.store.select(selectError);
+
+  ngOnInit() {
+    this.store.dispatch(AuthActions.clearAuthErrors());
+  }
 
   registerForm = this.fb.group({
     firstName: ['', [Validators.required]],

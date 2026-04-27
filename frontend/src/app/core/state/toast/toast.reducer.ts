@@ -19,10 +19,13 @@ export const toastFeature = createFeature({
   name: 'toast',
   reducer: createReducer(
     initialState,
-    on(ToastActions.showToast, (state, { id, message, toastType }) => ({
-      ...state,
-      toasts: [...state.toasts, { id: id || Math.random().toString(36), message, toastType }],
-    })),
+    on(ToastActions.showToast, (state, { id, message, toastType }) => {
+      const toastId = id || Math.random().toString(36);
+      return {
+        ...state,
+        toasts: [...state.toasts.filter(t => t.id !== toastId), { id: toastId, message, toastType }],
+      };
+    }),
     on(ToastActions.hideToast, (state, { id }) => ({
       ...state,
       toasts: state.toasts.filter((t) => t.id !== id),

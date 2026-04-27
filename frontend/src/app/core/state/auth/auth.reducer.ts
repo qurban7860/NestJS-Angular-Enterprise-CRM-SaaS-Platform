@@ -58,6 +58,11 @@ export const authFeature = createFeature({
       ...state,
       user: null,
       accessToken: null,
+      error: null,
+    })),
+    on(AuthActions.clearAuthErrors, (state) => ({
+      ...state,
+      error: null,
     })),
   ),
 });

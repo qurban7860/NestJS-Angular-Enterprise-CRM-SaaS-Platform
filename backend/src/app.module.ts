@@ -15,6 +15,7 @@ import { FilesModule } from './features/files/files.module';
 import { SystemModule } from './features/system/system.module';
 import { BillingModule } from './features/billing/billing.module';
 import { PremiumFeaturesModule } from './features/premium/premium-features.module';
+import { SearchModule } from './features/search/search.module';
 import { GlobalExceptionFilter } from './core/presentation/filters/global-exception.filter';
 import { LoggingInterceptor } from './core/presentation/interceptors/logging.interceptor';
 import { TransformInterceptor } from './core/presentation/interceptors/transform.interceptor';
@@ -57,6 +58,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     SystemModule,
     BillingModule,
     PremiumFeaturesModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [

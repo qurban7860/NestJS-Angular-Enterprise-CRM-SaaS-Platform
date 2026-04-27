@@ -32,12 +32,12 @@ import { RequiresPremiumDirective } from '../../directives/premium-gate.directiv
           (click)="navService.closeSidebar()"
         >
           <div
-            class="w-8 h-8 rounded-lg bg-gradient-premium flex items-center justify-center font-bold text-white shadow-lg"
+            class="w-8 h-8 rounded-lg bg-gradient-premium flex items-center justify-center font-bold text-white shadow-lg overflow-hidden"
           >
-            E
+            <img src="assets/astraeus_logo_3d.png" alt="A" class="w-full h-full object-cover">
           </div>
           <span class="text-xl font-bold tracking-tight"
-            >Enterprise <span class="text-brand-primary">SaaS</span></span
+            >Astraeus <span class="text-brand-primary">CRM</span></span
           >
         </div>
       </div>
