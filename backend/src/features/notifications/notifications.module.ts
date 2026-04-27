@@ -6,17 +6,24 @@ import { NotificationsGateway } from './infrastructure/gateways/notifications.ga
 
 import { AuthModule } from '../auth/auth.module';
 
+import { GetNotificationsUseCase } from './application/use-cases/get-notifications.use-case';
+
 @Module({
   imports: [AuthModule],
   controllers: [NotificationsController],
   providers: [
     MarkNotificationReadUseCase,
+    GetNotificationsUseCase,
     NotificationsGateway,
     {
       provide: 'INotificationRepository',
       useClass: PrismaNotificationRepository,
     },
   ],
-  exports: [MarkNotificationReadUseCase, NotificationsGateway, 'INotificationRepository'],
+  exports: [
+    MarkNotificationReadUseCase,
+    NotificationsGateway,
+    'INotificationRepository',
+  ],
 })
 export class NotificationsModule {}

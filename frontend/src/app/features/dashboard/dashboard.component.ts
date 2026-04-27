@@ -18,7 +18,7 @@ import { SubscriptionService } from '../../core/services/subscription.service';
       <!-- Welcome Header -->
       <section>
         @if (user$ | async; as user) {
-          <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Welcome back, <span class="bg-gradient-premium bg-clip-text text-transparent italic">{{ user.firstName }}</span></h1>
+          <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Welcome back, <span class="bg-gradient-premium bg-clip-text text-transparent italic pr-2">{{ user.firstName }}</span></h1>
         }
         <p class="text-brand-secondary text-sm sm:text-base mt-1">Here's what's happening with your business today.</p>
       </section>

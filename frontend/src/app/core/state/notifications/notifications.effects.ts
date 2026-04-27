@@ -1,8 +1,35 @@
 import { inject } from '@angular/core';
-import { createEffect } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { NotificationsService } from '../../services/notifications.service';
 import { SocketService } from '../../services/socket.service';
 import { NotificationActions } from './notifications.actions';
-import { map, tap } from 'rxjs';
+import { catchError, map, mergeMap, of, tap } from 'rxjs';
+
+export const loadNotifications$ = createEffect(
+  (actions$ = inject(Actions), notificationsService = inject(NotificationsService)) => {
+    return actions$.pipe(
+      ofType(NotificationActions.loadNotifications),
+      mergeMap(() => notificationsService.getNotifications().pipe(
+        map(notifications => NotificationActions.loadNotificationsSuccess({ notifications })),
+        catchError(error => of(NotificationActions.loadNotificationsFailure({ error: error.message })))
+      ))
+    );
+  },
+  { functional: true }
+);
+
+export const markAsRead$ = createEffect(
+  (actions$ = inject(Actions), notificationsService = inject(NotificationsService)) => {
+    return actions$.pipe(
+      ofType(NotificationActions.markAsRead),
+      mergeMap(({ id }) => notificationsService.markAsRead(id).pipe(
+        map(() => ({ type: '[Notifications] Mark As Read Success' })),
+        catchError(() => of({ type: '[Notifications] Mark As Read Error' }))
+      ))
+    );
+  },
+  { functional: true, dispatch: false }
+);
 
 export const listenToNotificationsEffect = createEffect(
   (socketService = inject(SocketService)) => {

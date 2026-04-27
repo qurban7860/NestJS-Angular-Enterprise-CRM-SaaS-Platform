@@ -26,13 +26,20 @@
 }
 
 @layer components {
+
   .glass-panel {
-    @apply bg-brand-surface/40 backdrop-blur-md border border-brand-border rounded-xl shadow-premium;
+    @apply bg-brand-surface/70 backdrop-blur-md border border-brand-border rounded-xl shadow-premium;
+    background-clip: padding-box;
+  }
+
+  .glass-elevated {
+    @apply bg-brand-surface/90 backdrop-blur-xl saturate-150 shadow-2xl;
+    isolation: isolate;
   }
   
   .premium-button {
-    @apply relative overflow-hidden px-6 py-2.5 rounded-lg font-medium transition-all duration-300
-           bg-gradient-premium shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 
+    @apply relative overflow-hidden px-6 py-2.5 rounded-lg font-medium transition-all duration-300 
+           bg-gradient-premium shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40
            hover:-translate-y-0.5 active:translate-y-0 active:scale-95;
   }
 
