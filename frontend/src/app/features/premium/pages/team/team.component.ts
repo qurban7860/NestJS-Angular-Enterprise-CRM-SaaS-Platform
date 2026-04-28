@@ -18,13 +18,13 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
     <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white/5 border border-brand-border rounded-2xl p-8 glass-panel relative overflow-hidden gap-6">
         <div class="relative z-10">
-          <h1 class="text-3xl font-extrabold tracking-tight">Team <span class="bg-gradient-premium bg-clip-text text-transparent italic">Management</span></h1>
+          <h1 class="text-3xl font-extrabold tracking-tight">Team <span class="bg-gradient-premium bg-clip-text text-transparent italic pr-2">Management</span></h1>
           <p class="text-brand-secondary mt-2 max-w-xl">Scale your organization by adding team members, assigning custom roles, and managing permissions.</p>
         </div>
-        <app-button variant="premium" (clicked)="openAddModal()" customClass="relative z-10 w-full sm:w-auto justify-center py-3 px-6">
-          <span class="flex items-center gap-2">
+        <app-button variant="premium" (clicked)="openAddModal()" customClass="z-10 w-full sm:w-auto justify-center">
+          <span class="flex items-center">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
-            Add Member
+            <span class="line-clamp-1 ml-1 md:block hidden">Add Member</span>
           </span>
         </app-button>
         <div class="absolute top-0 right-0 w-64 h-64 bg-brand-primary/10 rounded-full blur-[100px] -z-0"></div>
@@ -89,7 +89,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
 
       <!-- Member Modal -->
       @if (isModalOpen()) {
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div class="glass-panel w-full max-w-md p-8 shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200 relative max-h-[90vh] overflow-y-auto">
             <button (click)="isModalOpen.set(false)" class="absolute top-4 right-4 text-brand-secondary hover:text-white transition-colors">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>

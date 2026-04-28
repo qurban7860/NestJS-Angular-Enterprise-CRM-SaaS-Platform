@@ -21,7 +21,7 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
     <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white/5 border border-brand-border rounded-2xl p-8 glass-panel relative overflow-hidden gap-6">
         <div class="relative z-10">
-          <h1 class="text-3xl font-extrabold tracking-tight">Logic <span class="bg-gradient-premium bg-clip-text text-transparent italic">Automations</span></h1>
+          <h1 class="text-3xl font-extrabold tracking-tight">Logic <span class="bg-gradient-premium bg-clip-text text-transparent italic pr-2">Automations</span></h1>
           <p class="text-brand-secondary mt-2 max-w-xl">Build and manage automated workflows to streamline your business processes and eliminate manual tasks.</p>
         </div>
         <app-button variant="premium" (clicked)="openCreateModal()" customClass="relative z-10 w-full sm:w-auto justify-center py-3 px-6">

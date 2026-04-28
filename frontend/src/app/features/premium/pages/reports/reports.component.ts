@@ -22,10 +22,10 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
     <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white/5 border border-brand-border rounded-2xl p-8 glass-panel relative overflow-hidden gap-6">
         <div class="relative z-10">
-          <h1 class="text-3xl font-extrabold tracking-tight">Intelligence <span class="bg-gradient-premium bg-clip-text text-transparent italic">Studio</span></h1>
+          <h1 class="text-3xl font-extrabold tracking-tight">Intelligence <span class="bg-gradient-premium bg-clip-text text-transparent italic pr-2">Studio</span></h1>
           <p class="text-brand-secondary mt-2 max-w-xl">Generate high-fidelity intelligence reports with custom branding and metrics.</p>
         </div>
-        <app-button variant="premium" (clicked)="openCreateModal()" customClass="relative z-10 w-full sm:w-auto justify-center py-3 px-6">
+        <app-button variant="secondary" (clicked)="openCreateModal()" class="secondary-button !border-amber-500/10 hover!bg-amber-500/10 text-amber-400 relative z-10">
           <span class="flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             Build Report

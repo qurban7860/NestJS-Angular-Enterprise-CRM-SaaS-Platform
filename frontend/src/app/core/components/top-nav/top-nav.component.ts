@@ -18,7 +18,7 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, RouterLink, ReactiveFormsModule],
   template: `
-    <header class="h-16 glass-panel !rounded-none border-x-0 border-t-0 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-[60]">
+    <header class="h-16 glass-panel !rounded-none border-x-0 border-t-0 flex items-center justify-between px-4 sm:px-8">
       <div class="flex items-center gap-4 flex-1">
         <button (click)="navService.toggleSidebar()" class="lg:hidden p-2 text-brand-secondary hover:text-white transition-colors hover:bg-white/5 rounded-lg">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -26,7 +26,7 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
           </svg>
         </button>
 
-        <div #searchContainer class="relative w-full max-w-md group hidden sm:block">
+        <div class="relative w-full max-w-md group hidden sm:block">
           <div class="relative">
             <input
               type="text"
