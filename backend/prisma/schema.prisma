@@ -142,6 +142,7 @@ model User {
   customRole       CustomRole?      @relation(fields: [customRoleId], references: [id])
   customRoleId     String?
   reports          CustomReport[]
+  sentBroadcasts   Broadcast[]      @relation("BroadcastSender")
 
   @@index([email])
   @@index([orgId])
@@ -528,4 +529,27 @@ model CustomReport {
   @@index([orgId])
   @@index([ownerId])
   @@map("custom_reports")
+}
+// ─────────────────────────────────────────────
+// SYSTEM: BROADCASTING
+// ─────────────────────────────────────────────
+
+model Broadcast {
+  id          String   @id @default(uuid())
+  title       String
+  message     String
+  type        String   @default("INFO") // INFO, WARNING, SUCCESS, URGENT
+  expiresAt   DateTime?
+  isActive    Boolean  @default(true)
+  senderId    String
+  orgId       String?  // Null for system-wide, String for org-specific
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sender      User     @relation("BroadcastSender", fields: [senderId], references: [id])
+
+  @@index([isActive])
+  @@index([expiresAt])
+  @@index([orgId])
+  @@map("broadcasts")
 }

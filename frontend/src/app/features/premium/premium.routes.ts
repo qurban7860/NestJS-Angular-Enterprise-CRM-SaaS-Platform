@@ -20,5 +20,9 @@ export const PREMIUM_ROUTES: Routes = [
   {
     path: 'team',
     loadComponent: () => import('./pages/team/team.component').then(c => c.TeamManagementComponent)
+  },
+  {
+    path: 'broadcasting',
+    loadComponent: () => import('./pages/broadcasting/broadcasting.component').then(c => c.BroadcastingComponent)
   }
 ];

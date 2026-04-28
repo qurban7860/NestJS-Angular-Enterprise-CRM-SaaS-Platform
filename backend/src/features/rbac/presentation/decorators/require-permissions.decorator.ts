@@ -25,7 +25,8 @@ export type Permission =
   | 'tasks:read'      | 'tasks:write'      | 'tasks:delete'
   | 'reports:read'    | 'reports:write'    | 'reports:delete'
   | 'workflows:read'  | 'workflows:write'  | 'workflows:delete'
-  | 'roles:read'      | 'roles:write'      | 'roles:delete';
+  | 'roles:read'      | 'roles:write'      | 'roles:delete'
+  | 'broadcast:read'  | 'broadcast:write';
 
 export const RequirePermissions = (...permissions: Permission[]) =>
   SetMetadata(PERMISSIONS_KEY, permissions);
