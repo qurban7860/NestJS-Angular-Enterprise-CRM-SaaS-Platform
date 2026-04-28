@@ -4,6 +4,7 @@ import { ListContactsUseCase } from './application/use-cases/list-contacts.use-c
 import { GetContactUseCase } from './application/use-cases/get-contact.use-case';
 import { UpdateContactUseCase } from './application/use-cases/update-contact.use-case';
 import { DeleteContactUseCase } from './application/use-cases/delete-contact.use-case';
+import { SearchContactsUseCase } from './application/use-cases/search-contacts.use-case';
 import { ListDealsUseCase } from './application/use-cases/list-deals.use-case';
 import { CreateDealUseCase } from './application/use-cases/create-deal.use-case';
 import { UpdateDealStageUseCase } from './application/use-cases/update-deal-stage.use-case';
@@ -23,6 +24,7 @@ import { DealsController } from './presentation/controllers/deals.controller';
     GetContactUseCase,
     UpdateContactUseCase,
     DeleteContactUseCase,
+    SearchContactsUseCase,
     ListDealsUseCase,
     CreateDealUseCase,
     UpdateDealStageUseCase,
@@ -40,6 +42,7 @@ import { DealsController } from './presentation/controllers/deals.controller';
     GetContactUseCase,
     UpdateContactUseCase,
     DeleteContactUseCase,
+    SearchContactsUseCase,
     ListDealsUseCase,
     CreateDealUseCase,
     UpdateDealStageUseCase,

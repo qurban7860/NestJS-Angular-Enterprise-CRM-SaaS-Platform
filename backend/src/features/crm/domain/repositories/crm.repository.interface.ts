@@ -12,6 +12,7 @@ export interface ICRMRepository {
   // Contact
   findContactById(id: string): Promise<Contact | null>;
   findContactsByOrgId(orgId: string): Promise<Contact[]>;
+  searchContacts(orgId: string, query: string): Promise<Contact[]>;
   saveContact(contact: Contact): Promise<void>;
   
   // Company
@@ -21,5 +22,6 @@ export interface ICRMRepository {
   // Deal
   findDealById(id: string): Promise<Deal | null>;
   findDealsByOrgId(orgId: string): Promise<Deal[]>;
+  searchDeals(orgId: string, query: string): Promise<Deal[]>;
   saveDeal(deal: Deal): Promise<void>;
 }

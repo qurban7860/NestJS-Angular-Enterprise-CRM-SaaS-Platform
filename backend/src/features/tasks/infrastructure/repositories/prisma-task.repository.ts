@@ -12,7 +12,10 @@ export class PrismaTaskRepository implements ITaskRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<Task | null> {
-    const raw = await this.prisma.task.findUnique({ where: { id } });
+    const raw = await this.prisma.task.findUnique({ 
+      where: { id },
+      include: { assignee: true }
+    });
     if (!raw) return null;
     return this.mapToTask(raw);
   }
@@ -23,6 +26,7 @@ export class PrismaTaskRepository implements ITaskRepository {
         orgId,
         isDeleted: false
       },
+      include: { assignee: true },
       orderBy: { createdAt: 'desc' }
     });
 
@@ -32,6 +36,7 @@ export class PrismaTaskRepository implements ITaskRepository {
   async findByAssigneeId(orgId: string, assigneeId: string): Promise<Task[]> {
     const raws = await this.prisma.task.findMany({
       where: { orgId, assigneeId, isDeleted: false },
+      include: { assignee: true },
       orderBy: { createdAt: 'desc' }
     });
 
@@ -41,6 +46,7 @@ export class PrismaTaskRepository implements ITaskRepository {
   async findByContactId(orgId: string, contactId: string): Promise<Task[]> {
     const raws = await this.prisma.task.findMany({
       where: { orgId, contactId, isDeleted: false } as any,
+      include: { assignee: true },
       orderBy: { createdAt: 'desc' }
     });
 
@@ -50,6 +56,7 @@ export class PrismaTaskRepository implements ITaskRepository {
   async findByDealId(orgId: string, dealId: string): Promise<Task[]> {
     const raws = await this.prisma.task.findMany({
       where: { orgId, dealId, isDeleted: false } as any,
+      include: { assignee: true },
       orderBy: { createdAt: 'desc' }
     });
 
@@ -70,6 +77,7 @@ export class PrismaTaskRepository implements ITaskRepository {
       contactId: raw.contactId || undefined,
       dealId: raw.dealId || undefined,
       tags: raw.tags,
+      checklist: (raw.checklist as any[]) || [],
       isDeleted: raw.isDeleted,
       version: raw.version,
       createdAt: raw.createdAt,
@@ -91,6 +99,7 @@ export class PrismaTaskRepository implements ITaskRepository {
       contactId: task.contactId,
       dealId: task.dealId,
       tags: task.tags,
+      checklist: task.checklist,
       isDeleted: task.isDeleted,
       version: { increment: 1 },
     };

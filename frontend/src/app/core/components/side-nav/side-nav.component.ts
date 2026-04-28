@@ -7,6 +7,7 @@ import { AuthActions } from '../../state/auth/auth.actions';
 import { NavService } from '../../services/nav.service';
 import { RequiresPremiumDirective } from '../../directives/premium-gate.directive';
 import { HasPermissionDirective } from '../../directives/has-permission.directive';
+import { BroadcastingService } from '../../services/broadcasting.service';
 
 @Component({
   selector: 'app-side-nav',
@@ -316,6 +317,9 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
                 />
               </svg>
               Signal Center
+              @if (broadcastService.activeBroadcasts().length > 0) {
+                <span class="ml-auto w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
+              }
             </a>
           </div>
         </div>
@@ -482,6 +486,7 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
 export class SideNavComponent {
   private store = inject(Store);
   navService = inject(NavService);
+  broadcastService = inject(BroadcastingService);
   user$ = this.store.select(selectUser);
 
   logout() {

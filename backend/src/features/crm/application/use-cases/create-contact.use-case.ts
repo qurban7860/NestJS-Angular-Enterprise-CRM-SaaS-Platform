@@ -39,8 +39,11 @@ export class CreateContactUseCase implements UseCase<
 
     return Result.ok<ContactResponseDto>({
       id: contact.id,
+      firstName: contact.firstName,
+      lastName: contact.lastName,
       fullName: contact.fullName,
       email: contact.email,
+      phone: contact.phone,
       status: contact.status,
     });
   }

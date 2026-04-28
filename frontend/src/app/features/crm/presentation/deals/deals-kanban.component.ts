@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { CRMActions } from '../../../../core/state/crm/crm.actions';
 import { selectDeals, selectIsLoading } from '../../../../core/state/crm/crm.reducer';
@@ -10,8 +10,9 @@ import { ConfirmModalComponent } from '../../../../core/components/confirm-modal
 import { SubscriptionService } from '../../../../core/services/subscription.service';
 import { selectStats } from '../../../../core/state/dashboard/dashboard.reducer';
 import { DashboardActions } from '../../../../core/state/dashboard/dashboard.actions';
-import { combineLatest, take, Observable } from 'rxjs';
+import { combineLatest, take, Observable, of, debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs';
 import { HasPermissionDirective } from '../../../../core/directives/has-permission.directive';
+import { CrmService } from '../../../../core/services/crm.service';
 
 interface KanbanColumn {
   id: string;
@@ -50,12 +51,12 @@ interface KanbanColumn {
 
       <!-- Create Deal Modal Overlay -->
       @if (isModalOpen) {
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in zoom-in duration-200 p-4">
-          <div class="glass-panel w-full max-w-md p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center animate-in fade-in zoom-in duration-300 p-2 sm:p-4">
+          <div class="glass-panel w-full max-w-lg p-4 sm:p-8 relative max-h-[95vh] overflow-y-auto custom-scrollbar shadow-2xl border border-white/10">
             <button (click)="closeCreateModal()" class="absolute top-4 right-4 text-brand-secondary hover:text-white transition-colors">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <h2 class="text-xl sm:text-2xl font-bold mb-6">{{ editingDealId ? 'Edit Deal' : 'Create New Deal' }}</h2>
+            <h2 class="text-lg sm:text-2xl font-black italic uppercase tracking-tighter mb-6">{{ editingDealId ? 'Update' : 'Initiate' }} <span class="text-brand-primary">Deal</span></h2>
             <form [formGroup]="dealForm" (ngSubmit)="submitDeal()" class="space-y-4">
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Deal Title</label>
@@ -63,7 +64,50 @@ interface KanbanColumn {
               </div>
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Value Amount</label>
-                <input formControlName="valueAmount" type="number" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="Enter the deal value">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                   <input formControlName="valueAmount" type="number" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="0.00">
+                   <div class="relative">
+                      <input formControlName="probability" type="number" min="0" max="100" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="Win %">
+                      <span class="absolute right-3 top-2.5 text-brand-secondary text-xs">%</span>
+                   </div>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-brand-secondary mb-1">Associate Contact</label>
+                <div class="relative">
+                   <input [formControl]="contactSearchControl" type="text" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="Search contacts...">
+                   <svg class="w-4 h-4 absolute right-3 top-2.5 text-brand-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                   
+                   @if (contactSearchResults$ | async; as results) {
+                     @if (results.length > 0 && showContactResults) {
+                       <div class="absolute top-full left-0 right-0 mt-1 glass-panel z-[60] border border-white/10 max-h-48 overflow-y-auto shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200">
+                         @for (c of results; track c.id) {
+                           <div (click)="selectContact(c)" class="p-3 hover:bg-white/10 cursor-pointer flex items-center justify-between group">
+                             <div>
+                               <p class="text-xs font-bold text-white group-hover:text-brand-primary transition-colors">{{ c.fullName }}</p>
+                               <p class="text-[10px] text-brand-secondary">{{ c.email }}</p>
+                             </div>
+                             <span class="text-[10px] text-brand-primary opacity-0 group-hover:opacity-100 uppercase font-black">Select</span>
+                           </div>
+                         }
+                       </div>
+                     }
+                   }
+                </div>
+                @if (selectedContact) {
+                  <div class="mt-2 p-2 bg-brand-primary/10 border border-brand-primary/20 rounded-lg flex items-center justify-between">
+                    <span class="text-xs font-medium text-brand-primary">Selected: {{ selectedContact.fullName }}</span>
+                    <button type="button" (click)="clearContact()" class="text-brand-secondary hover:text-white transition-colors">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                  </div>
+                }
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-brand-secondary mb-1">Expected Close Date</label>
+                <input formControlName="expectedCloseDate" type="date" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -144,9 +188,14 @@ interface KanbanColumn {
                     </div>
                     
                     <div class="flex justify-between items-center mt-4">
-                      <span class="text-brand-primary font-black text-sm">
-                        {{ deal.valueAmount | currency:deal.valueCurrency:'symbol':'1.0-0' }}
-                      </span>
+                      <div class="flex flex-col">
+                        <span class="text-brand-primary font-black text-sm">
+                          {{ deal.valueAmount | currency:deal.valueCurrency:'symbol':'1.0-0' }}
+                        </span>
+                        @if (deal.probability) {
+                          <span class="text-[10px] text-brand-secondary font-bold">{{ deal.probability }}% Probability</span>
+                        }
+                      </div>
                       <div class="flex -space-x-2">
                         <div class="w-7 h-7 rounded-full bg-indigo-500/20 border-2 border-brand-dark flex items-center justify-center text-[10px] font-bold text-indigo-400">
                           {{ deal.ownerId ? 'U' : '?' }}
@@ -195,6 +244,7 @@ export class DealsKanbanComponent implements OnInit {
   private store = inject(Store);
   private fb = inject(FormBuilder);
   private subService = inject(SubscriptionService);
+  private crmService = inject(CrmService);
   
   deals$ = this.store.select(selectDeals);
   stats$ = this.store.select(selectStats);
@@ -204,13 +254,22 @@ export class DealsKanbanComponent implements OnInit {
   isConfirmModalOpen = false;
   dealToDelete: any = null;
   editingDealId: string | null = null;
+  
+  // Contact Search
+  contactSearchControl = new FormControl('');
+  contactSearchResults$: Observable<any[]> = of([]);
+  selectedContact: any = null;
+  showContactResults = false;
+
   dealForm = this.fb.group({
     title: ['', Validators.required],
     valueAmount: [0, [Validators.required, Validators.min(0)]],
     valueCurrency: ['USD', Validators.required],
     stage: ['PROSPECTING', Validators.required],
-    contactId: ['00000000-0000-0000-0000-000000000000'],
-    companyId: ['00000000-0000-0000-0000-000000000000']
+    probability: [0, [Validators.min(0), Validators.max(100)]],
+    expectedCloseDate: [null as string | null],
+    contactId: [null as string | null],
+    companyId: [null as string | null]
   });
 
   stageIds = ['PROSPECTING', 'QUALIFICATION', 'PROPOSAL', 'NEGOTIATION', 'CLOSED_WON'];
@@ -232,6 +291,29 @@ export class DealsKanbanComponent implements OnInit {
   ngOnInit() {
     this.store.dispatch(CRMActions.loadDeals());
     this.store.dispatch(DashboardActions.loadStats());
+
+    this.contactSearchResults$ = this.contactSearchControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((query: string | null) => {
+        if (!query || typeof query !== 'string' || query.length < 2) return of([]);
+        return this.crmService.searchContacts(query);
+      }),
+      tap(() => this.showContactResults = true)
+    );
+  }
+
+  selectContact(contact: any) {
+    this.selectedContact = contact;
+    this.dealForm.patchValue({ contactId: contact.id });
+    this.showContactResults = false;
+    this.contactSearchControl.setValue(contact.fullName, { emitEvent: false });
+  }
+
+  clearContact() {
+    this.selectedContact = null;
+    this.dealForm.patchValue({ contactId: null });
+    this.contactSearchControl.setValue('');
   }
 
   openCreateModal() { 
@@ -247,29 +329,27 @@ export class DealsKanbanComponent implements OnInit {
         return;
       }
       this.editingDealId = null;
-      this.dealForm.reset({ valueCurrency: 'USD', stage: 'PROSPECTING', contactId: '00000000-0000-0000-0000-000000000000', companyId: '00000000-0000-0000-0000-000000000000' });
+      this.selectedContact = null;
+      this.contactSearchControl.setValue('');
+      this.dealForm.reset({ valueCurrency: 'USD', stage: 'PROSPECTING', probability: 0 });
       this.isModalOpen = true; 
     });
   }
   closeCreateModal() { 
     this.isModalOpen = false;
     this.editingDealId = null;
-    this.dealForm.reset({ valueCurrency: 'USD', stage: 'PROSPECTING', contactId: '00000000-0000-0000-0000-000000000000', companyId: '00000000-0000-0000-0000-000000000000' });
+    this.selectedContact = null;
+    this.contactSearchControl.setValue('');
+    this.dealForm.reset({ valueCurrency: 'USD', stage: 'PROSPECTING', probability: 0 });
   }
 
   submitDeal() {
     if (this.dealForm.valid) {
       const formValue = this.dealForm.value;
-      const payload = {
-        ...formValue,
-        contactId: formValue.contactId === '00000000-0000-0000-0000-000000000000' ? null : formValue.contactId,
-        companyId: formValue.companyId === '00000000-0000-0000-0000-000000000000' ? null : formValue.companyId
-      };
-
       if (this.editingDealId) {
-        this.store.dispatch(CRMActions.updateDeal({ id: this.editingDealId, deal: payload }));
+        this.store.dispatch(CRMActions.updateDeal({ id: this.editingDealId, deal: formValue }));
       } else {
-        this.store.dispatch(CRMActions.createDeal({ deal: payload }));
+        this.store.dispatch(CRMActions.createDeal({ deal: formValue }));
       }
       this.closeCreateModal();
     }
@@ -312,9 +392,18 @@ export class DealsKanbanComponent implements OnInit {
       valueAmount: deal.valueAmount,
       valueCurrency: deal.valueCurrency,
       stage: deal.stage,
-      contactId: deal.contactId || '00000000-0000-0000-0000-000000000000',
-      companyId: deal.companyId || '00000000-0000-0000-0000-000000000000'
+      probability: deal.probability || 0,
+      expectedCloseDate: deal.expectedCloseDate ? new Date(deal.expectedCloseDate).toISOString().split('T')[0] : null,
+      contactId: deal.contactId,
+      companyId: deal.companyId
     });
+    
+    if (deal.contactId) {
+      // In a real app we'd fetch the contact details if not in store
+      this.selectedContact = { id: deal.contactId, fullName: 'Linked Contact' };
+      this.contactSearchControl.setValue(this.selectedContact.fullName, { emitEvent: false });
+    }
+
     this.isModalOpen = true;
   }
 

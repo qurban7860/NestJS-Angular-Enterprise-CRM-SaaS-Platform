@@ -7,6 +7,8 @@ import { RequiresPremiumDirective } from '../../../../core/directives/premium-ga
 import { HasPermissionDirective } from '../../../../core/directives/has-permission.directive';
 import { ConfirmModalComponent } from '../../../../core/components/confirm-modal/confirm-modal.component';
 import { RouterLink } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { selectUser } from '../../../../core/state/auth/auth.reducer';
 
 @Component({
   selector: 'app-broadcasting-admin',
@@ -103,15 +105,20 @@ import { RouterLink } from '@angular/router';
                 </div>
 
                 <div>
-                  <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-brand-secondary mb-2">Priority Level</label>
-                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    @for (type of ['INFO', 'SUCCESS', 'WARNING', 'URGENT']; track type) {
-                      <button type="button" (click)="broadcastForm.patchValue({type})" 
-                              [class]="broadcastForm.get('type')?.value === type ? 'border-indigo-500 bg-indigo-500/20 text-white' : 'border-white/5 bg-white/5 text-brand-secondary hover:bg-white/10'"
-                              class="px-3 py-2 rounded-xl border text-[10px] font-bold transition-all">
-                        {{ type }}
-                      </button>
-                    }
+                  <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-brand-secondary mb-2">Target Audience</label>
+                  <div class="grid grid-cols-2 gap-3">
+                    <button type="button" (click)="broadcastForm.patchValue({orgId: null})" 
+                            [class]="!broadcastForm.get('orgId')?.value ? 'border-brand-primary bg-brand-primary/20 text-white' : 'border-white/5 bg-white/5 text-brand-secondary hover:bg-white/10'"
+                            class="px-3 py-3 rounded-xl border text-[10px] font-bold transition-all flex items-center justify-center gap-2">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
+                      Global System
+                    </button>
+                    <button type="button" (click)="setOrgScope()" 
+                            [class]="broadcastForm.get('orgId')?.value ? 'border-brand-primary bg-brand-primary/20 text-white' : 'border-white/5 bg-white/5 text-brand-secondary hover:bg-white/10'"
+                            class="px-3 py-3 rounded-xl border text-[10px] font-bold transition-all flex items-center justify-center gap-2">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5" /></svg>
+                      My Organization
+                    </button>
                   </div>
                 </div>
 
@@ -148,8 +155,11 @@ import { RouterLink } from '@angular/router';
 export class BroadcastingComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly broadcastService = inject(BroadcastingService);
+  private readonly store = inject(Store);
+  private readonly user$ = this.store.select(selectUser);
+  private currentUser: any;
 
-  broadcasts = signal<Broadcast[]>([]);
+  broadcasts = this.broadcastService.activeBroadcasts;
   isModalOpen = signal(false);
 
   broadcastForm = this.fb.group({
@@ -160,13 +170,16 @@ export class BroadcastingComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.loadBroadcasts();
+    this.user$.subscribe((user: any) => this.currentUser = user);
   }
 
-  loadBroadcasts() {
-    // We can use the service signal or fetch manually
-    this.broadcasts.set(this.broadcastService.activeBroadcasts());
+  setOrgScope() {
+    if (this.currentUser?.orgId) {
+      this.broadcastForm.patchValue({ orgId: this.currentUser.orgId });
+    }
   }
+
+
 
   getTypeBadgeClasses(type: string) {
     switch (type) {

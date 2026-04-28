@@ -22,6 +22,12 @@ export class CrmService {
       .pipe(map(res => res.data || res as any));
   }
 
+  searchContacts(query: string): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/contacts/search`, {
+      params: { q: query }
+    }).pipe(map(res => res.data || res as any));
+  }
+
   getContact(id: string): Observable<any> {
     return this.http.get<ApiResponse<any>>(`${this.apiUrl}/contacts/${id}`)
       .pipe(map(res => res.data || res as any));
@@ -73,6 +79,12 @@ export class CrmService {
 
   deleteDeal(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/deals/${id}`);
+  }
+
+  searchDeals(query: string): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/deals/search`, {
+      params: { q: query }
+    }).pipe(map(res => res.data || res as any));
   }
 
   exportDeals(): Observable<Blob> {

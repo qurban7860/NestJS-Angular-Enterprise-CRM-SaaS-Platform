@@ -84,6 +84,15 @@ export class FeatureQuotaService {
       case 'reports':
         return this.prisma.customReport.count({ where: { orgId } });
 
+      case 'contacts':
+        return this.prisma.contact.count({ where: { orgId } });
+
+      case 'deals':
+        return this.prisma.deal.count({ where: { orgId } });
+
+      case 'tasks':
+        return this.prisma.task.count({ where: { orgId } });
+
       default: {
         const _exhaustive: never = feature;
         this.logger.error(`Unhandled quota feature: ${String(_exhaustive)}`);

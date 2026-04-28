@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { TasksActions } from '../../../core/state/tasks/tasks.actions';
 import { selectTasks, selectIsLoading } from '../../../core/state/tasks/tasks.reducer';
 import { FormControl, ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
-import { map, startWith, combineLatest, Observable, take } from 'rxjs';
+import { map, startWith, combineLatest, Observable, take, debounceTime, distinctUntilChanged, switchMap, tap, of } from 'rxjs';
 import { FileUploadComponent } from '../../../core/components/file-upload/file-upload.component';
 import { TaskCommentsComponent } from '../../../core/components/task-comments/task-comments.component';
 import { ToastActions } from '../../../core/state/toast/toast.actions';
@@ -143,9 +143,13 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
                               </span>
                             }
                           </div>
-                          @if (task.assigneeId) {
-                            <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-brand-primary/20 flex items-center justify-center text-[8px] sm:text-[10px] font-bold text-brand-primary border border-brand-primary/30" title="Assigned">
-                              {{ getAssigneeInitials(task.assigneeId) }}
+                          @if (task.assignee) {
+                            <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-brand-primary/20 flex items-center justify-center text-[8px] sm:text-[10px] font-bold text-brand-primary border border-brand-primary/30" [title]="task.assignee.firstName + ' ' + task.assignee.lastName">
+                              {{ task.assignee.firstName[0] }}{{ task.assignee.lastName[0] }}
+                            </div>
+                          } @else if (task.assigneeId) {
+                            <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white/5 flex items-center justify-center text-[8px] sm:text-[10px] font-bold text-brand-secondary border border-white/10" title="Assigned (ID)">
+                              ?
                             </div>
                           }
                         </div>
@@ -162,6 +166,29 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
 
                       @if (selectedTaskId === task.id) {
                         <div class="mt-4 pt-4 border-t border-white/10 space-y-4 cursor-default" (click)="$event.stopPropagation()">
+                          
+                          <!-- Checklist Section -->
+                          <div>
+                            <h5 class="text-[10px] uppercase font-black tracking-widest text-brand-secondary mb-3">Checklist</h5>
+                            <div class="space-y-2">
+                              @for (item of task.checklist; track $index) {
+                                <div class="flex items-center gap-3 group/item">
+                                  <input type="checkbox" [checked]="item.completed" (change)="toggleChecklistItem(task, $index)" class="w-3.5 h-3.5 rounded bg-black/50 border-white/10 accent-brand-primary cursor-pointer">
+                                  <span [class.line-through]="item.completed" [class.opacity-50]="item.completed" class="text-xs flex-1 transition-all">{{ item.text }}</span>
+                                  <button (click)="removeChecklistItem(task, $index)" class="opacity-0 group-hover/item:opacity-100 text-brand-secondary hover:text-red-400 transition-all">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                  </button>
+                                </div>
+                              }
+                              <div class="flex items-center gap-2 mt-3">
+                                <input #newItemInput (keyup.enter)="addChecklistItem(task, newItemInput.value); newItemInput.value = ''" type="text" placeholder="Add item..." class="flex-1 bg-white/5 border border-white/10 rounded-lg py-1.5 px-3 text-xs outline-none focus:border-brand-primary/50">
+                                <button (click)="addChecklistItem(task, newItemInput.value); newItemInput.value = ''" class="p-1.5 bg-brand-primary/10 text-brand-primary rounded-lg hover:bg-brand-primary/20">
+                                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
                           <app-file-upload [relatedEntityType]="'TASK'" [relatedEntityId]="task.id" (uploadSuccess)="onUploadSuccess($event)"></app-file-upload>
                           <app-task-comments [taskId]="task.id"></app-task-comments>
                         </div>
@@ -252,13 +279,13 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
     </div>
 
     @if (isModalOpen) {
-      <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in zoom-in duration-200 p-4">
-        <div class="glass-panel w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl border border-white/10">
+      <div class="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center animate-in fade-in zoom-in duration-300 p-2 sm:p-4">
+        <div class="glass-panel w-full max-w-lg p-4 sm:p-8 relative max-h-[95vh] overflow-y-auto custom-scrollbar shadow-2xl border border-white/10">
           <button (click)="closeCreateModal()" class="absolute top-6 right-6 text-brand-secondary hover:text-white transition-colors">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
           <div class="mb-6">
-            <h2 class="text-xl font-bold">{{ editingTaskId ? 'Edit Task' : 'New Task' }}</h2>
+            <h2 class="text-lg sm:text-2xl font-black italic uppercase tracking-tighter">{{ editingTaskId ? 'Update' : 'Generate' }} <span class="text-brand-primary">Task</span></h2>
           </div>
           <form [formGroup]="taskForm" (ngSubmit)="submitTask()" class="space-y-5">
             
@@ -307,22 +334,36 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
 
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-brand-secondary mb-1">Link Contact</label>
-                  <select formControlName="contactId" class="cursor-pointer w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 appearance-none">
-                    <option value="" class="bg-[#0a0a0a]">None</option>
-                    @for (c of contacts$ | async; track c.id) {
-                      <option [value]="c.id" class="bg-[#0a0a0a]">{{ c.fullName }}</option>
+                  <label class="block text-sm font-medium text-brand-secondary mb-1">Associate Contact</label>
+                  <div class="relative">
+                    <input [formControl]="contactSearchControl" type="text" placeholder="Search contacts..." 
+                           class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500/30 transition-all text-xs">
+                    @if (contactSearchResults$ | async; as results) {
+                      @if (results.length > 0 && showContactResults) {
+                        <div class="absolute top-full left-0 right-0 mt-1 glass-panel z-[60] border border-white/10 max-h-40 overflow-y-auto shadow-2xl">
+                          @for (c of results; track c.id) {
+                            <div (click)="selectContact(c)" class="p-2 hover:bg-white/10 cursor-pointer text-[10px] font-bold">{{ c.fullName }}</div>
+                          }
+                        </div>
+                      }
                     }
-                  </select>
+                  </div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-brand-secondary mb-1">Link Deal</label>
-                  <select formControlName="dealId" class="cursor-pointer w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 appearance-none">
-                    <option value="" class="bg-[#0a0a0a]">None</option>
-                    @for (d of deals$ | async; track d.id) {
-                      <option [value]="d.id" class="bg-[#0a0a0a]">{{ d.title }}</option>
+                  <label class="block text-sm font-medium text-brand-secondary mb-1">Associate Deal</label>
+                  <div class="relative">
+                    <input [formControl]="dealSearchControl" type="text" placeholder="Search deals..." 
+                           class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500/30 transition-all text-xs">
+                    @if (dealSearchResults$ | async; as results) {
+                      @if (results.length > 0 && showDealResults) {
+                        <div class="absolute top-full left-0 right-0 mt-1 glass-panel z-[60] border border-white/10 max-h-40 overflow-y-auto shadow-2xl">
+                          @for (d of results; track d.id) {
+                            <div (click)="selectDeal(d)" class="p-2 hover:bg-white/10 cursor-pointer text-[10px] font-bold">{{ d.title }}</div>
+                          }
+                        </div>
+                      }
                     }
-                  </select>
+                  </div>
                 </div>
               </div>
             </div>
@@ -369,6 +410,15 @@ export class TasksListComponent implements OnInit {
   
   // Bulk Actions State
   selectedTasks = new Set<string>();
+
+  // Search State
+  contactSearchControl = new FormControl('');
+  contactSearchResults$: Observable<any[]> = of([]);
+  showContactResults = false;
+  
+  dealSearchControl = new FormControl('');
+  dealSearchResults$: Observable<any[]> = of([]);
+  showDealResults = false;
 
   // Advanced Filtering Form
   advancedFilters: FormGroup = this.fb.group({
@@ -431,6 +481,51 @@ export class TasksListComponent implements OnInit {
       // Create fresh copies of objects to prevent CDK strictly modifying ReadOnly NgRx state arrays
       this.filteredTasks = [...filtered];
     });
+
+    // Search pipelines
+    this.contactSearchResults$ = this.contactSearchControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((q: string | null) => q && typeof q === 'string' && q.length >= 2 ? this.crmService.searchContacts(q) : of([])),
+      tap(() => this.showContactResults = true)
+    );
+
+    this.dealSearchResults$ = this.dealSearchControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((q: string | null) => q && typeof q === 'string' && q.length >= 2 ? this.crmService.searchDeals(q) : of([])),
+      tap(() => this.showDealResults = true)
+    );
+  }
+
+  selectContact(c: any) {
+    this.taskForm.patchValue({ contactId: c.id });
+    this.contactSearchControl.setValue(c.fullName, { emitEvent: false });
+    this.showContactResults = false;
+  }
+
+  selectDeal(d: any) {
+    this.taskForm.patchValue({ dealId: d.id });
+    this.dealSearchControl.setValue(d.title, { emitEvent: false });
+    this.showDealResults = false;
+  }
+
+  addChecklistItem(task: any, text: string) {
+    if (!text) return;
+    const checklist = [...(task.checklist || []), { text, completed: false }];
+    this.store.dispatch(TasksActions.updateTask({ id: task.id, task: { checklist } }));
+  }
+
+  toggleChecklistItem(task: any, index: number) {
+    const checklist = task.checklist.map((item: any, i: number) => 
+      i === index ? { ...item, completed: !item.completed } : item
+    );
+    this.store.dispatch(TasksActions.updateTask({ id: task.id, task: { checklist } }));
+  }
+
+  removeChecklistItem(task: any, index: number) {
+    const checklist = task.checklist.filter((_: any, i: number) => i !== index);
+    this.store.dispatch(TasksActions.updateTask({ id: task.id, task: { checklist } }));
   }
 
   // Kanban Helper
@@ -521,6 +616,8 @@ export class TasksListComponent implements OnInit {
       }
       this.editingTaskId = null;
       this.taskForm.reset({ priority: 'MEDIUM', status: 'TODO', assigneeId: '', contactId: '', dealId: '', dueDate: '' });
+      this.contactSearchControl.setValue('');
+      this.dealSearchControl.setValue('');
       this.isModalOpen = true; 
     });
   }
@@ -528,6 +625,8 @@ export class TasksListComponent implements OnInit {
     this.isModalOpen = false;
     this.editingTaskId = null;
     this.taskForm.reset({ priority: 'MEDIUM', status: 'TODO', assigneeId: '', contactId: '', dealId: '', dueDate: '' });
+    this.contactSearchControl.setValue('');
+    this.dealSearchControl.setValue('');
   }
 
   submitTask() {
@@ -581,6 +680,11 @@ export class TasksListComponent implements OnInit {
       dealId: task.dealId || '',
       dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : ''
     });
+    
+    // Set search control values for edit mode
+    if (task.contactId) this.contactSearchControl.setValue('Linked Contact', { emitEvent: false });
+    if (task.dealId) this.dealSearchControl.setValue('Linked Deal', { emitEvent: false });
+
     this.isModalOpen = true;
   }
 

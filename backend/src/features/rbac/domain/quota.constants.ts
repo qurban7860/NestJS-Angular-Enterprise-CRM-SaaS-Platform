@@ -21,6 +21,21 @@ export const QUOTA_MAP = {
     [SubscriptionPlan.PREMIUM]: Infinity,
     [SubscriptionPlan.ENTERPRISE]: Infinity,
   },
+  contacts: {
+    [SubscriptionPlan.FREE]: 50,
+    [SubscriptionPlan.PREMIUM]: 5000,
+    [SubscriptionPlan.ENTERPRISE]: Infinity,
+  },
+  deals: {
+    [SubscriptionPlan.FREE]: 10,
+    [SubscriptionPlan.PREMIUM]: 1000,
+    [SubscriptionPlan.ENTERPRISE]: Infinity,
+  },
+  tasks: {
+    [SubscriptionPlan.FREE]: 20,
+    [SubscriptionPlan.PREMIUM]: 2000,
+    [SubscriptionPlan.ENTERPRISE]: Infinity,
+  },
 } as const satisfies Record<string, Record<SubscriptionPlan, number>>;
 
 export type QuotaFeature = keyof typeof QUOTA_MAP;

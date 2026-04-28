@@ -63,6 +63,23 @@ export class PrismaCRMRepository implements ICRMRepository {
     return raws.map(raw => this.mapToContact(raw));
   }
 
+  async searchContacts(orgId: string, query: string): Promise<Contact[]> {
+    const raws = await this.prisma.contact.findMany({
+      where: {
+        orgId,
+        isDeleted: false,
+        OR: [
+          { firstName: { contains: query, mode: 'insensitive' } },
+          { lastName: { contains: query, mode: 'insensitive' } },
+          { email: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+      take: 20,
+      orderBy: { createdAt: 'desc' },
+    });
+    return raws.map(raw => this.mapToContact(raw));
+  }
+
   private mapToContact(raw: any): Contact {
     return Contact.create({
       firstName: raw.firstName,
@@ -151,6 +168,21 @@ export class PrismaCRMRepository implements ICRMRepository {
     return raws.map(raw => this.mapToDeal(raw));
   }
 
+  async searchDeals(orgId: string, query: string): Promise<Deal[]> {
+    const raws = await this.prisma.deal.findMany({
+      where: {
+        orgId,
+        isDeleted: false,
+        OR: [
+          { title: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+      take: 20,
+      orderBy: { updatedAt: 'desc' },
+    });
+    return raws.map(raw => this.mapToDeal(raw));
+  }
+
   private mapToDeal(raw: any): Deal {
     return Deal.create({
       title: raw.title,
@@ -162,6 +194,7 @@ export class PrismaCRMRepository implements ICRMRepository {
       contactId: raw.contactId,
       companyId: raw.companyId,
       expectedCloseDate: raw.expectedCloseDate || undefined,
+      probability: raw.probability ? Number(raw.probability) : undefined,
       closedAt: raw.closedAt || undefined,
       isDeleted: raw.isDeleted,
       createdAt: raw.createdAt,
@@ -180,6 +213,7 @@ export class PrismaCRMRepository implements ICRMRepository {
       contactId: deal.contactId ?? null,
       companyId: deal.companyId ?? null,
       expectedCloseDate: deal.expectedCloseDate ?? null,
+      probability: deal.probability ?? null,
       closedAt: deal.closedAt ?? null,
       isDeleted: deal.isDeleted,
     };

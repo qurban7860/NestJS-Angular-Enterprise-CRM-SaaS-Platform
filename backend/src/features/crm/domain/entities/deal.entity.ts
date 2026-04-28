@@ -14,6 +14,7 @@ interface DealProps {
   contactId?: string;
   companyId?: string;
   expectedCloseDate?: Date;
+  probability?: number;
   closedAt?: Date;
   isDeleted: boolean;
   createdAt?: Date;
@@ -34,6 +35,7 @@ export class Deal extends Entity<DealProps> {
   get contactId(): string | undefined { return this.props.contactId; }
   get companyId(): string | undefined { return this.props.companyId; }
   get expectedCloseDate(): Date | undefined { return this.props.expectedCloseDate; }
+  get probability(): number | undefined { return this.props.probability; }
   get closedAt(): Date | undefined { return this.props.closedAt; }
   get isDeleted(): boolean { return this.props.isDeleted; }
   get createdAt(): Date | undefined { return this.props.createdAt; }
@@ -67,6 +69,8 @@ export class Deal extends Entity<DealProps> {
     if (props.stage !== undefined) this.props.stage = props.stage;
     if (props.contactId !== undefined) this.props.contactId = props.contactId;
     if (props.companyId !== undefined) this.props.companyId = props.companyId;
+    if (props.expectedCloseDate !== undefined) this.props.expectedCloseDate = props.expectedCloseDate;
+    if (props.probability !== undefined) this.props.probability = props.probability;
 
     this.props.updatedAt = new Date();
   }

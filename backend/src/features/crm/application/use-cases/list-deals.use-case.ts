@@ -25,6 +25,8 @@ export class ListDealsUseCase implements UseCase<string, DealResponseDto[]> {
         ownerId: deal.ownerId,
         contactId: deal.contactId,
         companyId: deal.companyId,
+        expectedCloseDate: deal.expectedCloseDate,
+        probability: deal.probability,
         createdAt: deal.createdAt!,
       })),
     );

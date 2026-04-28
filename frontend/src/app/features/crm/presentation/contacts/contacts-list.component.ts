@@ -47,7 +47,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
       <!-- Add Contact Modal Overlay -->
       @if (isModalOpen) {
         <div
-          class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in zoom-in duration-200 p-4"
+          class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center animate-in fade-in zoom-in duration-200 p-4"
         >
           <div class="glass-panel w-full max-w-md p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
             <app-button
@@ -443,11 +443,9 @@ export class ContactsListComponent implements OnInit {
 
   editContact(contact: any) {
     this.editingContactId = contact.id;
-    // Basic split for demo purposes since fullName comes from backend 
-    const [firstName = '', lastName = ''] = (contact.fullName || '').split(' ');
     this.contactForm.patchValue({
-      firstName,
-      lastName,
+      firstName: contact.firstName,
+      lastName: contact.lastName,
       email: contact.email,
       phone: contact.phone || '',
       companyId: null

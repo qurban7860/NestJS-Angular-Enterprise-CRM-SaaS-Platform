@@ -38,6 +38,12 @@ export class ContactResponseDto {
   id!: string;
 
   @ApiProperty()
+  firstName!: string;
+
+  @ApiProperty()
+  lastName!: string;
+
+  @ApiProperty()
   fullName!: string;
 
   @ApiProperty()
@@ -45,6 +51,9 @@ export class ContactResponseDto {
 
   @ApiProperty({ enum: ['LEAD', 'QUALIFIED', 'CUSTOMER', 'CHURNED'] })
   status!: string;
+
+  @ApiProperty({ required: false })
+  phone?: string;
 }
 
 export class UpdateContactDto {

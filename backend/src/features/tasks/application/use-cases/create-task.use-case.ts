@@ -26,6 +26,7 @@ export class CreateTaskUseCase implements UseCase<CreateTaskDto, TaskResponseDto
       contactId: request.contactId,
       dealId: request.dealId,
       tags: [],
+      checklist: request.checklist || [],
       version: 0,
       isDeleted: false,
     });
@@ -52,6 +53,10 @@ export class CreateTaskUseCase implements UseCase<CreateTaskDto, TaskResponseDto
       title: task.title,
       status: task.status,
       priority: task.priority,
+      assigneeId: task.assigneeId,
+      contactId: task.contactId,
+      dealId: task.dealId,
+      checklist: task.checklist,
       createdAt: task.createdAt!,
     });
   }

@@ -9,6 +9,7 @@ import {
   Patch,
   Delete,
   Res,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -22,6 +23,7 @@ import { ListContactsUseCase } from '../../application/use-cases/list-contacts.u
 import { GetContactUseCase } from '../../application/use-cases/get-contact.use-case';
 import { UpdateContactUseCase } from '../../application/use-cases/update-contact.use-case';
 import { DeleteContactUseCase } from '../../application/use-cases/delete-contact.use-case';
+import { SearchContactsUseCase } from '../../application/use-cases/search-contacts.use-case';
 import {
   CreateContactDto,
   ContactResponseDto,
@@ -47,6 +49,7 @@ export class ContactsController {
     private readonly getContactUseCase: GetContactUseCase,
     private readonly updateContactUseCase: UpdateContactUseCase,
     private readonly deleteContactUseCase: DeleteContactUseCase,
+    private readonly searchContactsUseCase: SearchContactsUseCase,
     private readonly csvExportService: CsvExportService,
     private readonly limitsService: PlanLimitsService,
   ) {}
@@ -84,6 +87,21 @@ export class ContactsController {
   @ApiResponse({ status: 200, type: [ContactResponseDto] })
   async findAll(@CurrentUser() user: any) {
     const result = await this.listContactsUseCase.execute(user.orgId);
+    if (result.isFailure) {
+      throw new BusinessException(result.error!);
+    }
+    return result.getValue();
+  }
+
+  @Get('search')
+  @RequirePermissions('contacts:read')
+  @ApiOperation({ summary: 'Search contacts with query' })
+  @ApiResponse({ status: 200, type: [ContactResponseDto] })
+  async search(@Query('q') query: string, @CurrentUser() user: any) {
+    const result = await this.searchContactsUseCase.execute({
+      orgId: user.orgId,
+      query: query || '',
+    });
     if (result.isFailure) {
       throw new BusinessException(result.error!);
     }

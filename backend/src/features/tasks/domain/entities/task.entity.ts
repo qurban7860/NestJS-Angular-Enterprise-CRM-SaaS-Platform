@@ -18,6 +18,7 @@ interface TaskProps {
   contactId?: string | null;
   dealId?: string | null;
   tags: string[];
+  checklist: any[];
   isDeleted: boolean;
   version: number;
   createdAt?: Date;
@@ -41,6 +42,7 @@ export class Task extends Entity<TaskProps> {
   get contactId(): string | null | undefined { return this.props.contactId; }
   get dealId(): string | null | undefined { return this.props.dealId; }
   get tags(): string[] { return this.props.tags; }
+  get checklist(): any[] { return this.props.checklist; }
   get isDeleted(): boolean { return this.props.isDeleted; }
   get version(): number { return this.props.version; }
   get createdAt(): Date | undefined { return this.props.createdAt; }
@@ -54,6 +56,7 @@ export class Task extends Entity<TaskProps> {
       status: props.status ?? 'TODO',
       priority: props.priority ?? 'MEDIUM',
       tags: props.tags ?? [],
+      checklist: props.checklist ?? [],
       version: props.version ?? 0,
       isDeleted: props.isDeleted ?? false,
       createdAt: props.createdAt ?? new Date(),
@@ -86,6 +89,7 @@ export class Task extends Entity<TaskProps> {
     if (props.contactId !== undefined) this.props.contactId = props.contactId;
     if (props.dealId !== undefined) this.props.dealId = props.dealId;
     if (props.tags !== undefined) this.props.tags = props.tags;
+    if (props.checklist !== undefined) this.props.checklist = props.checklist;
     
     this.props.updatedAt = new Date();
   }

@@ -23,9 +23,12 @@ export class GetContactUseCase {
 
     const dto = new ContactResponseDto();
     dto.id = contact.id;
-    dto.fullName = `${contact.firstName} ${contact.lastName}`;
+    dto.firstName = contact.firstName;
+    dto.lastName = contact.lastName;
+    dto.fullName = contact.fullName;
     dto.email = contact.email;
     dto.status = contact.status;
+    dto.phone = contact.phone ?? undefined;
 
     return Result.ok(dto);
   }

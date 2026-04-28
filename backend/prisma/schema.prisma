@@ -261,6 +261,7 @@ model Deal {
   contactId         String?
   ownerId           String
   expectedCloseDate DateTime?
+  probability       Decimal?  @db.Decimal(5, 2) @default(0)
   closedAt          DateTime?
   isDeleted         Boolean   @default(false)
   createdAt         DateTime  @default(now())
@@ -300,6 +301,7 @@ model Task {
   tags             String[]
   version          Int          @default(0)
   isDeleted        Boolean      @default(false)
+  checklist        Json?        @default("[]")
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 

@@ -21,6 +21,8 @@ export class CreateDealUseCase implements UseCase<CreateDealDto, DealResponseDto
       companyId: request.companyId,
       ownerId: request.ownerId!,
       orgId: request.orgId!,
+      expectedCloseDate: request.expectedCloseDate,
+      probability: request.probability,
       isDeleted: false,
     });
 
@@ -41,6 +43,8 @@ export class CreateDealUseCase implements UseCase<CreateDealDto, DealResponseDto
       ownerId: deal.ownerId,
       contactId: deal.contactId,
       companyId: deal.companyId,
+      expectedCloseDate: deal.expectedCloseDate,
+      probability: deal.probability,
       createdAt: deal.createdAt!,
     });
   }
