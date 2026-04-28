@@ -57,6 +57,30 @@ export class PremiumEffects {
     )
   );
 
+  updateRole$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(PremiumActions.updateCustomRole),
+      mergeMap(({ id, role }) =>
+        this.premiumService.updateCustomRole(id, role).pipe(
+          map((updatedRole) => PremiumActions.updateCustomRoleSuccess({ role: updatedRole })),
+          catchError((error) => of(PremiumActions.updateCustomRoleFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
+  deleteRole$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(PremiumActions.deleteCustomRole),
+      mergeMap(({ id }) =>
+        this.premiumService.deleteCustomRole(id).pipe(
+          map(() => PremiumActions.deleteCustomRoleSuccess({ id })),
+          catchError((error) => of(PremiumActions.deleteCustomRoleFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
   createWorkflow$ = createEffect(() =>
     this.actions$.pipe(
       ofType(PremiumActions.createWorkflow),
@@ -69,6 +93,30 @@ export class PremiumEffects {
     )
   );
 
+  toggleWorkflow$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(PremiumActions.toggleWorkflow),
+      mergeMap(({ id, isActive }) =>
+        this.premiumService.toggleWorkflow(id, isActive).pipe(
+          map((updatedWorkflow) => PremiumActions.toggleWorkflowSuccess({ workflow: updatedWorkflow })),
+          catchError((error) => of(PremiumActions.toggleWorkflowFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
+  deleteWorkflow$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(PremiumActions.deleteWorkflow),
+      mergeMap(({ id }) =>
+        this.premiumService.deleteWorkflow(id).pipe(
+          map(() => PremiumActions.deleteWorkflowSuccess({ id })),
+          catchError((error) => of(PremiumActions.deleteWorkflowFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
   createReport$ = createEffect(() =>
     this.actions$.pipe(
       ofType(PremiumActions.createReport),
@@ -76,6 +124,18 @@ export class PremiumEffects {
         this.premiumService.createReport(report).pipe(
           map((newReport) => PremiumActions.createReportSuccess({ report: newReport })),
           catchError((error) => of(PremiumActions.createReportFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
+  deleteReport$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(PremiumActions.deleteReport),
+      mergeMap(({ id }) =>
+        this.premiumService.deleteReport(id).pipe(
+          map(() => PremiumActions.deleteReportSuccess({ id })),
+          catchError((error) => of(PremiumActions.deleteReportFailure({ error: error.message })))
         )
       )
     )

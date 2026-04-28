@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { Controller, Get, Post, Body, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, BadRequestException, Patch, Param, Delete, HttpCode, HttpStatus } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -8,6 +7,8 @@ import {
 } from '@nestjs/swagger';
 import { ListUsersUseCase } from '../../application/use-cases/list-users.use-case';
 import { CreateUserUseCase } from '../../application/use-cases/create-user.use-case';
+import { UpdateUserUseCase } from '../../application/use-cases/update-user.use-case';
+import { DeleteUserUseCase } from '../../application/use-cases/delete-user.use-case';
 import { UserResponseDto } from '../../application/dtos/auth.dto';
 import { CurrentUser } from '../../../../core/presentation/decorators/current-user.decorator';
 
@@ -17,7 +18,9 @@ import { CurrentUser } from '../../../../core/presentation/decorators/current-us
 export class UsersController {
   constructor(
     private readonly listUsersUseCase: ListUsersUseCase,
-    private readonly createUserUseCase: CreateUserUseCase
+    private readonly createUserUseCase: CreateUserUseCase,
+    private readonly updateUserUseCase: UpdateUserUseCase,
+    private readonly deleteUserUseCase: DeleteUserUseCase,
   ) {}
 
   @Get()
@@ -26,8 +29,7 @@ export class UsersController {
   async findAll(@CurrentUser() user: { orgId: string }) {
     const result = await this.listUsersUseCase.execute(user.orgId);
     if (result.isFailure) {
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
-      throw result.error;
+      throw new BadRequestException(result.error);
     }
     return result.getValue();
   }
@@ -41,5 +43,38 @@ export class UsersController {
        throw new BadRequestException(result.error);
     }
     return result.getValue();
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update a team member' })
+  @ApiResponse({ status: 200, type: UserResponseDto })
+  async update(
+    @CurrentUser() user: { orgId: string },
+    @Param('id') userId: string,
+    @Body() dto: any
+  ) {
+    const result = await this.updateUserUseCase.execute({ 
+      ...dto, 
+      userId, 
+      orgId: user.orgId 
+    });
+    if (result.isFailure) {
+      throw new BadRequestException(result.error);
+    }
+    return result.getValue();
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Remove a team member' })
+  @ApiResponse({ status: 204 })
+  async remove(
+    @CurrentUser() user: { orgId: string },
+    @Param('id') userId: string
+  ) {
+    const result = await this.deleteUserUseCase.execute({ userId, orgId: user.orgId });
+    if (result.isFailure) {
+      throw new BadRequestException(result.error);
+    }
   }
 }

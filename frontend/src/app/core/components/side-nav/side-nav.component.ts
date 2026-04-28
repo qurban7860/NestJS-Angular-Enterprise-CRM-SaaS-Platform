@@ -60,7 +60,7 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
             >Astraeus <span class="text-brand-primary">CRM</span></span
           >
         </div>
-        @if (user$ | async; as user) {
+        <!-- @if (user$ | async; as user) {
           @if (user.orgName) {
             <div
               class="mt-4 px-3 py-1.5 rounded-lg bg-brand-primary/10 border border-brand-primary/20 flex items-center gap-2"
@@ -80,7 +80,7 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
               >
             </div>
           }
-        }
+        } -->
       </div>
 
       <nav class="flex-1 px-4 py-4 space-y-6 overflow-y-auto">

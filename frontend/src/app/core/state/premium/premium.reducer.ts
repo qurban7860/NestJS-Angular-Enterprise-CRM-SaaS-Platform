@@ -37,17 +37,47 @@ export const premiumReducer = createReducer(
     roles: [...state.roles, role],
     loading: false 
   })),
+
+  on(PremiumActions.updateCustomRoleSuccess, (state, { role }) => ({
+    ...state,
+    roles: state.roles.map(r => r.id === role.id ? role : r),
+    loading: false
+  })),
+
+  on(PremiumActions.deleteCustomRoleSuccess, (state, { id }) => ({
+    ...state,
+    roles: state.roles.filter(r => r.id !== id),
+    loading: false
+  })),
   
   on(PremiumActions.createWorkflowSuccess, (state, { workflow }) => ({ 
     ...state, 
     workflows: [...state.workflows, workflow],
     loading: false 
   })),
+
+  on(PremiumActions.toggleWorkflowSuccess, (state, { workflow }) => ({
+    ...state,
+    workflows: state.workflows.map(w => w.id === workflow.id ? workflow : w),
+    loading: false
+  })),
+
+  on(PremiumActions.deleteWorkflowSuccess, (state, { id }) => ({
+    ...state,
+    workflows: state.workflows.filter(w => w.id !== id),
+    loading: false
+  })),
   
   on(PremiumActions.createReportSuccess, (state, { report }) => ({ 
     ...state, 
     reports: [...state.reports, report],
     loading: false 
+  })),
+
+  on(PremiumActions.deleteReportSuccess, (state, { id }) => ({
+    ...state,
+    reports: state.reports.filter(r => r.id !== id),
+    loading: false
   })),
 
   on(PremiumActions.quotaExceeded, (state, { payload }) => ({

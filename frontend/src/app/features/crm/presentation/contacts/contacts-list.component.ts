@@ -13,7 +13,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { map, startWith, combineLatest } from 'rxjs';
-import { ButtonComponent } from '../../../tasks/presentation/button.component';
+import { ButtonComponent } from '../../../../core/components/button/button.component';
 import { ConfirmModalComponent } from '../../../../core/components/confirm-modal/confirm-modal.component';
 import { SubscriptionService } from '../../../../core/services/subscription.service';
 import { selectStats } from '../../../../core/state/dashboard/dashboard.reducer';

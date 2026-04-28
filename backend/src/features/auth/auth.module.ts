@@ -7,6 +7,8 @@ import { RegisterUseCase } from './application/use-cases/register.use-case';
 import { LoginUseCase } from './application/use-cases/login.use-case';
 import { ListUsersUseCase } from './application/use-cases/list-users.use-case';
 import { CreateUserUseCase } from './application/use-cases/create-user.use-case';
+import { UpdateUserUseCase } from './application/use-cases/update-user.use-case';
+import { DeleteUserUseCase } from './application/use-cases/delete-user.use-case';
 import { PrismaUserRepository } from './infrastructure/repositories/prisma-user.repository';
 import { Argon2HasherService } from './infrastructure/services/argon2-hasher.service';
 import { JwtWrapperService } from './infrastructure/services/jwt-wrapper.service';
@@ -34,6 +36,8 @@ import { CrmModule } from '../crm/crm.module';
     LoginUseCase,
     ListUsersUseCase,
     CreateUserUseCase,
+    UpdateUserUseCase,
+    DeleteUserUseCase,
 
     // Strategies
     JwtStrategy,
