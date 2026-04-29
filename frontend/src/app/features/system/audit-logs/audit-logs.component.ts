@@ -31,7 +31,7 @@ import { AuditLogService, AuditLogEntry, AuditLogPage } from '../../../core/serv
             Showing <span class="text-white font-bold">{{ pageData()!.data.length }}</span>
             of <span class="text-white font-bold">{{ pageData()!.total }}</span> events
           </span>
-          <div class="flex items-center gap-2 w-full sm:w-auto justify-center">
+          <div class="flex items-center gap-2 justify-center">
             <button
               (click)="loadPage(currentPage() - 1)"
               [disabled]="currentPage() === 1"

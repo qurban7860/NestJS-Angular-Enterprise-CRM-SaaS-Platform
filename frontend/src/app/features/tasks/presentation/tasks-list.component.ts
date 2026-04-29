@@ -76,7 +76,7 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
           </select>
           
           @if (hasActiveFilters) {
-            <button (click)="clearFilters()" class="text-xs text-brand-secondary hover:text-white transition-colors w-full sm:w-auto text-center py-2 sm:py-0">Clear All</button>
+            <button (click)="clearFilters()" class="text-xs text-brand-secondary hover:text-white transition-colors text-center py-2 sm:py-0">Clear All</button>
           }
         </div>
       </div>

@@ -48,16 +48,16 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m3.243-9.757a4 4 0 015.657 5.657M10 21h4" /></svg>
                 </div>
                 <div class="flex gap-2">
-                  <button (click)="executeReport(report)" class="p-2 text-brand-secondary hover:text-amber-400 transition-colors bg-white/5 rounded-lg" title="Run Report">
+                  <button [disabled]="isSubmitting()" (click)="executeReport(report)" class="p-2 text-brand-secondary hover:text-amber-400 transition-colors bg-white/5 rounded-lg disabled:opacity-50" title="Run Report">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   </button>
-                  <button *hasPermission="'reports:delete'" (click)="deleteReport(report)" class="p-2 text-brand-secondary hover:text-red-400 transition-colors bg-white/5 rounded-lg" title="Delete Report">
+                  <button *hasPermission="'reports:delete'" [disabled]="isSubmitting()" (click)="deleteReport(report)" class="p-2 text-brand-secondary hover:text-red-400 transition-colors bg-white/5 rounded-lg disabled:opacity-50" title="Delete Report">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                   </button>
                 </div>
               </div>
               <h3 class="text-lg font-bold text-white mb-1">{{ report.name }}</h3>
-              <p class="text-[10px] text-brand-secondary uppercase tracking-widest font-bold mb-4">{{ report.type }} Report</p>
+              <p class="text-[10px] text-brand-secondary uppercase tracking-widest font-bold mb-4">{{ report.config?.type || 'UNKNOWN' }} Report</p>
               
               <div class="space-y-3 pt-4 border-t border-white/5">
                 <div class="flex justify-between items-center text-xs">
@@ -66,7 +66,7 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
                 </div>
                 <div class="flex justify-between items-center text-xs">
                   <span class="text-brand-secondary">Format:</span>
-                  <span class="text-amber-400 font-bold">{{ report.format }}</span>
+                  <span class="text-amber-400 font-bold">{{ report.config?.format || 'PDF' }}</span>
                 </div>
               </div>
             </div>
@@ -127,8 +127,8 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
               </div>
 
               <div class="pt-6 flex gap-3 border-t border-white/5">
-                <app-button type="button" variant="secondary" (clicked)="isModalOpen.set(false)" customClass="flex-1 py-3 justify-center">Cancel</app-button>
-                <app-button type="submit" [disabled]="reportForm.invalid" variant="premium" customClass="!bg-amber-500 !text-black !border-none flex-1 py-3 justify-center font-bold">
+                <app-button type="button" variant="secondary" [disabled]="isSubmitting()" (clicked)="isModalOpen.set(false)" customClass="flex-1 py-3 justify-center">Cancel</app-button>
+                <app-button type="submit" [disabled]="reportForm.invalid || isSubmitting()" [loading]="isSubmitting()" variant="premium" customClass="!bg-amber-500 !text-black !border-none flex-1 py-3 justify-center font-bold">
                    Build Report
                 </app-button>
               </div>
@@ -142,6 +142,7 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
           title="Delete Report"
           [message]="'Are you sure you want to delete ' + selectedReport()?.name + '? This will permanently remove all historical snapshots of this report.'"
           confirmText="Delete Report"
+          [loading]="isSubmitting()"
           (confirm)="confirmDelete()"
           (cancel)="isConfirmDeleteOpen.set(false)"
         ></app-confirm-modal>
@@ -162,10 +163,12 @@ export class ReportsComponent implements OnInit {
 
   isModalOpen = signal(false);
   isConfirmDeleteOpen = signal(false);
+  isSubmitting = signal(false);
   selectedReport = signal<any>(null);
 
   reportForm: FormGroup = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
+    description: [''],
     type: ['SALES', Validators.required],
     format: ['PDF', Validators.required],
     range: ['LAST_30_DAYS', Validators.required]
@@ -181,18 +184,24 @@ export class ReportsComponent implements OnInit {
 
   submitReport() {
     if (this.reportForm.valid) {
-      const { name, ...config } = this.reportForm.value;
+      const { name, description, ...config } = this.reportForm.value;
+      this.isSubmitting.set(true);
       this.store.dispatch(PremiumActions.createReport({ 
-        report: { name, config } 
+        report: { name, description, config } 
       }));
-      this.isModalOpen.set(false);
-      this.reportForm.reset({ type: 'SALES', format: 'PDF', range: 'LAST_30_DAYS' });
-      this.store.dispatch(ToastActions.showToast({ message: 'Report build job started', toastType: 'success' }));
+      
+      setTimeout(() => {
+        this.isModalOpen.set(false);
+        this.isSubmitting.set(false);
+        this.reportForm.reset({ type: 'SALES', format: 'PDF', range: 'LAST_30_DAYS' });
+        this.store.dispatch(ToastActions.showToast({ message: 'Report build job started', toastType: 'success' }));
+      }, 500);
     }
   }
 
   executeReport(report: any) {
-    this.store.dispatch(ToastActions.showToast({ message: `Generating ${report.name} (${report.format})...`, toastType: 'info' }));
+    this.isSubmitting.set(true);
+    this.store.dispatch(ToastActions.showToast({ message: `Generating ${report.name} (${report.config?.format || 'PDF'})...`, toastType: 'info' }));
     
     this.premiumService.runReport(report.id).pipe(take(1)).subscribe({
       next: (result) => {
@@ -202,9 +211,11 @@ export class ReportsComponent implements OnInit {
           window.open(result.url, '_blank');
         }
         this.store.dispatch(PremiumActions.loadReports());
+        this.isSubmitting.set(false);
       },
       error: (err) => {
         this.store.dispatch(ToastActions.showToast({ message: 'Failed to generate report', toastType: 'error' }));
+        this.isSubmitting.set(false);
       }
     });
   }
@@ -217,9 +228,13 @@ export class ReportsComponent implements OnInit {
   confirmDelete() {
     const report = this.selectedReport();
     if (report) {
+      this.isSubmitting.set(true);
       this.store.dispatch(PremiumActions.deleteReport({ id: report.id }));
-      this.isConfirmDeleteOpen.set(false);
-      this.store.dispatch(ToastActions.showToast({ message: 'Report deleted successfully', toastType: 'success' }));
+      setTimeout(() => {
+        this.isConfirmDeleteOpen.set(false);
+        this.isSubmitting.set(false);
+        this.store.dispatch(ToastActions.showToast({ message: 'Report deleted successfully', toastType: 'success' }));
+      }, 500);
     }
   }
 }

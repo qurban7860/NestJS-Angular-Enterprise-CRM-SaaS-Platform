@@ -25,7 +25,7 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
           <h1 class="text-3xl font-extrabold tracking-tight">Identity <span class="bg-gradient-premium bg-clip-text text-transparent italic">Manager</span></h1>
           <p class="text-brand-secondary mt-2 max-w-xl">Configure granular permissions and custom access levels for your organization.</p>
         </div>
-        <app-button variant="premium" (clicked)="openCreateModal()" customClass="relative z-10 w-full sm:w-auto justify-center py-3 px-6">
+        <app-button variant="premium" (clicked)="openCreateModal()" customClass="relative z-10 justify-center py-3 px-6">
           <span class="flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             New Role
@@ -66,13 +66,13 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
                   </div>
                 </div>
                 <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button (click)="openAssignModal(role)" class="p-2 text-brand-secondary hover:text-emerald-400 transition-colors" title="Assign Role">
+                  <button (click)="openAssignModal(role)" [disabled]="isSubmitting()" class="p-2 text-brand-secondary hover:text-emerald-400 transition-colors disabled:opacity-50" title="Assign Role">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
                   </button>
-                  <button (click)="editRole(role)" class="p-2 text-brand-secondary hover:text-white transition-colors" title="Edit Role">
+                  <button (click)="editRole(role)" [disabled]="isSubmitting()" class="p-2 text-brand-secondary hover:text-white transition-colors disabled:opacity-50" title="Edit Role">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                   </button>
-                  <button (click)="deleteRole(role)" class="p-2 text-brand-secondary hover:text-red-400 transition-colors" title="Delete Role">
+                  <button (click)="deleteRole(role)" [disabled]="isSubmitting()" class="p-2 text-brand-secondary hover:text-red-400 transition-colors disabled:opacity-50" title="Delete Role">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                   </button>
                 </div>
@@ -185,8 +185,8 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
               </div>
 
               <div class="pt-6 flex gap-3">
-                <app-button type="button" variant="secondary" (clicked)="closeModal()" customClass="flex-1 py-3 justify-center">Cancel</app-button>
-                <app-button type="submit" [disabled]="roleForm.invalid" variant="premium" customClass="flex-1 py-3 justify-center">
+                <app-button type="button" variant="secondary" (clicked)="closeModal()" [disabled]="isSubmitting()" customClass="flex-1 py-3 justify-center">Cancel</app-button>
+                <app-button type="submit" [disabled]="roleForm.invalid || isSubmitting()" [loading]="isSubmitting()" variant="premium" customClass="flex-1 py-3 justify-center">
                   {{ editingRole() ? 'Update' : 'Create' }} Role
                 </app-button>
               </div>
@@ -217,8 +217,13 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
               </div>
 
               <div class="pt-6 flex gap-3">
-                <button (click)="isAssignModalOpen.set(false)" class="flex-1 px-4 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-sm transition-all">Cancel</button>
-                <button (click)="submitAssignment(uidSelect.value)" class="premium-button flex-1 py-2.5">Confirm Assignment</button>
+                <button [disabled]="isSubmitting()" (click)="isAssignModalOpen.set(false)" class="flex-1 px-4 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-sm transition-all whitespace-nowrap disabled:opacity-50">Cancel</button>
+                <button [disabled]="isSubmitting()" (click)="submitAssignment(uidSelect.value)" class="premium-button flex-1 py-2.5 whitespace-nowrap relative">
+                  <span class="flex items-center justify-center gap-2" [class.opacity-0]="isSubmitting()">Confirm Assignment</span>
+                  <div *ngIf="isSubmitting()" class="absolute inset-0 flex items-center justify-center">
+                    <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  </div>
+                </button>
               </div>
             </div>
           </div>
@@ -230,6 +235,7 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
           title="Delete Role"
           [message]="'Are you sure you want to delete the role ' + selectedRole()?.name + '? This action cannot be undone.'"
           confirmText="Delete Role"
+          [loading]="isSubmitting()"
           (confirm)="confirmDelete()"
           (cancel)="isConfirmDeleteOpen.set(false)"
         ></app-confirm-modal>
@@ -254,6 +260,7 @@ export class RolesComponent implements OnInit {
   isConfirmDeleteOpen = signal(false);
   selectedRole = signal<any>(null);
   editingRole = signal<any>(null);
+  isSubmitting = signal(false);
   orgUsers = signal<any[]>([]);
   loadingUsers = signal(false);
   
@@ -315,9 +322,13 @@ export class RolesComponent implements OnInit {
   confirmDelete() {
     const role = this.selectedRole();
     if (role) {
+      this.isSubmitting.set(true);
       this.store.dispatch(PremiumActions.deleteCustomRole({ id: role.id }));
-      this.isConfirmDeleteOpen.set(false);
-      this.store.dispatch(ToastActions.showToast({ message: 'Role deleted successfully', toastType: 'success' }));
+      setTimeout(() => {
+        this.isConfirmDeleteOpen.set(false);
+        this.isSubmitting.set(false);
+        this.store.dispatch(ToastActions.showToast({ message: 'Role deleted successfully', toastType: 'success' }));
+      }, 500);
     }
   }
 
@@ -360,6 +371,7 @@ export class RolesComponent implements OnInit {
 
   submitRole() {
     if (this.roleForm.valid) {
+      this.isSubmitting.set(true);
       if (this.editingRole()) {
         this.store.dispatch(PremiumActions.updateCustomRole({ 
           id: this.editingRole().id, 
@@ -370,7 +382,10 @@ export class RolesComponent implements OnInit {
         this.store.dispatch(PremiumActions.createCustomRole({ role: this.roleForm.value }));
         this.store.dispatch(ToastActions.showToast({ message: 'Custom role created successfully', toastType: 'success' }));
       }
-      this.closeModal();
+      setTimeout(() => {
+        this.closeModal();
+        this.isSubmitting.set(false);
+      }, 500);
     }
   }
 
@@ -393,11 +408,15 @@ export class RolesComponent implements OnInit {
 
   submitAssignment(userId: string) {
     if (!userId) return;
+    this.isSubmitting.set(true);
     this.store.dispatch(PremiumActions.assignRole({ 
       roleId: this.selectedRole().id, 
       userId 
     }));
-    this.isAssignModalOpen.set(false);
-    this.store.dispatch(ToastActions.showToast({ message: 'Role assignment successful', toastType: 'success' }));
+    setTimeout(() => {
+      this.isAssignModalOpen.set(false);
+      this.isSubmitting.set(false);
+      this.store.dispatch(ToastActions.showToast({ message: 'Role assignment successful', toastType: 'success' }));
+    }, 500);
   }
 }

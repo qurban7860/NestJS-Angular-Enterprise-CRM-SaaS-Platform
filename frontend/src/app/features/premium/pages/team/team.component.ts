@@ -22,7 +22,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
           <h1 class="text-3xl font-extrabold tracking-tight">Team <span class="bg-gradient-premium bg-clip-text text-transparent italic pr-2">Management</span></h1>
           <p class="text-brand-secondary mt-2 max-w-xl">Scale your organization by adding team members, assigning custom roles, and managing permissions.</p>
         </div>
-        <app-button variant="premium" (clicked)="openAddModal()" customClass="z-10 w-full sm:w-auto justify-center">
+        <app-button variant="premium" (clicked)="openAddModal()" customClass="z-10 justify-center">
           <span class="flex items-center">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
             <span class="line-clamp-1 ml-1 md:block hidden">Add Member</span>
@@ -45,10 +45,10 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
                 </div>
               </div>
               <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button *hasPermission="'team:write'" (click)="editMember(member)" class="p-2 text-brand-secondary hover:text-white transition-colors rounded-lg hover:bg-white/5" title="Edit Member">
+                <button *hasPermission="'team:write'" (click)="editMember(member)" [disabled]="isSubmitting()" class="p-2 text-brand-secondary hover:text-white transition-colors rounded-lg hover:bg-white/5 disabled:opacity-50" title="Edit Member">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                 </button>
-                <button *hasPermission="'team:write'" (click)="deleteMember(member)" class="p-2 text-brand-secondary hover:text-red-400 transition-colors rounded-lg hover:bg-white/5" title="Remove Member">
+                <button *hasPermission="'team:write'" (click)="deleteMember(member)" [disabled]="isSubmitting()" class="p-2 text-brand-secondary hover:text-red-400 transition-colors rounded-lg hover:bg-white/5 disabled:opacity-50" title="Remove Member">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 </button>
               </div>
@@ -73,7 +73,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
             </div>
             
             <div class="mt-6 flex gap-2">
-               <app-button variant="ghost" customClass="w-full text-[11px] font-bold uppercase tracking-wider py-2" (clicked)="toggleStatus(member)">
+               <app-button variant="ghost" customClass="w-full text-[11px] font-bold uppercase tracking-wider py-2" [disabled]="isSubmitting()" (clicked)="toggleStatus(member)">
                  {{ member.isActive ? 'Deactivate' : 'Activate' }}
                </app-button>
             </div>
@@ -147,8 +147,8 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
               </div>
 
               <div class="pt-6 flex gap-3">
-                <app-button type="button" variant="secondary" (clicked)="isModalOpen.set(false)" customClass="flex-1 py-3 justify-center">Cancel</app-button>
-                <app-button type="submit" [disabled]="userForm.invalid" variant="premium" customClass="flex-1 py-3 justify-center">
+                <app-button type="button" variant="secondary" (clicked)="isModalOpen.set(false)" [disabled]="isSubmitting()" customClass="flex-1 py-3 justify-center">Cancel</app-button>
+                <app-button type="submit" [disabled]="userForm.invalid || isSubmitting()" [loading]="isSubmitting()" variant="premium" customClass="flex-1 py-3 justify-center">
                   {{ editingMember() ? 'Update' : 'Add' }} Member
                 </app-button>
               </div>
@@ -162,6 +162,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
           title="Remove Member"
           [message]="'Are you sure you want to remove ' + selectedMember()?.firstName + ' ' + selectedMember()?.lastName + ' from the organization? This will revoke all access immediately.'"
           confirmText="Remove Member"
+          [loading]="isSubmitting()"
           (confirm)="confirmDelete()"
           (cancel)="isConfirmDeleteOpen.set(false)"
         ></app-confirm-modal>
@@ -179,6 +180,7 @@ export class TeamManagementComponent implements OnInit {
   customRoles = signal<any[]>([]);
   isModalOpen = signal(false);
   isConfirmDeleteOpen = signal(false);
+  isSubmitting = signal(false);
   selectedMember = signal<any>(null);
   editingMember = signal<any>(null);
   currentUser = this.store.selectSignal(selectUser);
@@ -244,33 +246,40 @@ export class TeamManagementComponent implements OnInit {
   confirmDelete() {
     const member = this.selectedMember();
     if (member) {
+      this.isSubmitting.set(true);
       this.premiumService.removeTeamMember(member.id).pipe(take(1)).subscribe({
         next: () => {
           this.store.dispatch(ToastActions.showToast({ message: 'Team member removed', toastType: 'success' }));
           this.isConfirmDeleteOpen.set(false);
+          this.isSubmitting.set(false);
           this.refreshData();
         },
         error: (err) => {
           this.store.dispatch(ToastActions.showToast({ message: err.error?.message || 'Failed to remove member', toastType: 'error' }));
+          this.isSubmitting.set(false);
         }
       });
     }
   }
 
   toggleStatus(member: any) {
+    this.isSubmitting.set(true);
     this.premiumService.updateTeamMember(member.id, { isActive: !member.isActive }).pipe(take(1)).subscribe({
       next: () => {
         this.store.dispatch(ToastActions.showToast({ 
           message: `Member ${member.isActive ? 'deactivated' : 'activated'}`, 
           toastType: 'success' 
         }));
+        this.isSubmitting.set(false);
         this.refreshData();
-      }
+      },
+      error: () => this.isSubmitting.set(false)
     });
   }
 
   submitUser() {
     if (this.userForm.valid) {
+      this.isSubmitting.set(true);
       const data = this.userForm.value;
       const obs = this.editingMember() 
         ? this.premiumService.updateTeamMember(this.editingMember().id, data)
@@ -283,10 +292,12 @@ export class TeamManagementComponent implements OnInit {
             toastType: 'success' 
           }));
           this.isModalOpen.set(false);
+          this.isSubmitting.set(false);
           this.refreshData();
         },
         error: (err) => {
           this.store.dispatch(ToastActions.showToast({ message: err.error?.message || 'Operation failed', toastType: 'error' }));
+          this.isSubmitting.set(false);
         }
       });
     }

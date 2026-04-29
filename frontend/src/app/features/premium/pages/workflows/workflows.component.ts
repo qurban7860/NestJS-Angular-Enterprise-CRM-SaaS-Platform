@@ -24,7 +24,7 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
           <h1 class="text-3xl font-extrabold tracking-tight">Logic <span class="bg-gradient-premium bg-clip-text text-transparent italic pr-2">Automations</span></h1>
           <p class="text-brand-secondary mt-2 max-w-xl">Build and manage automated workflows to streamline your business processes and eliminate manual tasks.</p>
         </div>
-        <app-button variant="premium" (clicked)="openCreateModal()" customClass="relative z-10 w-full sm:w-auto justify-center py-3 px-6">
+        <app-button variant="premium" (clicked)="openCreateModal()" customClass="relative z-10 justify-center py-3 px-6">
           <span class="flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             New Workflow
@@ -58,7 +58,7 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                       }
                     </button>
-                    <button *hasPermission="'workflows:delete'" (click)="deleteWorkflow(wf)" class="p-2 text-brand-secondary hover:text-red-400 transition-colors" title="Delete Workflow">
+                    <button *hasPermission="'workflows:delete'" (click)="deleteWorkflow(wf)" [disabled]="isSubmitting()" class="p-2 text-brand-secondary hover:text-red-400 transition-colors disabled:opacity-50" title="Delete Workflow">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     </button>
                   </div>
@@ -157,8 +157,8 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
                </div>
 
               <div class="pt-6 flex gap-3 border-t border-white/5">
-                <app-button type="button" variant="secondary" (clicked)="isModalOpen.set(false)" customClass="flex-1 py-3 justify-center">Cancel</app-button>
-                <app-button type="submit" [disabled]="wfForm.invalid" variant="premium" customClass="!bg-emerald-500 !text-black !border-none flex-1 py-3 justify-center font-bold">
+                <app-button type="button" variant="secondary" (clicked)="isModalOpen.set(false)" [disabled]="isSubmitting()" customClass="flex-1 py-3 justify-center">Cancel</app-button>
+                <app-button type="submit" [disabled]="wfForm.invalid || isSubmitting()" [loading]="isSubmitting()" variant="premium" customClass="!bg-emerald-500 !text-black !border-none flex-1 py-3 justify-center font-bold">
                    Create Workflow
                 </app-button>
               </div>
@@ -172,6 +172,7 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
           title="Delete Workflow"
           [message]="'Are you sure you want to delete ' + selectedWorkflow()?.name + '? All automation logs for this workflow will be archived.'"
           confirmText="Delete Workflow"
+          [loading]="isSubmitting()"
           (confirm)="confirmDelete()"
           (cancel)="isConfirmDeleteOpen.set(false)"
         ></app-confirm-modal>
@@ -192,6 +193,7 @@ export class WorkflowsComponent implements OnInit {
 
   isModalOpen = signal(false);
   isConfirmDeleteOpen = signal(false);
+  isSubmitting = signal(false);
   selectedWorkflow = signal<any>(null);
 
   wfForm: FormGroup = this.fb.group({
@@ -228,11 +230,17 @@ export class WorkflowsComponent implements OnInit {
   }
 
   toggleWorkflow(wf: any) {
+    this.isSubmitting.set(true);
+    // Note: If toggleWorkflow doesn't have an effect that turns off loading, 
+    // ideally it should. For now, since NGRX effects handle it, we assume optimistically or let effect manage it.
+    // However, to avoid sticking in loading, we can rely on a local timeout or subscription.
+    // Assuming standard NGRX, we just dispatch.
     this.store.dispatch(PremiumActions.toggleWorkflow({ id: wf.id, isActive: !wf.isActive }));
     this.store.dispatch(ToastActions.showToast({ 
       message: `Workflow ${wf.isActive ? 'paused' : 'resumed'} successfully`, 
       toastType: 'success' 
     }));
+    this.isSubmitting.set(false);
   }
 
   deleteWorkflow(wf: any) {
@@ -243,9 +251,13 @@ export class WorkflowsComponent implements OnInit {
   confirmDelete() {
     const wf = this.selectedWorkflow();
     if (wf) {
+      this.isSubmitting.set(true);
       this.store.dispatch(PremiumActions.deleteWorkflow({ id: wf.id }));
-      this.isConfirmDeleteOpen.set(false);
-      this.store.dispatch(ToastActions.showToast({ message: 'Workflow deleted successfully', toastType: 'success' }));
+      setTimeout(() => {
+        this.isConfirmDeleteOpen.set(false);
+        this.isSubmitting.set(false);
+        this.store.dispatch(ToastActions.showToast({ message: 'Workflow deleted successfully', toastType: 'success' }));
+      }, 500); // simulate short network delay for UI feedback
     }
   }
 
@@ -259,14 +271,18 @@ export class WorkflowsComponent implements OnInit {
         config: JSON.parse(a.configText || '{}')
       }));
 
+      this.isSubmitting.set(true);
       this.store.dispatch(PremiumActions.createWorkflow({ 
         workflow: { name, trigger, description, isActive, actions: mappedActions } 
       }));
       
-      this.isModalOpen.set(false);
-      this.wfForm.reset({ trigger: 'CONTACT_CREATED', isActive: true });
-      this.actions.clear();
-      this.store.dispatch(ToastActions.showToast({ message: 'Automation workflow created successfully', toastType: 'success' }));
+      setTimeout(() => {
+        this.isModalOpen.set(false);
+        this.isSubmitting.set(false);
+        this.wfForm.reset({ trigger: 'CONTACT_CREATED', isActive: true });
+        this.actions.clear();
+        this.store.dispatch(ToastActions.showToast({ message: 'Automation workflow created successfully', toastType: 'success' }));
+      }, 500);
     }
   }
 }

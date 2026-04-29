@@ -38,7 +38,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
           </p>
         </div>
         <div *hasPermission="'contacts:write'">
-          <app-button variant="premium" (clicked)="openCreateModal()" customClass="w-full sm:w-auto justify-center">
+          <app-button variant="premium" (clicked)="openCreateModal()" customClass="justify-center">
             <span class="text-lg">+</span> Add Contact
           </app-button>
         </div>
@@ -50,25 +50,9 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
           class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center animate-in fade-in zoom-in duration-200 p-4"
         >
           <div class="glass-panel w-full max-w-md p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
-            <app-button
-              variant="none"
-              (clicked)="closeCreateModal()"
-              customClass="absolute top-4 right-4 text-brand-secondary hover:text-white transition-colors"
-            >
-              <svg
-                class="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"
-                ></path>
-              </svg>
-            </app-button>
+            <button (click)="closeCreateModal()" class="absolute top-6 right-4 text-brand-secondary hover:text-white transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
             <h2 class="text-xl sm:text-2xl font-bold mb-6">{{ editingContactId ? 'Edit Contact' : 'Add New Contact' }}</h2>
             <form
               [formGroup]="contactForm"
@@ -129,7 +113,8 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
               </div>
               <app-button
                 type="submit"
-                [disabled]="contactForm.invalid"
+                [disabled]="contactForm.invalid || isSubmitting"
+                [loading]="isSubmitting"
                 variant="premium"
                 customClass="w-full mt-6 py-3 justify-center"
                 >{{ editingContactId ? 'Update Contact' : 'Save Contact' }}</app-button
@@ -242,14 +227,14 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
                     <td class="px-6 py-4 text-right">
                       <div class="flex justify-end gap-1">
                         <ng-container *hasPermission="'contacts:write'">
-                          <app-button variant="ghost" (clicked)="editContact(contact)" customClass="!p-2">
+                          <app-button variant="ghost" [disabled]="isSubmitting" (clicked)="editContact(contact)" customClass="!p-2 disabled:opacity-50">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
                             </svg>
                           </app-button>
                         </ng-container>
                         <ng-container *hasPermission="'contacts:delete'">
-                          <app-button variant="ghost" (clicked)="deleteContact(contact)" customClass="text-red-400 hover:text-red-300 !p-2">
+                          <app-button variant="ghost" [disabled]="isSubmitting" (clicked)="deleteContact(contact)" customClass="text-red-400 hover:text-red-300 !p-2 disabled:opacity-50">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                             </svg>
@@ -281,10 +266,10 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
                    </div>
                    <div class="flex justify-end gap-2 pt-2 border-t border-white/5">
                       <div *hasPermission="'contacts:write'">
-                        <app-button variant="secondary" (clicked)="editContact(contact)" customClass="!py-1.5 !px-3 text-xs">Edit</app-button>
+                        <app-button variant="secondary" [disabled]="isSubmitting" (clicked)="editContact(contact)" customClass="!py-1.5 !px-3 text-xs disabled:opacity-50">Edit</app-button>
                       </div>
                       <div *hasPermission="'contacts:delete'">
-                        <app-button variant="ghost" (clicked)="deleteContact(contact)" customClass="text-red-400 !py-1.5 !px-3 text-xs">Delete</app-button>
+                        <app-button variant="ghost" [disabled]="isSubmitting" (clicked)="deleteContact(contact)" customClass="text-red-400 !py-1.5 !px-3 text-xs disabled:opacity-50">Delete</app-button>
                       </div>
                    </div>
                  </div>
@@ -323,6 +308,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
           title="Delete Contact"
           [message]="'Are you sure you want to delete ' + contactToDelete?.fullName + '?'"
           confirmText="Delete"
+          [loading]="isSubmitting"
           (confirm)="confirmDelete()"
           (cancel)="cancelDelete()"
         ></app-confirm-modal>
@@ -349,6 +335,7 @@ export class ContactsListComponent implements OnInit {
 
   isModalOpen = false;
   isConfirmModalOpen = false;
+  isSubmitting = false;
   contactToDelete: any = null;
   editingContactId: string | null = null;
   contactForm = this.fb.group({
@@ -405,6 +392,7 @@ export class ContactsListComponent implements OnInit {
 
   submitContact() {
     if (this.contactForm.valid) {
+      this.isSubmitting = true;
       if (this.editingContactId) {
         this.store.dispatch(
           CRMActions.updateContact({ id: this.editingContactId, contact: this.contactForm.value }),
@@ -414,7 +402,10 @@ export class ContactsListComponent implements OnInit {
           CRMActions.createContact({ contact: this.contactForm.value }),
         );
       }
-      this.closeCreateModal();
+      setTimeout(() => {
+        this.isSubmitting = false;
+        this.closeCreateModal();
+      }, 500);
     }
   }
 
@@ -466,10 +457,14 @@ export class ContactsListComponent implements OnInit {
 
   confirmDelete() {
     if (this.contactToDelete) {
+      this.isSubmitting = true;
       this.store.dispatch(CRMActions.deleteContact({ id: this.contactToDelete.id }));
-      this.contactToDelete = null;
+      setTimeout(() => {
+        this.contactToDelete = null;
+        this.isSubmitting = false;
+        this.isConfirmModalOpen = false;
+      }, 500);
     }
-    this.isConfirmModalOpen = false;
   }
 
   cancelDelete() {
