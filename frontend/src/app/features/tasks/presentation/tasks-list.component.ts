@@ -49,37 +49,48 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
         </div>
       </div>
 
-      <div class="glass-panel p-4 rounded-xl flex flex-col lg:flex-row gap-4 items-center justify-between border border-white/5 relative z-20">
-        <div class="flex flex-1 flex-wrap gap-3 items-center w-full" [formGroup]="advancedFilters">
-          <div class="relative w-full sm:w-64">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-secondary">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            </span>
-            <input formControlName="search" type="text" placeholder="Search tasks..." 
-            class="w-full bg-white/5 border border-brand-border rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-brand-primary/50 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
-          </div>
-          
-          <select formControlName="priority" class="flex-1 sm:flex-none bg-black/40 border border-white/10 rounded-lg py-2 px-3 text-sm focus:outline-none focus:border-brand-primary/50 appearance-none cursor-pointer min-w-[120px]">
-            <option value="">All Priorities</option>
-            <option value="URGENT">Urgent</option>
-            <option value="HIGH">High</option>
-            <option value="MEDIUM">Medium</option>
-            <option value="LOW">Low</option>
-          </select>
+      <div class="glass-panel p-4 rounded-xl flex flex-row gap-4 items-center justify-between border border-white/5 relative z-20 overflow-x-auto">
+  
+  <div class="flex flex-1 gap-3 items-center min-w-0" [formGroup]="advancedFilters">
 
-          <select formControlName="assigneeId" class="flex-1 sm:flex-none bg-black/40 border border-white/10 rounded-lg py-2 px-3 text-sm focus:outline-none focus:border-brand-primary/50 appearance-none cursor-pointer min-w-[120px]">
-            <option value="">All Assignees</option>
-            <option [value]="currentUserId">My Tasks</option>
-            @for (user of users$ | async; track user.id) {
-              <option [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
-            }
-          </select>
-          
-          @if (hasActiveFilters) {
-            <button (click)="clearFilters()" class="text-xs text-brand-secondary hover:text-white transition-colors text-center py-2 sm:py-0">Clear All</button>
-          }
-        </div>
-      </div>
+    <!-- Search -->
+    <div class="relative w-64 shrink-0">
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-secondary">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </span>
+      <input formControlName="search" type="text" placeholder="Search tasks..."
+        class="w-full bg-white/5 border border-brand-border rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-brand-primary/50 ring-0 focus:ring-2 focus:ring-blue-500/30 transition-all duration-200">
+    </div>
+
+    <!-- Priority -->
+    <select formControlName="priority" class="custom-select w-40 shrink-0">
+      <option value="">All Priorities</option>
+      <option value="URGENT">Urgent</option>
+      <option value="HIGH">High</option>
+      <option value="MEDIUM">Medium</option>
+      <option value="LOW">Low</option>
+    </select>
+
+    <!-- Assignee -->
+    <select formControlName="assigneeId" class="custom-select w-44 shrink-0">
+      <option value="">All Assignees</option>
+      <option [value]="currentUserId">My Tasks</option>
+      @for (user of users$ | async; track user.id) {
+        <option [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+      }
+    </select>
+
+    <!-- Clear -->
+    @if (hasActiveFilters) {
+      <button (click)="clearFilters()" class="text-xs text-brand-secondary hover:text-white whitespace-nowrap">
+        Clear All
+      </button>
+    }
+
+  </div>
+</div>
 
       @if (selectedTasks.size > 0) {
         <div class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#0a0a0a] border border-brand-primary/50 shadow-[0_10px_40px_rgba(var(--brand-primary-rgb),0.2)] rounded-2xl sm:rounded-full px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center gap-3 sm:gap-6 z-50 animate-in slide-in-from-bottom-5 w-[90%] sm:w-auto">
@@ -275,20 +286,21 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
       }
     }
       
-      @if (isConfirmModalOpen) {
-        <app-confirm-modal
-          [title]="taskToDelete ? 'Delete Task' : 'Delete Selected Tasks'"
-          [message]="taskToDelete ? 'Are you sure you want to delete task ' + taskToDelete.title + '?' : 'Are you sure you want to delete ' + selectedTasks.size + ' selected tasks?'"
-          confirmText="Delete"
-          (confirm)="confirmDelete()"
-          (cancel)="cancelDelete()"
-        ></app-confirm-modal>
-      }
     </div>
 
+    @if (isConfirmModalOpen) {
+      <app-confirm-modal
+        [title]="taskToDelete ? 'Delete Task' : 'Delete Selected Tasks'"
+        [message]="taskToDelete ? 'Are you sure you want to delete task ' + taskToDelete.title + '?' : 'Are you sure you want to delete ' + selectedTasks.size + ' selected tasks?'"
+        confirmText="Delete"
+        (confirm)="confirmDelete()"
+        (cancel)="cancelDelete()"
+      ></app-confirm-modal>
+    }
+
     @if (isModalOpen) {
-      <div class="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center animate-in fade-in zoom-in duration-300 p-2 sm:p-4">
-        <div class="glass-panel w-full max-w-lg p-4 sm:p-8 relative max-h-[95vh] overflow-y-auto custom-scrollbar shadow-2xl border border-white/10">
+      <div class="fixed inset-0 bg-black/65 backdrop-blur-[6px] z-[100] flex items-center justify-center animate-in fade-in duration-200 p-2 sm:p-4">
+        <div class="glass-panel w-full max-w-lg p-4 sm:p-8 relative max-h-[95vh] overflow-y-auto custom-scrollbar shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200">
           <button (click)="closeCreateModal()" class="absolute top-6 right-6 text-brand-secondary hover:text-white transition-colors">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
@@ -313,12 +325,11 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-brand-secondary mb-1">Priority Level</label>
-                  <select formControlName="priority" 
-                    class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 appearance-none cursor-pointer">
-                      <option value="LOW" class="bg-[#0a0a0a]">Low</option>
-                      <option value="MEDIUM" class="bg-[#0a0a0a]">Medium</option>
-                      <option value="HIGH" class="bg-[#0a0a0a]">High</option>
-                      <option value="URGENT" class="bg-[#0a0a0a]">Urgent</option>
+                  <select formControlName="priority" class="custom-select">
+                    <option value="LOW" class="bg-[#0d0d0f]">Low Priority</option>
+                    <option value="MEDIUM" class="bg-[#0d0d0f]">Medium Priority</option>
+                    <option value="HIGH" class="bg-[#0d0d0f]">High Priority</option>
+                    <option value="URGENT" class="bg-[#0d0d0f]">Urgent</option>
                   </select>
                 </div>
                 <div>
@@ -332,10 +343,10 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
             <div class="pt-4 border-t border-white/5 space-y-4">
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Assign To</label>
-                <select formControlName="assigneeId" class="cursor-pointer w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 appearance-none">
-                  <option value="" class="bg-[#0a0a0a]">Unassigned</option>
+                <select formControlName="assigneeId" class="custom-select cursor-pointer">
+                  <option value="" class="bg-[#0d0d0f]">Unassigned</option>
                   @for (user of users$ | async; track user.id) {
-                    <option [value]="user.id" class="bg-[#0a0a0a]">{{ user.firstName }} {{ user.lastName }}</option>
+                    <option [value]="user.id" class="bg-[#0d0d0f]">{{ user.firstName }} {{ user.lastName }}</option>
                   }
                 </select>
               </div>

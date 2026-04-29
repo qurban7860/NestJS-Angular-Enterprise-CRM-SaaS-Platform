@@ -8,11 +8,13 @@ describe('Contact Entity', () => {
     status: 'LEAD' as ContactStatus,
     orgId: 'org-123',
     ownerId: 'user-123',
+    tags: [],
+    isDeleted: false,
   };
 
   it('should create a valid contact', () => {
     const contactResult = Contact.create(validProps);
-    
+
     expect(contactResult.isSuccess).toBe(true);
     const contact = contactResult.getValue();
     expect(contact.firstName).toBe('John');
@@ -23,7 +25,7 @@ describe('Contact Entity', () => {
   it('should fail if email is empty', () => {
     const props = { ...validProps, email: '' };
     const contactResult = Contact.create(props);
-    
+
     expect(contactResult.isFailure).toBe(true);
     expect(contactResult.error).toContain('Email is required');
   });
@@ -31,7 +33,7 @@ describe('Contact Entity', () => {
   it('should fail if first name is too short', () => {
     const props = { ...validProps, firstName: '' };
     const contactResult = Contact.create(props);
-    
+
     expect(contactResult.isFailure).toBe(true);
     expect(contactResult.error).toContain('First name is required');
   });

@@ -104,143 +104,144 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
           }
         }
       </div>
+    </div>
 
-      <!-- Create Role Modal -->
-      @if (isModalOpen()) {
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div class="glass-panel w-full max-w-md p-8 shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200 relative max-h-[90vh] overflow-y-auto">
-            <button (click)="closeModal()" class="absolute top-4 right-4 text-brand-secondary hover:text-white transition-colors">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            
-            <h2 class="text-2xl font-bold mb-6">{{ editingRole() ? 'Edit' : 'Create' }} Custom Role</h2>
+    <!-- Create Role Modal -->
+    @if (isModalOpen()) {
+      <div class="fixed inset-0 bg-black/65 backdrop-blur-[6px] z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div class="glass-panel w-full max-w-md p-8 shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200 relative max-h-[90vh] overflow-y-auto">
+          <button (click)="closeModal()" class="absolute top-4 right-4 text-brand-secondary hover:text-white transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+          
+          <h2 class="text-2xl font-bold mb-6">{{ editingRole() ? 'Edit' : 'Create' }} Custom Role</h2>
 
-            <form [formGroup]="roleForm" (ngSubmit)="submitRole()" class="space-y-6">
-              <div class="space-y-4">
-                <div>
-                  <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Role Name</label>
-                  <input formControlName="name" type="text" placeholder="e.g., Senior Accountant" 
-                  class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 transition-all outline-none ring-0 focus:ring-2 focus:ring-blue-500/30">
-                </div>
-
-                <div>
-                  <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Description</label>
-                  <textarea formControlName="description" rows="2" placeholder="Briefly describe this role's purpose..." 
-                   class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 transition-all resize-none outline-none ring-0 focus:ring-2 focus:ring-blue-500/30"></textarea>
-                </div>
-
-                <div>
-                  <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-3">Permissions Matrix</label>
-                  
-                  <div class="glass-panel overflow-hidden border border-white/5 bg-black/20 rounded-xl">
-                    <table class="w-full text-left border-collapse">
-                      <thead>
-                        <tr class="bg-white/5 border-b border-white/10">
-                          <th class="p-3 text-[9px] font-black uppercase tracking-widest text-brand-secondary">Feature</th>
-                          <th class="p-3 text-center text-[9px] font-black uppercase tracking-widest text-brand-secondary">Read</th>
-                          <th class="p-3 text-center text-[9px] font-black uppercase tracking-widest text-brand-secondary">Write</th>
-                          <th class="p-3 text-center text-[9px] font-black uppercase tracking-widest text-brand-secondary">Delete</th>
-                          <th class="p-3 text-center text-[9px] font-black uppercase tracking-widest text-brand-secondary">Row</th>
-                        </tr>
-                      </thead>
-                      <tbody class="divide-y divide-white/5">
-                        @for (feature of permissionFeatures; track feature) {
-                          <tr class="hover:bg-white/[0.02] transition-colors">
-                            <td class="p-3 text-[11px] font-bold text-white capitalize">{{ feature }}</td>
-                            <td class="p-3 text-center">
-                              <input type="checkbox" [checked]="hasPerm(feature, 'read')" (change)="togglePerm(feature, 'read')" 
-                                     class="w-3.5 h-3.5 rounded bg-black/40 border-white/10 text-brand-primary accent-brand-primary">
-                            </td>
-                            <td class="p-3 text-center">
-                              <input type="checkbox" [checked]="hasPerm(feature, 'write')" (change)="togglePerm(feature, 'write')" 
-                                     class="w-3.5 h-3.5 rounded bg-black/40 border-white/10 text-brand-primary accent-brand-primary">
-                            </td>
-                            <td class="p-3 text-center">
-                              <input type="checkbox" [checked]="hasPerm(feature, 'delete')" (change)="togglePerm(feature, 'delete')" 
-                                     class="w-3.5 h-3.5 rounded bg-black/40 border-white/10 text-brand-primary accent-brand-primary">
-                            </td>
-                            <td class="p-3 text-center">
-                              <button type="button" (click)="toggleFeatureRow(feature)" class="text-[8px] font-black uppercase tracking-tighter text-brand-primary/60 hover:text-brand-primary">
-                                {{ isFeatureAllSelected(feature) ? 'None' : 'All' }}
-                              </button>
-                            </td>
-                          </tr>
-                        }
-                        <!-- Special Case: System Audit -->
-                        <tr class="hover:bg-white/[0.02] transition-colors">
-                          <td class="p-3 text-[11px] font-bold text-white">System</td>
-                          <td colspan="3" class="p-3">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                              <input type="checkbox" [checked]="selectedPermissions.has('system:audit')" (change)="togglePermission('system:audit')" 
-                                     class="w-3.5 h-3.5 rounded bg-black/40 border-white/10 text-brand-primary accent-brand-primary">
-                              <span class="text-[10px] text-brand-secondary">Audit Logs Access</span>
-                            </label>
-                          </td>
-                          <td class="p-3 text-center"></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-
-              <div class="pt-6 flex gap-3">
-                <app-button type="button" variant="secondary" (clicked)="closeModal()" [disabled]="isSubmitting()" customClass="flex-1 py-3 justify-center">Cancel</app-button>
-                <app-button type="submit" [disabled]="roleForm.invalid || isSubmitting()" [loading]="isSubmitting()" variant="premium" customClass="flex-1 py-3 justify-center">
-                  {{ editingRole() ? 'Update' : 'Create' }} Role
-                </app-button>
-              </div>
-            </form>
-          </div>
-        </div>
-      }
-
-      <!-- Assign Role Modal -->
-      @if (isAssignModalOpen()) {
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div class="glass-panel w-full max-w-sm p-8 shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200">
-            <h2 class="text-xl font-bold mb-6">Assign <span class="text-brand-primary">{{ selectedRole()?.name }}</span></h2>
-            
+          <form [formGroup]="roleForm" (ngSubmit)="submitRole()" class="space-y-6">
             <div class="space-y-4">
               <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Select Team Member</label>
-                <select #uidSelect 
-                class="w-full bg-[#0a0a0a] border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 appearance-none cursor-pointer">
-                  <option value="">-- Choose User --</option>
-                  @for (user of orgUsers(); track user.id) {
-                    <option [value]="user.id">{{ user.firstName }} {{ user.lastName }} ({{ user.email }})</option>
-                  }
-                </select>
-                @if (loadingUsers()) {
-                  <p class="text-[10px] text-brand-primary mt-2 animate-pulse italic">Loading team members...</p>
-                }
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Role Name</label>
+                <input formControlName="name" type="text" placeholder="e.g., Senior Accountant" 
+                class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 transition-all outline-none ring-0 focus:ring-2 focus:ring-blue-500/30">
               </div>
 
-              <div class="pt-6 flex gap-3">
-                <button [disabled]="isSubmitting()" (click)="isAssignModalOpen.set(false)" class="flex-1 px-4 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-sm transition-all whitespace-nowrap disabled:opacity-50">Cancel</button>
-                <button [disabled]="isSubmitting()" (click)="submitAssignment(uidSelect.value)" class="premium-button flex-1 py-2.5 whitespace-nowrap relative">
-                  <span class="flex items-center justify-center gap-2" [class.opacity-0]="isSubmitting()">Confirm Assignment</span>
-                  <div *ngIf="isSubmitting()" class="absolute inset-0 flex items-center justify-center">
-                    <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                  </div>
-                </button>
+              <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Description</label>
+                <textarea formControlName="description" rows="2" placeholder="Briefly describe this role's purpose..." 
+                 class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 transition-all resize-none outline-none ring-0 focus:ring-2 focus:ring-blue-500/30"></textarea>
               </div>
+
+              <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-3">Permissions Matrix</label>
+                
+                <div class="glass-panel overflow-hidden border border-white/5 bg-black/20 rounded-xl">
+                  <table class="w-full text-left border-collapse">
+                    <thead>
+                      <tr class="bg-white/5 border-b border-white/10">
+                        <th class="p-3 text-[9px] font-black uppercase tracking-widest text-brand-secondary">Feature</th>
+                        <th class="p-3 text-center text-[9px] font-black uppercase tracking-widest text-brand-secondary">Read</th>
+                        <th class="p-3 text-center text-[9px] font-black uppercase tracking-widest text-brand-secondary">Write</th>
+                        <th class="p-3 text-center text-[9px] font-black uppercase tracking-widest text-brand-secondary">Delete</th>
+                        <th class="p-3 text-center text-[9px] font-black uppercase tracking-widest text-brand-secondary">Row</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                      @for (feature of permissionFeatures; track feature) {
+                        <tr class="hover:bg-white/[0.02] transition-colors">
+                          <td class="p-3 text-[11px] font-bold text-white capitalize">{{ feature }}</td>
+                          <td class="p-3 text-center">
+                            <input type="checkbox" [checked]="hasPerm(feature, 'read')" (change)="togglePerm(feature, 'read')" 
+                                   class="w-3.5 h-3.5 rounded bg-black/40 border-white/10 text-brand-primary accent-brand-primary">
+                          </td>
+                          <td class="p-3 text-center">
+                            <input type="checkbox" [checked]="hasPerm(feature, 'write')" (change)="togglePerm(feature, 'write')" 
+                                   class="w-3.5 h-3.5 rounded bg-black/40 border-white/10 text-brand-primary accent-brand-primary">
+                          </td>
+                          <td class="p-3 text-center">
+                            <input type="checkbox" [checked]="hasPerm(feature, 'delete')" (change)="togglePerm(feature, 'delete')" 
+                                   class="w-3.5 h-3.5 rounded bg-black/40 border-white/10 text-brand-primary accent-brand-primary">
+                          </td>
+                          <td class="p-3 text-center">
+                            <button type="button" (click)="toggleFeatureRow(feature)" class="text-[8px] font-black uppercase tracking-tighter text-brand-primary/60 hover:text-brand-primary">
+                              {{ isFeatureAllSelected(feature) ? 'None' : 'All' }}
+                            </button>
+                          </td>
+                        </tr>
+                      }
+                      <!-- Special Case: System Audit -->
+                      <tr class="hover:bg-white/[0.02] transition-colors">
+                        <td class="p-3 text-[11px] font-bold text-white">System</td>
+                        <td colspan="3" class="p-3">
+                          <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" [checked]="selectedPermissions.has('system:audit')" (change)="togglePermission('system:audit')" 
+                                   class="w-3.5 h-3.5 rounded bg-black/40 border-white/10 text-brand-primary accent-brand-primary">
+                            <span class="text-[10px] text-brand-secondary">Audit Logs Access</span>
+                          </label>
+                        </td>
+                        <td class="p-3 text-center"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-6 flex gap-3">
+              <app-button type="button" variant="secondary" (clicked)="closeModal()" [disabled]="isSubmitting()" customClass="flex-1 py-3 justify-center">Cancel</app-button>
+              <app-button type="submit" [disabled]="roleForm.invalid || isSubmitting()" [loading]="isSubmitting()" variant="premium" customClass="flex-1 py-3 justify-center">
+                {{ editingRole() ? 'Update' : 'Create' }} Role
+              </app-button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+
+    <!-- Assign Role Modal -->
+    @if (isAssignModalOpen()) {
+      <div class="fixed inset-0 bg-black/65 backdrop-blur-[6px] z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div class="glass-panel w-full max-w-sm p-8 shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200">
+          <div class="mb-6">
+            <h2 class="text-xl font-bold">Assign <span class="text-brand-primary">{{ selectedRole()?.name }}</span></h2>
+            <p class="text-sm text-brand-secondary mt-1">Select a team member to assign this role to.</p>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Select Team Member</label>
+              <select #uidSelect class="custom-select">
+                <option value="">— Choose Team Member —</option>
+                @for (user of orgUsers(); track user.id) {
+                  <option [value]="user.id">{{ user.firstName }} {{ user.lastName }} · {{ user.email }}</option>
+                }
+              </select>
+              @if (loadingUsers()) {
+                <p class="text-[10px] text-brand-primary mt-2 animate-pulse italic">Loading team members...</p>
+              }
+            </div>
+
+            <div class="pt-6 flex gap-3">
+              <button [disabled]="isSubmitting()" (click)="isAssignModalOpen.set(false)" class="flex-1 px-4 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-sm transition-all whitespace-nowrap disabled:opacity-50">Cancel</button>
+              <button [disabled]="isSubmitting()" (click)="submitAssignment(uidSelect.value)" class="premium-button flex-1 py-2.5 whitespace-nowrap relative">
+                <span class="flex items-center justify-center gap-2" [class.opacity-0]="isSubmitting()">Confirm Assignment</span>
+                <div *ngIf="isSubmitting()" class="absolute inset-0 flex items-center justify-center">
+                  <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                </div>
+              </button>
             </div>
           </div>
         </div>
-      }
+      </div>
+    }
 
-      @if (isConfirmDeleteOpen()) {
-        <app-confirm-modal
-          title="Delete Role"
-          [message]="'Are you sure you want to delete the role ' + selectedRole()?.name + '? This action cannot be undone.'"
-          confirmText="Delete Role"
-          [loading]="isSubmitting()"
-          (confirm)="confirmDelete()"
-          (cancel)="isConfirmDeleteOpen.set(false)"
-        ></app-confirm-modal>
-      }
-    </div>
+    @if (isConfirmDeleteOpen()) {
+      <app-confirm-modal
+        title="Delete Role"
+        [message]="'Are you sure you want to delete the role ' + selectedRole()?.name + '? This action cannot be undone.'"
+        confirmText="Delete Role"
+        [loading]="isSubmitting()"
+        (confirm)="confirmDelete()"
+        (cancel)="isConfirmDeleteOpen.set(false)"
+      ></app-confirm-modal>
+    }
   `,
   styles: [`
     :host { display: block; }

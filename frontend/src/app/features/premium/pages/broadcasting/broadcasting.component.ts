@@ -15,7 +15,7 @@ import { selectUser } from '../../../../core/state/auth/auth.reducer';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, ButtonComponent, RequiresPremiumDirective, HasPermissionDirective, ConfirmModalComponent, RouterLink],
   template: `
-    <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div class="space-y-8">
       <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white/5 border border-brand-border rounded-2xl p-8 glass-panel relative overflow-hidden gap-6">
         <div class="relative z-10">
           <h1 class="text-3xl font-extrabold tracking-tight">Signal <span class="bg-gradient-premium bg-clip-text text-transparent italic pr-2">Broadcaster</span></h1>
@@ -86,63 +86,86 @@ import { selectUser } from '../../../../core/state/auth/auth.reducer';
         </div>
       </div>
 
-      <!-- Create Modal -->
-      @if (isModalOpen()) {
-        <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-[110] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div class="glass-panel w-full max-w-lg p-8 shadow-2xl border border-indigo-500/30 animate-in zoom-in-95 duration-300 relative">
-            <button (click)="isModalOpen.set(false)" class="absolute top-4 right-4 text-brand-secondary hover:text-white transition-colors">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-
-            <h2 class="text-2xl font-black mb-6 uppercase tracking-tighter italic">Initiate <span class="text-indigo-400">Transmission</span></h2>
-
-            <form [formGroup]="broadcastForm" (ngSubmit)="submit()" class="space-y-6">
-              <div class="space-y-4">
-                <div>
-                  <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-brand-secondary mb-2">Subject Header</label>
-                  <input formControlName="title" type="text" placeholder="URGENT SYSTEM UPDATE" 
-                  class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-all placeholder:opacity-30">
-                </div>
-
-                <div>
-                  <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-brand-secondary mb-2">Target Audience</label>
-                  <div class="grid grid-cols-2 gap-3">
-                    <button type="button" (click)="broadcastForm.patchValue({orgId: null})" 
-                            [class]="!broadcastForm.get('orgId')?.value ? 'border-brand-primary bg-brand-primary/20 text-white' : 'border-white/5 bg-white/5 text-brand-secondary hover:bg-white/10'"
-                            class="px-3 py-3 rounded-xl border text-[10px] font-bold transition-all flex items-center justify-center gap-2">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
-                      Global System
-                    </button>
-                    <button type="button" (click)="setOrgScope()" 
-                            [class]="broadcastForm.get('orgId')?.value ? 'border-brand-primary bg-brand-primary/20 text-white' : 'border-white/5 bg-white/5 text-brand-secondary hover:bg-white/10'"
-                            class="px-3 py-3 rounded-xl border text-[10px] font-bold transition-all flex items-center justify-center gap-2">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5" /></svg>
-                      My Organization
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-brand-secondary mb-2">Broadcast Message</label>
-                  <textarea formControlName="message" rows="4" placeholder="Transmit your message here..." 
-                  class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-all resize-none placeholder:opacity-30"></textarea>
-                </div>
-
-                <div class="flex items-center gap-2 p-4 bg-indigo-500/5 border border-indigo-500/10 rounded-xl">
-                   <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                   <p class="text-[11px] text-indigo-300/70 font-medium">This message will be pushed instantly to all active user sessions globally.</p>
-                </div>
-              </div>
-
-              <div class="pt-4 flex gap-3">
-                <app-button type="button" variant="secondary" [disabled]="isSubmitting()" (clicked)="isModalOpen.set(false)" customClass="flex-1 py-3 justify-center">Abort</app-button>
-                <app-button type="submit" [disabled]="broadcastForm.invalid || isSubmitting()" [loading]="isSubmitting()" variant="premium" customClass="flex-1 py-3 justify-center">Initiate Broadcast</app-button>
-              </div>
-            </form>
-          </div>
-        </div>
-      }
     </div>
+
+    <!-- Create Broadcast Modal (outside animate-in to fix fixed positioning) -->
+    @if (isModalOpen()) {
+      <div class="fixed inset-0 bg-black/65 backdrop-blur-[6px] z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div class="glass-panel w-full max-w-lg p-8 shadow-2xl border border-indigo-500/30 animate-in zoom-in-95 duration-200 relative max-h-[90vh] overflow-y-auto custom-scrollbar">
+          <button (click)="isModalOpen.set(false)" class="absolute top-4 right-4 text-brand-secondary hover:text-white transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+
+          <h2 class="text-2xl font-black mb-6 uppercase tracking-tighter italic">Initiate <span class="text-indigo-400">Transmission</span></h2>
+
+          <form [formGroup]="broadcastForm" (ngSubmit)="submit()" class="space-y-6">
+            <div class="space-y-4">
+              <div>
+                <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-brand-secondary mb-2">Subject Header</label>
+                <input formControlName="title" type="text" placeholder="URGENT SYSTEM UPDATE" 
+                class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-all placeholder:opacity-30">
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-brand-secondary mb-2">Target Audience</label>
+                <div class="grid grid-cols-2 gap-3">
+                  <button type="button" (click)="broadcastForm.patchValue({orgId: null})" 
+                          [class]="!broadcastForm.get('orgId')?.value ? 'border-brand-primary bg-brand-primary/20 text-white' : 'border-white/5 bg-white/5 text-brand-secondary hover:bg-white/10'"
+                          class="px-3 py-3 rounded-xl border text-[10px] font-bold transition-all flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
+                    Global System
+                  </button>
+                  <button type="button" (click)="setOrgScope()" 
+                          [class]="broadcastForm.get('orgId')?.value ? 'border-brand-primary bg-brand-primary/20 text-white' : 'border-white/5 bg-white/5 text-brand-secondary hover:bg-white/10'"
+                          class="px-3 py-3 rounded-xl border text-[10px] font-bold transition-all flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5" /></svg>
+                    My Organization
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-brand-secondary mb-2">Broadcast Message</label>
+                <textarea formControlName="message" rows="4" placeholder="Transmit your message here..." 
+                class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-all resize-none placeholder:opacity-30"></textarea>
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-brand-secondary mb-2">Signal Type</label>
+                <select formControlName="type" class="custom-select">
+                  <option value="INFO">&#128161; Info — General announcement</option>
+                  <option value="SUCCESS">&#9989; Success — Positive update</option>
+                  <option value="WARNING">&#9888; Warning — Requires attention</option>
+                  <option value="URGENT">&#128680; Urgent — Immediate action needed</option>
+                </select>
+              </div>
+
+              <div class="flex items-center gap-2 p-4 bg-indigo-500/5 border border-indigo-500/10 rounded-xl">
+                 <svg class="w-5 h-5 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                 <p class="text-[11px] text-indigo-300/70 font-medium">This message will be pushed instantly to all active user sessions globally.</p>
+              </div>
+            </div>
+
+            <div class="pt-4 flex gap-3">
+              <app-button type="button" variant="secondary" [disabled]="isSubmitting()" (clicked)="isModalOpen.set(false)" customClass="flex-1 py-3 justify-center">Abort</app-button>
+              <app-button type="submit" [disabled]="broadcastForm.invalid || isSubmitting()" [loading]="isSubmitting()" variant="premium" customClass="flex-1 py-3 justify-center">Initiate Broadcast</app-button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+
+    <!-- Confirm Delete Modal (outside animate-in to fix fixed positioning) -->
+    @if (isConfirmDeleteOpen()) {
+      <app-confirm-modal
+        title="Stop Broadcast"
+        [message]="'Are you sure you want to stop this broadcast? It will be removed from all users screens immediately.'"
+        confirmText="Stop Broadcast"
+        [loading]="isSubmitting()"
+        (confirm)="confirmDelete()"
+        (cancel)="isConfirmDeleteOpen.set(false)"
+      ></app-confirm-modal>
+    }
   `,
   styles: [`
     :host { display: block; }
@@ -162,6 +185,8 @@ export class BroadcastingComponent implements OnInit {
   broadcasts = this.broadcastService.activeBroadcasts;
   isModalOpen = signal(false);
   isSubmitting = signal(false);
+  isConfirmDeleteOpen = signal(false);
+  private selectedBroadcastId = signal<string | null>(null);
 
   broadcastForm = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(5)]],
@@ -217,17 +242,28 @@ export class BroadcastingComponent implements OnInit {
   }
 
   deactivate(id: string) {
+    this.selectedBroadcastId.set(id);
+    this.isConfirmDeleteOpen.set(true);
+  }
+
+  confirmDelete() {
+    const id = this.selectedBroadcastId();
+    if (!id) return;
     this.isSubmitting.set(true);
     this.broadcastService.deactivateBroadcast(id).subscribe({
       next: () => {
         setTimeout(() => {
-          // Manually update if WebSocket didn't handle deactivation event yet
           this.broadcastService.dismiss(id);
           this.broadcasts.set(this.broadcastService.activeBroadcasts());
           this.isSubmitting.set(false);
+          this.isConfirmDeleteOpen.set(false);
+          this.selectedBroadcastId.set(null);
         }, 500);
       },
-      error: () => this.isSubmitting.set(false)
+      error: () => {
+        this.isSubmitting.set(false);
+        this.isConfirmDeleteOpen.set(false);
+      }
     });
   }
 }

@@ -49,90 +49,7 @@ interface KanbanColumn {
         </div>
       </div>
 
-      <!-- Create Deal Modal Overlay -->
-      @if (isModalOpen) {
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center animate-in fade-in zoom-in duration-300 p-2 sm:p-4">
-          <div class="glass-panel w-full max-w-lg p-4 sm:p-8 relative max-h-[95vh] overflow-y-auto custom-scrollbar shadow-2xl border border-white/10">
-            <button (click)="closeCreateModal()" class="absolute top-4 right-4 text-brand-secondary hover:text-white transition-colors">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <h2 class="text-lg sm:text-2xl font-black italic uppercase tracking-tighter mb-6">{{ editingDealId ? 'Update' : 'Initiate' }} <span class="text-brand-primary">Deal</span></h2>
-            <form [formGroup]="dealForm" (ngSubmit)="submitDeal()" class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-brand-secondary mb-1">Deal Title</label>
-                <input formControlName="title" type="text" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="Enter the deal title">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-brand-secondary mb-1">Value Amount</label>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                   <input formControlName="valueAmount" type="number" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="0.00">
-                   <div class="relative">
-                      <input formControlName="probability" type="number" min="0" max="100" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="Win %">
-                      <span class="absolute right-3 top-2.5 text-brand-secondary text-xs">%</span>
-                   </div>
-                </div>
-              </div>
 
-              <div>
-                <label class="block text-sm font-medium text-brand-secondary mb-1">Associate Contact</label>
-                <div class="relative">
-                   <input [formControl]="contactSearchControl" type="text" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="Search contacts...">
-                   <svg class="w-4 h-4 absolute right-3 top-2.5 text-brand-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                   
-                   @if (contactSearchResults$ | async; as results) {
-                     @if (results.length > 0 && showContactResults) {
-                       <div class="absolute top-full left-0 right-0 mt-1 glass-panel z-[60] border border-white/10 max-h-48 overflow-y-auto shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200">
-                         @for (c of results; track c.id) {
-                           <div (click)="selectContact(c)" class="p-3 hover:bg-white/10 cursor-pointer flex items-center justify-between group">
-                             <div>
-                               <p class="text-xs font-bold text-white group-hover:text-brand-primary transition-colors">{{ c.fullName }}</p>
-                               <p class="text-[10px] text-brand-secondary">{{ c.email }}</p>
-                             </div>
-                             <span class="text-[10px] text-brand-primary opacity-0 group-hover:opacity-100 uppercase font-black">Select</span>
-                           </div>
-                         }
-                       </div>
-                     }
-                   }
-                </div>
-                @if (selectedContact) {
-                  <div class="mt-2 p-2 bg-brand-primary/10 border border-brand-primary/20 rounded-lg flex items-center justify-between">
-                    <span class="text-xs font-medium text-brand-primary">Selected: {{ selectedContact.fullName }}</span>
-                    <button type="button" (click)="clearContact()" class="text-brand-secondary hover:text-white transition-colors">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                  </div>
-                }
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-brand-secondary mb-1">Expected Close Date</label>
-                <input formControlName="expectedCloseDate" type="date" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
-              </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-brand-secondary mb-1">Currency</label>
-                  <select formControlName="valueCurrency" class="w-full bg-black/40 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                    <option value="AUD">AUD</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-brand-secondary mb-1">Stage</label>
-                  <select formControlName="stage" class="w-full bg-black/40 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
-                    <option value="PROSPECTING">Prospecting</option>
-                    <option value="QUALIFICATION">Qualification</option>
-                    <option value="PROPOSAL">Proposal</option>
-                    <option value="NEGOTIATION">Negotiation</option>
-                  </select>
-                </div>
-              </div>
-              <button type="submit" [disabled]="dealForm.invalid" class="premium-button w-full mt-6 py-3 disabled:opacity-50 text-sm">{{ editingDealId ? 'Update Pipeline Deal' : 'Create Pipeline Deal' }}</button>
-            </form>
-          </div>
-        </div>
-      }
 
       <!-- Kanban Board -->
       <div class="flex-1 overflow-x-auto overflow-y-hidden -mx-4 sm:mx-0 px-4 sm:px-0">
@@ -221,17 +138,101 @@ interface KanbanColumn {
           }
         </div>
       </div>
-
-      @if (isConfirmModalOpen) {
-        <app-confirm-modal
-          title="Delete Deal"
-          [message]="'Are you sure you want to delete deal ' + dealToDelete?.title + '?'"
-          confirmText="Delete"
-          (confirm)="confirmDelete()"
-          (cancel)="cancelDelete()"
-        ></app-confirm-modal>
-      }
     </div>
+
+    <!-- Create Deal Modal Overlay -->
+    @if (isModalOpen) {
+      <div class="fixed inset-0 bg-black/65 backdrop-blur-[6px] z-[100] flex items-center justify-center animate-in fade-in duration-200 p-2 sm:p-4">
+        <div class="glass-panel w-full max-w-lg p-4 sm:p-8 relative max-h-[95vh] overflow-y-auto custom-scrollbar shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200">
+          <button (click)="closeCreateModal()" class="absolute top-4 right-4 text-brand-secondary hover:text-white transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+          <h2 class="text-lg sm:text-2xl font-black italic uppercase tracking-tighter mb-6">{{ editingDealId ? 'Update' : 'Initiate' }} <span class="text-brand-primary">Deal</span></h2>
+          <form [formGroup]="dealForm" (ngSubmit)="submitDeal()" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-brand-secondary mb-1">Deal Title</label>
+              <input formControlName="title" type="text" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="Enter the deal title">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-brand-secondary mb-1">Value Amount</label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                 <input formControlName="valueAmount" type="number" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="0.00">
+                 <div class="relative">
+                    <input formControlName="probability" type="number" min="0" max="100" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="Win %">
+                    <span class="absolute right-3 top-2.5 text-brand-secondary text-xs">%</span>
+                 </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-brand-secondary mb-1">Associate Contact</label>
+              <div class="relative">
+                 <input [formControl]="contactSearchControl" type="text" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="Search contacts...">
+                 <svg class="w-4 h-4 absolute right-3 top-2.5 text-brand-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                 
+                 @if (contactSearchResults$ | async; as results) {
+                   @if (results.length > 0 && showContactResults) {
+                     <div class="absolute top-full left-0 right-0 mt-1 glass-panel z-[60] border border-white/10 max-h-48 overflow-y-auto shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200">
+                       @for (c of results; track c.id) {
+                         <div (click)="selectContact(c)" class="p-3 hover:bg-white/10 cursor-pointer flex items-center justify-between group">
+                           <div>
+                             <p class="text-xs font-bold text-white group-hover:text-brand-primary transition-colors">{{ c.fullName }}</p>
+                             <p class="text-[10px] text-brand-secondary">{{ c.email }}</p>
+                           </div>
+                           <span class="text-[10px] text-brand-primary opacity-0 group-hover:opacity-100 uppercase font-black">Select</span>
+                         </div>
+                       }
+                     </div>
+                   }
+                 }
+              </div>
+              @if (dealForm.get('contactId')?.value) {
+                <div class="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-lg">
+                  <span class="text-xs font-medium">{{ selectedContact?.fullName }}</span>
+                  <button type="button" (click)="clearContact()" class="text-brand-secondary hover:text-red-400">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                  </button>
+                </div>
+              }
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div>
+                <label class="block text-sm font-medium text-brand-secondary mb-1">Pipeline Stage</label>
+                <select formControlName="stageId" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500/30 transition-all text-sm">
+                  <option value="lead">Lead</option>
+                  <option value="contact_made">Contact Made</option>
+                  <option value="needs_defined">Needs Defined</option>
+                  <option value="proposal_made">Proposal Made</option>
+                  <option value="negotiations">Negotiations</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-brand-secondary mb-1">Status</label>
+                <select formControlName="status" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500/30 transition-all text-sm">
+                  <option value="OPEN">Open</option>
+                  <option value="WON">Won</option>
+                  <option value="LOST">Lost</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" [disabled]="dealForm.invalid" class="w-full premium-button !py-3 mt-6 text-sm flex justify-center items-center gap-2">
+              {{ editingDealId ? 'Update Deal' : 'Initialize Deal' }}
+            </button>
+          </form>
+        </div>
+      </div>
+    }
+
+    @if (isConfirmModalOpen) {
+      <app-confirm-modal
+        title="Delete Deal"
+        [message]="'Are you sure you want to delete deal ' + dealToDelete?.title + '?'"
+        confirmText="Delete"
+        (confirm)="confirmDelete()"
+        (cancel)="cancelDelete()"
+      ></app-confirm-modal>
+    }
   `,
   styles: [`
     :host { display: block; height: 100%; }

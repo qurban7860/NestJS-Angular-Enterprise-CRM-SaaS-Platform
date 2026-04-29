@@ -44,86 +44,6 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
         </div>
       </div>
 
-      <!-- Add Contact Modal Overlay -->
-      @if (isModalOpen) {
-        <div
-          class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center animate-in fade-in zoom-in duration-200 p-4"
-        >
-          <div class="glass-panel w-full max-w-md p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
-            <button (click)="closeCreateModal()" class="absolute top-6 right-4 text-brand-secondary hover:text-white transition-colors">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <h2 class="text-xl sm:text-2xl font-bold mb-6">{{ editingContactId ? 'Edit Contact' : 'Add New Contact' }}</h2>
-            <form
-              [formGroup]="contactForm"
-              (ngSubmit)="submitContact()"
-              class="space-y-4"
-            >
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    class="block text-sm font-medium text-brand-secondary mb-1"
-                    >First Name</label
-                  >
-                  <input
-                    formControlName="firstName"
-                    type="text"
-                    placeholder="First Name"
-                    class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
-                  />
-                </div>
-                <div>
-                  <label
-                    class="block text-sm font-medium text-brand-secondary mb-1"
-                    >Last Name</label
-                  >
-                  <input
-                    formControlName="lastName"
-                    type="text"
-                    placeholder="Last Name"
-                    class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
-                  />
-                </div>
-              </div>
-              <div>
-                <label
-                  class="block text-sm font-medium text-brand-secondary mb-1"
-                  >Email Address</label
-                >
-                <input
-                  formControlName="email"
-                  type="email"
-                  placeholder="Email Address"
-                  class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
-                />
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-brand-secondary mb-1">Phone Number</label>
-                  <input formControlName="phone" type="text" placeholder="+1..." class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500/30 transition-all">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-brand-secondary mb-1">Status</label>
-                  <select formControlName="status" class="w-full bg-[#0a0a0a] border border-brand-border rounded-xl py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500/30 transition-all appearance-none cursor-pointer">
-                    <option value="LEAD">Lead</option>
-                    <option value="QUALIFIED">Qualified</option>
-                    <option value="CUSTOMER">Customer</option>
-                  </select>
-                </div>
-              </div>
-              <app-button
-                type="submit"
-                [disabled]="contactForm.invalid || isSubmitting"
-                [loading]="isSubmitting"
-                variant="premium"
-                customClass="w-full mt-6 py-3 justify-center"
-                >{{ editingContactId ? 'Update Contact' : 'Save Contact' }}</app-button
-              >
-            </form>
-          </div>
-        </div>
-      }
-
       <!-- Filters & Search -->
       <div class="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div class="relative w-full sm:w-96">
@@ -302,18 +222,98 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
           </div>
         }
       </div>
-
-      @if (isConfirmModalOpen) {
-        <app-confirm-modal
-          title="Delete Contact"
-          [message]="'Are you sure you want to delete ' + contactToDelete?.fullName + '?'"
-          confirmText="Delete"
-          [loading]="isSubmitting"
-          (confirm)="confirmDelete()"
-          (cancel)="cancelDelete()"
-        ></app-confirm-modal>
-      }
     </div>
+
+    <!-- Add Contact Modal Overlay -->
+    @if (isModalOpen) {
+      <div
+        class="fixed inset-0 bg-black/65 backdrop-blur-[6px] z-[100] flex items-center justify-center animate-in fade-in duration-200 p-4"
+      >
+        <div class="glass-panel w-full max-w-md p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
+          <button (click)="closeCreateModal()" class="absolute top-6 right-4 text-brand-secondary hover:text-white transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+          <h2 class="text-xl sm:text-2xl font-bold mb-6">{{ editingContactId ? 'Edit Contact' : 'Add New Contact' }}</h2>
+          <form
+            [formGroup]="contactForm"
+            (ngSubmit)="submitContact()"
+            class="space-y-4"
+          >
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label
+                  class="block text-sm font-medium text-brand-secondary mb-1"
+                  >First Name</label
+                >
+                <input
+                  formControlName="firstName"
+                  type="text"
+                  placeholder="First Name"
+                  class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-brand-secondary mb-1"
+                  >Last Name</label
+                >
+                <input
+                  formControlName="lastName"
+                  type="text"
+                  placeholder="Last Name"
+                  class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
+                />
+              </div>
+            </div>
+            <div>
+              <label
+                class="block text-sm font-medium text-brand-secondary mb-1"
+                >Email Address</label
+              >
+              <input
+                formControlName="email"
+                type="email"
+                placeholder="Email Address"
+                class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
+              />
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-brand-secondary mb-1">Phone Number</label>
+                <input formControlName="phone" type="text" placeholder="+1..." class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500/30 transition-all">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-brand-secondary mb-1">Status</label>
+                <select formControlName="status" class="custom-select">
+                  <option value="LEAD">Lead</option>
+                  <option value="QUALIFIED">Qualified</option>
+                  <option value="CUSTOMER">Customer</option>
+                </select>
+              </div>
+            </div>
+            <app-button
+              type="submit"
+              [disabled]="contactForm.invalid || isSubmitting"
+              [loading]="isSubmitting"
+              variant="premium"
+              customClass="w-full mt-6 py-3 justify-center"
+              >{{ editingContactId ? 'Update Contact' : 'Save Contact' }}</app-button
+            >
+          </form>
+        </div>
+      </div>
+    }
+
+    @if (isConfirmModalOpen) {
+      <app-confirm-modal
+        title="Delete Contact"
+        [message]="'Are you sure you want to delete ' + contactToDelete?.fullName + '?'"
+        confirmText="Delete"
+        [loading]="isSubmitting"
+        (confirm)="confirmDelete()"
+        (cancel)="cancelDelete()"
+      ></app-confirm-modal>
+    }
   `,
   styles: [
     `

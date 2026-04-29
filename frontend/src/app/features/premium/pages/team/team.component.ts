@@ -87,87 +87,87 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
           </div>
         }
       </div>
-
-      <!-- Member Modal -->
-      @if (isModalOpen()) {
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div class="glass-panel w-full max-w-md p-8 shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200 relative max-h-[90vh] overflow-y-auto">
-            <button (click)="isModalOpen.set(false)" class="absolute top-4 right-4 text-brand-secondary hover:text-white transition-colors">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            
-            <h2 class="text-2xl font-bold mb-6">{{ editingMember() ? 'Edit Team Member' : 'Add New Member' }}</h2>
-            
-            <form [formGroup]="userForm" (ngSubmit)="submitUser()" class="space-y-4">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">First Name</label>
-                  <input formControlName="firstName" type="text" placeholder="John" 
-                         class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 transition-all">
-                </div>
-                <div>
-                  <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Last Name</label>
-                  <input formControlName="lastName" type="text" placeholder="Doe" 
-                         class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 transition-all">
-                </div>
-              </div>
-              
-              <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Email Address</label>
-                <input formControlName="email" type="email" placeholder="john@example.com" [readonly]="!!editingMember()"
-                       class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 transition-all"
-                       [class.opacity-50]="editingMember()">
-              </div>
-              
-              <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Base Role</label>
-                <select formControlName="role" class="w-full bg-[#0a0a0a] border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 appearance-none cursor-pointer">
-                  <option value="MEMBER">Member</option>
-                  <option value="MANAGER">Manager</option>
-                  <option *ngIf="currentUser()?.role === 'ADMIN'" value="ADMIN">Admin</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Custom Role (Optional)</label>
-                <select formControlName="customRoleId" class="w-full bg-[#0a0a0a] border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 appearance-none cursor-pointer">
-                  <option [value]="null">No Custom Role</option>
-                  @for (role of customRoles(); track role.id) {
-                    <option [value]="role.id">{{ role.name }}</option>
-                  }
-                </select>
-              </div>
-
-              <div *ngIf="!editingMember()" class="bg-brand-primary/10 border border-brand-primary/20 rounded-xl p-3">
-                 <p class="text-[11px] text-brand-primary font-bold">
-                    <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    Default Password: <span class="tracking-widest">Password123!</span>
-                 </p>
-                 <p class="text-[10px] text-brand-secondary mt-1 ml-5">The new member will use this password to log in initially.</p>
-              </div>
-
-              <div class="pt-6 flex gap-3">
-                <app-button type="button" variant="secondary" (clicked)="isModalOpen.set(false)" [disabled]="isSubmitting()" customClass="flex-1 py-3 justify-center">Cancel</app-button>
-                <app-button type="submit" [disabled]="userForm.invalid || isSubmitting()" [loading]="isSubmitting()" variant="premium" customClass="flex-1 py-3 justify-center">
-                  {{ editingMember() ? 'Update' : 'Add' }} Member
-                </app-button>
-              </div>
-            </form>
-          </div>
-        </div>
-      }
-
-      @if (isConfirmDeleteOpen()) {
-        <app-confirm-modal
-          title="Remove Member"
-          [message]="'Are you sure you want to remove ' + selectedMember()?.firstName + ' ' + selectedMember()?.lastName + ' from the organization? This will revoke all access immediately.'"
-          confirmText="Remove Member"
-          [loading]="isSubmitting()"
-          (confirm)="confirmDelete()"
-          (cancel)="isConfirmDeleteOpen.set(false)"
-        ></app-confirm-modal>
-      }
     </div>
+
+    <!-- Member Modal (Moved outside animate-in container to fix fixed positioning) -->
+    @if (isModalOpen()) {
+      <div class="fixed inset-0 bg-black/65 backdrop-blur-[6px] z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div class="glass-panel w-full max-w-md p-8 shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200 relative max-h-[90vh] overflow-y-auto">
+          <button (click)="isModalOpen.set(false)" class="absolute top-4 right-4 text-brand-secondary hover:text-white transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+          
+          <h2 class="text-2xl font-bold mb-6">{{ editingMember() ? 'Edit Team Member' : 'Add New Member' }}</h2>
+          
+          <form [formGroup]="userForm" (ngSubmit)="submitUser()" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">First Name</label>
+                <input formControlName="firstName" type="text" placeholder="John" 
+                       class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 transition-all">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Last Name</label>
+                <input formControlName="lastName" type="text" placeholder="Doe" 
+                       class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 transition-all">
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Email Address</label>
+              <input formControlName="email" type="email" placeholder="john@example.com" [readonly]="!!editingMember()"
+                     class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 transition-all"
+                     [class.opacity-50]="editingMember()">
+            </div>
+            
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Base Role</label>
+              <select formControlName="role" class="custom-select">
+                <option value="MEMBER">Member</option>
+                <option value="MANAGER">Manager</option>
+                <option *ngIf="currentUser()?.role === 'ADMIN'" value="ADMIN">Admin</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Custom Role (Optional)</label>
+              <select formControlName="customRoleId" class="custom-select">
+                <option [value]="null">No Custom Role</option>
+                @for (role of customRoles(); track role.id) {
+                  <option [value]="role.id">{{ role.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div *ngIf="!editingMember()" class="bg-brand-primary/10 border border-brand-primary/20 rounded-xl p-3">
+               <p class="text-[11px] text-brand-primary font-bold">
+                  <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  Default Password: <span class="tracking-widest">Password123!</span>
+               </p>
+               <p class="text-[10px] text-brand-secondary mt-1 ml-5">The new member will use this password to log in initially.</p>
+            </div>
+
+            <div class="pt-6 flex gap-3">
+              <app-button type="button" variant="secondary" (clicked)="isModalOpen.set(false)" [disabled]="isSubmitting()" customClass="flex-1 py-3 justify-center">Cancel</app-button>
+              <app-button type="submit" [disabled]="userForm.invalid || isSubmitting()" [loading]="isSubmitting()" variant="premium" customClass="flex-1 py-3 justify-center">
+                {{ editingMember() ? 'Update' : 'Add' }} Member
+              </app-button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+
+    @if (isConfirmDeleteOpen()) {
+      <app-confirm-modal
+        title="Remove Member"
+        [message]="'Are you sure you want to remove ' + selectedMember()?.firstName + ' ' + selectedMember()?.lastName + ' from the organization? This will revoke all access immediately.'"
+        confirmText="Remove Member"
+        [loading]="isSubmitting()"
+        (confirm)="confirmDelete()"
+        (cancel)="isConfirmDeleteOpen.set(false)"
+      ></app-confirm-modal>
+    }
   `
 })
 export class TeamManagementComponent implements OnInit {
