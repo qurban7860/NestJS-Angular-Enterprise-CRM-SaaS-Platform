@@ -165,32 +165,41 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
                       </div>
 
                       @if (selectedTaskId === task.id) {
-                        <div class="mt-4 pt-4 border-t border-white/10 space-y-4 cursor-default" (click)="$event.stopPropagation()">
+                        <div class="mt-4 pt-4 border-t border-white/10 space-y-6 cursor-default" (click)="$event.stopPropagation()">
                           
                           <!-- Checklist Section -->
-                          <div>
-                            <h5 class="text-[10px] uppercase font-black tracking-widest text-brand-secondary mb-3">Checklist</h5>
-                            <div class="space-y-2">
+                          <div class="bg-black/20 rounded-xl p-4 border border-white/5 shadow-inner">
+                            <h5 class="text-[10px] uppercase font-black tracking-widest text-brand-primary mb-4 flex items-center gap-2">
+                              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                              Checklist
+                            </h5>
+                            <div class="space-y-2.5">
                               @for (item of task.checklist; track $index) {
-                                <div class="flex items-center gap-3 group/item">
-                                  <input type="checkbox" [checked]="item.completed" (change)="toggleChecklistItem(task, $index)" class="w-3.5 h-3.5 rounded bg-black/50 border-white/10 accent-brand-primary cursor-pointer">
+                                <div class="flex items-center gap-3 group/item bg-white/5 p-2 rounded-lg border border-transparent hover:border-white/10 transition-all">
+                                  <input type="checkbox" [checked]="item.completed" (change)="toggleChecklistItem(task, $index)" class="w-4 h-4 rounded bg-black/50 border-white/10 accent-brand-primary cursor-pointer">
                                   <span [class.line-through]="item.completed" [class.opacity-50]="item.completed" class="text-xs flex-1 transition-all">{{ item.text }}</span>
                                   <button (click)="removeChecklistItem(task, $index)" class="opacity-0 group-hover/item:opacity-100 text-brand-secondary hover:text-red-400 transition-all">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                   </button>
                                 </div>
                               }
-                              <div class="flex items-center gap-2 mt-3">
-                                <input #newItemInput (keyup.enter)="addChecklistItem(task, newItemInput.value); newItemInput.value = ''" type="text" placeholder="Add item..." class="flex-1 bg-white/5 border border-white/10 rounded-lg py-1.5 px-3 text-xs outline-none focus:border-brand-primary/50">
-                                <button (click)="addChecklistItem(task, newItemInput.value); newItemInput.value = ''" class="p-1.5 bg-brand-primary/10 text-brand-primary rounded-lg hover:bg-brand-primary/20">
-                                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                              <div class="flex items-center gap-2 mt-4">
+                                <input #newItemInput (keyup.enter)="addChecklistItem(task, newItemInput.value); newItemInput.value = ''" type="text" placeholder="Add detailed sub-task..." class="flex-1 bg-white/5 border border-white/10 rounded-xl py-2 px-4 text-xs outline-none focus:border-brand-primary/50 transition-all">
+                                <button (click)="addChecklistItem(task, newItemInput.value); newItemInput.value = ''" class="p-2 bg-brand-primary/10 text-brand-primary rounded-xl hover:bg-brand-primary/20 transition-all">
+                                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                 </button>
                               </div>
                             </div>
                           </div>
 
-                          <app-file-upload [relatedEntityType]="'TASK'" [relatedEntityId]="task.id" (uploadSuccess)="onUploadSuccess($event)"></app-file-upload>
-                          <app-task-comments [taskId]="task.id"></app-task-comments>
+                          <div class="space-y-2">
+                             <h5 class="text-[10px] uppercase font-black tracking-widest text-brand-secondary">Documents & Files</h5>
+                             <app-file-upload [relatedEntityType]="'TASK'" [relatedEntityId]="task.id" (uploadSuccess)="onUploadSuccess($event)"></app-file-upload>
+                          </div>
+
+                          <div class="pt-4 border-t border-white/5">
+                            <app-task-comments [taskId]="task.id"></app-task-comments>
+                          </div>
                         </div>
                       }
                     </div>
@@ -244,12 +253,11 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
 
                 @if (selectedTaskId === task.id) {
                   <div class="glass-panel mx-4 p-4 border-t-0 rounded-t-none animate-in slide-in-from-top-2 duration-300 space-y-6">
-                    <div>
-                      <h5 class="text-xs font-bold uppercase tracking-wider text-brand-secondary mb-3">Attachments</h5>
+                    <div class="space-y-2">
+                      <h5 class="text-[10px] uppercase font-black tracking-widest text-brand-secondary">Documents & Files</h5>
                       <app-file-upload [relatedEntityType]="'TASK'" [relatedEntityId]="task.id" (uploadSuccess)="onUploadSuccess($event)"></app-file-upload>
                     </div>
                     <div class="pt-4 border-t border-white/5">
-                      <h5 class="text-xs font-bold uppercase tracking-wider text-brand-secondary mb-3">Activity</h5>
                       <app-task-comments [taskId]="task.id"></app-task-comments>
                     </div>
                   </div>

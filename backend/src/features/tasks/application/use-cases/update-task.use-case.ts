@@ -15,6 +15,7 @@ export interface UpdateTaskRequest {
   dueDate?: Date | null;
   contactId?: string;
   dealId?: string;
+  checklist?: any[];
 }
 
 @Injectable()
@@ -39,6 +40,7 @@ export class UpdateTaskUseCase {
       dueDate: req.dueDate,
       contactId: req.contactId,
       dealId: req.dealId,
+      checklist: req.checklist,
     });
 
     await this.taskRepo.save(task);
@@ -52,6 +54,7 @@ export class UpdateTaskUseCase {
     dto.contactId = task.contactId;
     dto.dealId = task.dealId;
     dto.dueDate = task.dueDate;
+    dto.checklist = task.checklist;
     dto.createdAt = task.createdAt || new Date();
 
     return Result.ok(dto);

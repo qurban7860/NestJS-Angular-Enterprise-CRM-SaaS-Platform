@@ -13,6 +13,8 @@ export interface UpdateDealRequest {
   stage?: string;
   contactId?: string;
   companyId?: string;
+  expectedCloseDate?: string;
+  probability?: number;
 }
 
 @Injectable()
@@ -35,6 +37,8 @@ export class UpdateDealUseCase {
       stage: req.stage as any,
       contactId: req.contactId,
       companyId: req.companyId,
+      expectedCloseDate: req.expectedCloseDate ? new Date(req.expectedCloseDate) : undefined,
+      probability: req.probability,
     });
 
     await this.crmRepo.saveDeal(deal);
@@ -49,6 +53,8 @@ export class UpdateDealUseCase {
     dto.ownerId = deal.ownerId;
     dto.contactId = deal.contactId;
     dto.companyId = deal.companyId;
+    dto.expectedCloseDate = deal.expectedCloseDate;
+    dto.probability = deal.probability;
     dto.createdAt = deal.createdAt || new Date();
 
     return Result.ok(dto);

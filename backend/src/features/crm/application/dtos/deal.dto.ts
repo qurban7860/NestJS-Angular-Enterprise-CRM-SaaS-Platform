@@ -39,12 +39,18 @@ export class CreateDealDto {
   contactId?: string;
 
   @ApiProperty({ required: false })
+  @IsOptional()
+  @IsUUID()
   companyId?: string;
 
   @ApiProperty({ required: false })
-  expectedCloseDate?: Date;
+  @IsOptional()
+  @IsString()
+  expectedCloseDate?: string;
 
   @ApiProperty({ example: 75, required: false })
+  @IsOptional()
+  @IsNumber()
   probability?: number;
 
   @IsOptional()
@@ -130,4 +136,14 @@ export class UpdateDealDto {
   @IsOptional()
   @IsUUID()
   companyId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  expectedCloseDate?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  probability?: number;
 }

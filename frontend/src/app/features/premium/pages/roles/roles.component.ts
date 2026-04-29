@@ -118,15 +118,56 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
                 </div>
 
                 <div>
-                  <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-3">Permissions</label>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-                    @for (perm of availablePermissions; track perm) {
-                      <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors group border border-transparent hover:border-white/5">
-                        <input type="checkbox" [value]="perm" [checked]="selectedPermissions.has(perm)" (change)="togglePermission(perm)" 
-                               class="w-4 h-4 rounded bg-black/40 border-white/10 text-brand-primary focus:ring-0 transition-all accent-brand-primary">
-                        <span class="text-[11px] text-brand-secondary group-hover:text-white">{{ perm }}</span>
-                      </label>
-                    }
+                  <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-3">Permissions Matrix</label>
+                  
+                  <div class="glass-panel overflow-hidden border border-white/5 bg-black/20 rounded-xl">
+                    <table class="w-full text-left border-collapse">
+                      <thead>
+                        <tr class="bg-white/5 border-b border-white/10">
+                          <th class="p-3 text-[9px] font-black uppercase tracking-widest text-brand-secondary">Feature</th>
+                          <th class="p-3 text-center text-[9px] font-black uppercase tracking-widest text-brand-secondary">Read</th>
+                          <th class="p-3 text-center text-[9px] font-black uppercase tracking-widest text-brand-secondary">Write</th>
+                          <th class="p-3 text-center text-[9px] font-black uppercase tracking-widest text-brand-secondary">Delete</th>
+                          <th class="p-3 text-center text-[9px] font-black uppercase tracking-widest text-brand-secondary">Row</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-white/5">
+                        @for (feature of permissionFeatures; track feature) {
+                          <tr class="hover:bg-white/[0.02] transition-colors">
+                            <td class="p-3 text-[11px] font-bold text-white capitalize">{{ feature }}</td>
+                            <td class="p-3 text-center">
+                              <input type="checkbox" [checked]="hasPerm(feature, 'read')" (change)="togglePerm(feature, 'read')" 
+                                     class="w-3.5 h-3.5 rounded bg-black/40 border-white/10 text-brand-primary accent-brand-primary">
+                            </td>
+                            <td class="p-3 text-center">
+                              <input type="checkbox" [checked]="hasPerm(feature, 'write')" (change)="togglePerm(feature, 'write')" 
+                                     class="w-3.5 h-3.5 rounded bg-black/40 border-white/10 text-brand-primary accent-brand-primary">
+                            </td>
+                            <td class="p-3 text-center">
+                              <input type="checkbox" [checked]="hasPerm(feature, 'delete')" (change)="togglePerm(feature, 'delete')" 
+                                     class="w-3.5 h-3.5 rounded bg-black/40 border-white/10 text-brand-primary accent-brand-primary">
+                            </td>
+                            <td class="p-3 text-center">
+                              <button type="button" (click)="toggleFeatureRow(feature)" class="text-[8px] font-black uppercase tracking-tighter text-brand-primary/60 hover:text-brand-primary">
+                                {{ isFeatureAllSelected(feature) ? 'None' : 'All' }}
+                              </button>
+                            </td>
+                          </tr>
+                        }
+                        <!-- Special Case: System Audit -->
+                        <tr class="hover:bg-white/[0.02] transition-colors">
+                          <td class="p-3 text-[11px] font-bold text-white">System</td>
+                          <td colspan="3" class="p-3">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                              <input type="checkbox" [checked]="selectedPermissions.has('system:audit')" (change)="togglePermission('system:audit')" 
+                                     class="w-3.5 h-3.5 rounded bg-black/40 border-white/10 text-brand-primary accent-brand-primary">
+                              <span class="text-[10px] text-brand-secondary">Audit Logs Access</span>
+                            </label>
+                          </td>
+                          <td class="p-3 text-center"></td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
@@ -210,6 +251,9 @@ export class RolesComponent implements OnInit {
     permissions: [[]]
   });
 
+  permissionFeatures = ['contacts', 'deals', 'tasks', 'reports', 'workflows', 'roles'];
+  permissionActions = ['read', 'write', 'delete'];
+
   availablePermissions = [
     'contacts:read', 'contacts:write', 'contacts:delete',
     'deals:read', 'deals:write', 'deals:delete',
@@ -271,6 +315,34 @@ export class RolesComponent implements OnInit {
     } else {
       this.selectedPermissions.add(perm);
     }
+    this.updateFormPermissions();
+  }
+
+  hasPerm(feature: string, action: string): boolean {
+    return this.selectedPermissions.has(`${feature}:${action}`);
+  }
+
+  togglePerm(feature: string, action: string) {
+    this.togglePermission(`${feature}:${action}`);
+  }
+
+  toggleFeatureRow(feature: string) {
+    const perms = this.permissionActions.map(a => `${feature}:${a}`);
+    const allSelected = perms.every(p => this.selectedPermissions.has(p));
+    
+    if (allSelected) {
+      perms.forEach(p => this.selectedPermissions.delete(p));
+    } else {
+      perms.forEach(p => this.selectedPermissions.add(p));
+    }
+    this.updateFormPermissions();
+  }
+
+  isFeatureAllSelected(feature: string): boolean {
+    return this.permissionActions.every(a => this.selectedPermissions.has(`${feature}:${a}`));
+  }
+
+  updateFormPermissions() {
     this.roleForm.patchValue({ permissions: Array.from(this.selectedPermissions) });
   }
 

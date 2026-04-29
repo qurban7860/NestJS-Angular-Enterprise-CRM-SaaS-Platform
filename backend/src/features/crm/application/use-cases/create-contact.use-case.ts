@@ -25,7 +25,7 @@ export class CreateContactUseCase implements UseCase<
       companyId: request.companyId,
       ownerId: request.ownerId,
       orgId: request.orgId,
-      status: 'LEAD',
+      status: (request.status as any) || 'LEAD',
       tags: [],
       isDeleted: false,
     });

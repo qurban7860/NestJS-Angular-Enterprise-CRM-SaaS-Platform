@@ -21,7 +21,7 @@ export class CreateDealUseCase implements UseCase<CreateDealDto, DealResponseDto
       companyId: request.companyId,
       ownerId: request.ownerId!,
       orgId: request.orgId!,
-      expectedCloseDate: request.expectedCloseDate,
+      expectedCloseDate: request.expectedCloseDate ? new Date(request.expectedCloseDate) : undefined,
       probability: request.probability,
       isDeleted: false,
     });

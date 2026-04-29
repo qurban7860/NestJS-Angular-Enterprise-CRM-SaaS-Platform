@@ -33,7 +33,7 @@ export class PrismaUserRepository implements IUserRepository {
 
   async findByOrgId(orgId: string): Promise<User[]> {
     const users = await this.prisma.user.findMany({
-      where: { orgId, isActive: true },
+      where: { orgId },
     });
 
     return users.map((user) => this.mapper.toDomain(user));

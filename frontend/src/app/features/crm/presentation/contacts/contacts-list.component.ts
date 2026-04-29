@@ -113,17 +113,20 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
                   class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
                 />
               </div>
-              <div>
-                <label
-                  class="block text-sm font-medium text-brand-secondary mb-1"
-                  >Phone Number (Optional)</label
-                >
-                <input
-                  formControlName="phone"
-                  type="text"
-                  placeholder="Phone Number"
-                  class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
-                />
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-brand-secondary mb-1">Phone Number</label>
+                  <input formControlName="phone" type="text" placeholder="+1..." class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500/30 transition-all">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-brand-secondary mb-1">Status</label>
+                  <select formControlName="status" class="w-full bg-[#0a0a0a] border border-brand-border rounded-xl py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500/30 transition-all appearance-none cursor-pointer">
+                    <option value="LEAD">Lead</option>
+                    <option value="QUALIFIED">Qualified</option>
+                    <option value="CUSTOMER">Customer</option>
+                    <option value="CHURNED">Churned</option>
+                  </select>
+                </div>
               </div>
               <app-button
                 type="submit"
@@ -197,9 +200,10 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
                   >
                     Status
                   </th>
-                  <th
-                    class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-brand-secondary"
-                  >
+                  <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-brand-secondary">
+                    Phone
+                  </th>
+                  <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-brand-secondary">
                     Email
                   </th>
                   <th
@@ -229,6 +233,9 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
                       >
                         {{ contact.status }}
                       </span>
+                    </td>
+                    <td class="px-6 py-4 text-xs font-medium text-brand-secondary">
+                      {{ contact.phone || '—' }}
                     </td>
                     <td class="px-6 py-4 text-brand-secondary text-sm">
                       {{ contact.email }}
@@ -350,6 +357,7 @@ export class ContactsListComponent implements OnInit {
     lastName: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     phone: [''],
+    status: ['LEAD', Validators.required],
     companyId: [null],
   });
 
@@ -386,7 +394,7 @@ export class ContactsListComponent implements OnInit {
         return;
       }
       this.editingContactId = null;
-      this.contactForm.reset();
+      this.contactForm.reset({ status: 'LEAD' });
       this.isModalOpen = true;
     });
   }
@@ -448,6 +456,7 @@ export class ContactsListComponent implements OnInit {
       lastName: contact.lastName,
       email: contact.email,
       phone: contact.phone || '',
+      status: contact.status,
       companyId: null
     });
     this.isModalOpen = true;

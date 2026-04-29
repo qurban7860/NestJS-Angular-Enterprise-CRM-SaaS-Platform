@@ -21,8 +21,13 @@ export class CreateContactDto {
 
   @ApiProperty({ example: 'uuid-company-id', required: false })
   @IsOptional()
-  @IsString() // Avoid IsUUID so we can use placeholder IDs from frontend while wiring up
+  @IsString()
   companyId?: string;
+
+  @ApiProperty({ enum: ['LEAD', 'QUALIFIED', 'CUSTOMER', 'CHURNED'], required: false })
+  @IsOptional()
+  @IsString()
+  status?: string;
 
   @ApiHideProperty()
   @IsOptional()
