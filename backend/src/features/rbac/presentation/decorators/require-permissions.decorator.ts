@@ -39,7 +39,10 @@ export type Permission =
   | 'roles:write'
   | 'roles:delete'
   | 'broadcast:read'
-  | 'broadcast:write';
+  | 'broadcast:write'
+  | 'team:read'
+  | 'team:write'
+  | 'team:delete';
 
 export const RequirePermissions = (...permissions: Permission[]) =>
   SetMetadata(PERMISSIONS_KEY, permissions);

@@ -3,9 +3,12 @@ import { Result } from '../../../../core/domain/base/result';
 import type { IUserRepository } from '../../domain/repositories/user.repository.interface';
 import { UserResponseDto } from '../dtos/auth.dto';
 import { Injectable, Inject } from '@nestjs/common';
+import { UserMapper } from '../mappers/user.mapper';
 
 @Injectable()
 export class ListUsersUseCase implements UseCase<string, UserResponseDto[]> {
+  private userMapper = new UserMapper();
+
   constructor(
     @Inject('IUserRepository') private readonly userRepo: IUserRepository,
   ) {}
@@ -14,15 +17,7 @@ export class ListUsersUseCase implements UseCase<string, UserResponseDto[]> {
     const users = await this.userRepo.findByOrgId(orgId);
 
     return Result.ok<UserResponseDto[]>(
-      users.map((user) => ({
-        id: user.id,
-        email: user.email.value,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        orgId: user.orgId,
-        isActive: user.isActive,
-      })),
+      users.map((user) => this.userMapper.toDto(user) as UserResponseDto),
     );
   }
 }
