@@ -24,7 +24,7 @@ export class CreateContactDto {
   @IsString()
   companyId?: string;
 
-  @ApiProperty({ enum: ['LEAD', 'QUALIFIED', 'CUSTOMER', 'CHURNED'], required: false })
+  @ApiProperty({ enum: ['LEAD', 'QUALIFIED', 'CUSTOMER'], required: false })
   @IsOptional()
   @IsString()
   status?: string;
@@ -54,7 +54,7 @@ export class ContactResponseDto {
   @ApiProperty()
   email!: string;
 
-  @ApiProperty({ enum: ['LEAD', 'QUALIFIED', 'CUSTOMER', 'CHURNED'] })
+  @ApiProperty({ enum: ['LEAD', 'QUALIFIED', 'CUSTOMER'] })
   status!: string;
 
   @ApiProperty({ required: false })

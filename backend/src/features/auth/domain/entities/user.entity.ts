@@ -13,9 +13,15 @@ interface UserProps {
   role: UserRole;
   orgId: string;
   isActive: boolean;
+  isDeleted?: boolean;
   plan?: string;
   avatarUrl?: string;
   refreshToken?: string;
+  customRole?: {
+    id: string;
+    name: string;
+    permissions: string[];
+  } | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -49,6 +55,12 @@ export class User extends Entity<UserProps> {
   get plan(): string {
     return this.props.plan || 'FREE';
   }
+  get isDeleted(): boolean {
+    return this.props.isDeleted ?? false;
+  }
+  get customRole() {
+    return this.props.customRole;
+  }
 
   public static create(props: UserProps, id?: string): Result<User> {
     // Domain validation logic here
@@ -60,6 +72,7 @@ export class User extends Entity<UserProps> {
       {
         ...props,
         isActive: props.isActive ?? true,
+        isDeleted: props.isDeleted ?? false,
         role: props.role ?? 'MEMBER',
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? new Date(),
@@ -94,6 +107,11 @@ export class User extends Entity<UserProps> {
     this.props.firstName = firstName;
     this.props.lastName = lastName;
     this.props.avatarUrl = avatarUrl;
+    this.props.updatedAt = new Date();
+  }
+
+  public delete(): void {
+    this.props.isDeleted = true;
     this.props.updatedAt = new Date();
   }
 }

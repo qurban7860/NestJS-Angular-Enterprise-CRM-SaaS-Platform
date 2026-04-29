@@ -12,7 +12,13 @@ export class CustomRolesService {
   findAll(orgId: string) {
     return this.prisma.customRole.findMany({
       where: { orgId },
-      include: { _count: { select: { users: true } } },
+      include: {
+        _count: { select: { users: true } },
+        users: {
+          select: { firstName: true, lastName: true, email: true },
+          take: 5,
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
   }

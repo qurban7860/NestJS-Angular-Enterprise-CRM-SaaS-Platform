@@ -11,6 +11,7 @@ import {
   PERMISSIONS_KEY,
   Permission,
 } from '../decorators/require-permissions.decorator';
+import { DEFAULT_ROLE_PERMISSIONS } from '../../domain/constants/default-permissions';
 
 interface AuthenticatedUser {
   id: string;
@@ -62,13 +63,20 @@ export class PermissionsGuard implements CanActivate {
     }
 
     if (!customRole) {
-      this.logger.warn(
-        `Permission denied: user=${user.id} has no customRole assigned. ` +
-          `Required: [${requiredPermissions.join(', ')}]`,
-      );
-      throw new ForbiddenException(
-        'You have not been assigned a custom role. Contact your organization admin.',
-      );
+      // Provide default permissions based on role if no custom role is assigned
+      const perms = DEFAULT_ROLE_PERMISSIONS[user.role] || [];
+      const hasAll = requiredPermissions.every((p) => perms.includes(p));
+
+      if (!hasAll) {
+        this.logger.warn(
+          `Permission denied: user=${user.id} role=${user.role} missing permissions. ` +
+            `Required: [${requiredPermissions.join(', ')}]`,
+        );
+        throw new ForbiddenException(
+          'Insufficient permissions for this action. Please contact your organization admin.',
+        );
+      }
+      return true;
     }
 
     const userPermissions = new Set(customRole.permissions);

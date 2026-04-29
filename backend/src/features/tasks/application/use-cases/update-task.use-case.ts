@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Inject } from '@nestjs/common';
 import { Result } from '../../../../core/domain/base/result';
@@ -11,10 +12,10 @@ export interface UpdateTaskRequest {
   description?: string;
   status?: string;
   priority?: string;
-  assigneeId?: string;
+  assigneeId?: string | null;
   dueDate?: Date | null;
-  contactId?: string;
-  dealId?: string;
+  contactId?: string | null;
+  dealId?: string | null;
   checklist?: any[];
 }
 
@@ -55,6 +56,8 @@ export class UpdateTaskUseCase {
     dto.dealId = task.dealId;
     dto.dueDate = task.dueDate;
     dto.checklist = task.checklist;
+    dto.contact = (task as any).contact;
+    dto.deal = (task as any).deal;
     dto.createdAt = task.createdAt || new Date();
 
     return Result.ok(dto);

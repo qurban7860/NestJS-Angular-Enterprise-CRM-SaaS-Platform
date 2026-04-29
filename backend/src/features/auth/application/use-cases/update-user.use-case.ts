@@ -12,6 +12,7 @@ export interface UpdateUserDto {
   role?: 'ADMIN' | 'MANAGER' | 'MEMBER';
   isActive?: boolean;
   customRoleId?: string | null;
+  currentUserRole: string;
 }
 
 @Injectable()
@@ -29,11 +30,22 @@ export class UpdateUserUseCase implements UseCase<UpdateUserDto, any> {
       return Result.fail('User not found in this organization');
     }
 
+    if (user.role === 'ADMIN' && request.currentUserRole !== 'ADMIN') {
+      return Result.fail(
+        'Only an administrator can modify an administrator account',
+      );
+    }
+
     if (request.firstName !== undefined && request.lastName !== undefined) {
       user.updateProfile(request.firstName, request.lastName);
     }
 
     if (request.role !== undefined) {
+      if (request.role === 'ADMIN' && request.currentUserRole !== 'ADMIN') {
+        return Result.fail(
+          'Only an administrator can grant administrator privileges',
+        );
+      }
       user.changeRole(request.role);
     }
 

@@ -51,6 +51,18 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
                   <div>
                     <h3 class="text-lg font-bold text-white">{{ role.name }}</h3>
                     <p class="text-[10px] text-brand-primary font-bold uppercase tracking-widest">{{ role._count?.users || 0 }} Members Assigned</p>
+                    @if (role.users && role.users.length > 0) {
+                      <div class="mt-1 flex flex-wrap gap-1">
+                        @for (user of role.users; track user.email) {
+                          <span class="text-[9px] bg-white/5 border border-white/10 text-brand-secondary px-1.5 py-0.5 rounded" [title]="user.email">
+                            {{ user.firstName }} {{ user.lastName }}
+                          </span>
+                        }
+                        @if (role._count?.users > 5) {
+                          <span class="text-[9px] text-brand-secondary/60 px-1.5 py-0.5">+{{ role._count.users - 5 }} more</span>
+                        }
+                      </div>
+                    }
                   </div>
                 </div>
                 <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

@@ -47,6 +47,12 @@ export class AuthResponseDto {
     role: string;
     orgId: string;
     plan: string;
+    isActive: boolean;
+    customRole?: {
+      id: string;
+      name: string;
+      permissions: string[];
+    } | null;
   };
 
   @ApiProperty({ description: 'JWT Access Token' })
@@ -71,4 +77,14 @@ export class UserResponseDto {
 
   @ApiProperty()
   orgId!: string;
+
+  @ApiProperty()
+  isActive!: boolean;
+
+  @ApiProperty({ required: false })
+  customRole?: {
+    id: string;
+    name: string;
+    permissions: string[];
+  } | null;
 }

@@ -2,7 +2,7 @@
 import { Entity } from '../../../../core/domain/base/entity.base';
 import { Result } from '../../../../core/domain/base/result';
 
-export type ContactStatus = 'LEAD' | 'QUALIFIED' | 'CUSTOMER' | 'CHURNED';
+export type ContactStatus = 'LEAD' | 'QUALIFIED' | 'CUSTOMER';
 
 interface ContactProps {
   firstName: string;

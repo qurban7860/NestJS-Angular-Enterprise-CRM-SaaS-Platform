@@ -124,7 +124,6 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
                     <option value="LEAD">Lead</option>
                     <option value="QUALIFIED">Qualified</option>
                     <option value="CUSTOMER">Customer</option>
-                    <option value="CHURNED">Churned</option>
                   </select>
                 </div>
               </div>
@@ -434,8 +433,6 @@ export class ContactsListComponent implements OnInit {
         );
       case 'CUSTOMER':
         return base + 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
-      case 'CHURNED':
-        return base + 'bg-red-500/10 text-red-400 border border-red-500/20';
       default:
         return base + 'bg-gray-500/10 text-gray-400';
     }

@@ -2,6 +2,7 @@ import { Directive, Input, TemplateRef, ViewContainerRef, inject, OnInit, OnDest
 import { Store } from '@ngrx/store';
 import { selectUser } from '../state/auth/auth.reducer';
 import { Subject, takeUntil } from 'rxjs';
+import { DEFAULT_ROLE_PERMISSIONS } from '../constants/default-permissions';
 
 /**
  * Structural directive to hide/show elements based on the active user's permissions.
@@ -25,6 +26,8 @@ export class HasPermissionDirective implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   private requiredPermissions: string[] = [];
+  
+  @Input() requireAll: boolean = true;
 
   @Input() set hasPermission(val: string[] | string | null | undefined) {
     if (typeof val === 'string') {
@@ -46,7 +49,15 @@ export class HasPermissionDirective implements OnInit, OnDestroy {
       .subscribe(user => {
         if (user) {
           this.userRole = user.role;
-          this.userPermissions = user.customRole?.permissions || [];
+          
+          // Logic: 
+          // 1. If custom role exists, use its permissions
+          // 2. Otherwise, use default permissions for the role
+          if (user.customRole) {
+            this.userPermissions = user.customRole.permissions || [];
+          } else {
+            this.userPermissions = DEFAULT_ROLE_PERMISSIONS[user.role] || [];
+          }
         } else {
           this.userRole = null;
           this.userPermissions = [];
@@ -75,8 +86,12 @@ export class HasPermissionDirective implements OnInit, OnDestroy {
       return true;
     }
 
-    // 3. For others, check if they have EVERY required permission
-    return this.requiredPermissions.every(p => this.userPermissions.includes(p));
+    // 3. For others, check based on requireAll flag
+    if (this.requireAll) {
+      return this.requiredPermissions.every(p => this.userPermissions.includes(p));
+    } else {
+      return this.requiredPermissions.some(p => this.userPermissions.includes(p));
+    }
   }
 
   ngOnDestroy(): void {

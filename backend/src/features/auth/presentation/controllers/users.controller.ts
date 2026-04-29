@@ -11,9 +11,14 @@ import { UpdateUserUseCase } from '../../application/use-cases/update-user.use-c
 import { DeleteUserUseCase } from '../../application/use-cases/delete-user.use-case';
 import { UserResponseDto } from '../../application/dtos/auth.dto';
 import { CurrentUser } from '../../../../core/presentation/decorators/current-user.decorator';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../../../auth/presentation/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../../rbac/presentation/guards/permissions.guard';
+import { RequirePermissions } from '../../../rbac/presentation/decorators/require-permissions.decorator';
 
 @ApiTags('Users')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('auth/users')
 export class UsersController {
   constructor(
@@ -24,6 +29,7 @@ export class UsersController {
   ) {}
 
   @Get()
+  @RequirePermissions('team:read')
   @ApiOperation({ summary: 'List all users in the current organization' })
   @ApiResponse({ status: 200, type: [UserResponseDto] })
   async findAll(@CurrentUser() user: { orgId: string }) {
@@ -35,6 +41,7 @@ export class UsersController {
   }
 
   @Post()
+  @RequirePermissions('team:write')
   @ApiOperation({ summary: 'Add a new member to the organization' })
   @ApiResponse({ status: 201, type: UserResponseDto })
   async create(@CurrentUser() user: { orgId: string }, @Body() dto: any) {
@@ -46,17 +53,19 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @RequirePermissions('team:write')
   @ApiOperation({ summary: 'Update a team member' })
   @ApiResponse({ status: 200, type: UserResponseDto })
   async update(
-    @CurrentUser() user: { orgId: string },
+    @CurrentUser() user: { orgId: string, role: string },
     @Param('id') userId: string,
     @Body() dto: any
   ) {
     const result = await this.updateUserUseCase.execute({ 
       ...dto, 
       userId, 
-      orgId: user.orgId 
+      orgId: user.orgId,
+      currentUserRole: user.role
     });
     if (result.isFailure) {
       throw new BadRequestException(result.error);
@@ -65,14 +74,15 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @RequirePermissions('team:write')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove a team member' })
   @ApiResponse({ status: 204 })
   async remove(
-    @CurrentUser() user: { orgId: string },
+    @CurrentUser() user: { orgId: string, role: string },
     @Param('id') userId: string
   ) {
-    const result = await this.deleteUserUseCase.execute({ userId, orgId: user.orgId });
+    const result = await this.deleteUserUseCase.execute({ userId, orgId: user.orgId, currentUserRole: user.role });
     if (result.isFailure) {
       throw new BadRequestException(result.error);
     }

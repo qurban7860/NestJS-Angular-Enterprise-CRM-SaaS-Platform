@@ -12,9 +12,9 @@ export class PrismaUserRepository implements IUserRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-      include: { org: true },
+    const user = await this.prisma.user.findFirst({
+      where: { id, isDeleted: false },
+      include: { org: true, customRole: true },
     });
 
     if (!user) return null;
@@ -22,9 +22,9 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-      include: { org: true },
+    const user = await this.prisma.user.findFirst({
+      where: { email, isDeleted: false },
+      include: { org: true, customRole: true },
     });
 
     if (!user) return null;
@@ -33,7 +33,8 @@ export class PrismaUserRepository implements IUserRepository {
 
   async findByOrgId(orgId: string): Promise<User[]> {
     const users = await this.prisma.user.findMany({
-      where: { orgId },
+      where: { orgId, isDeleted: false },
+      include: { customRole: true },
     });
 
     return users.map((user) => this.mapper.toDomain(user));
@@ -41,7 +42,7 @@ export class PrismaUserRepository implements IUserRepository {
 
   async exists(email: string): Promise<boolean> {
     const count = await this.prisma.user.count({
-      where: { email },
+      where: { email, isDeleted: false },
     });
     return count > 0;
   }
@@ -59,7 +60,7 @@ export class PrismaUserRepository implements IUserRepository {
   async delete(id: string): Promise<void> {
     await this.prisma.user.update({
       where: { id },
-      data: { isActive: false }, // Soft delete by default
+      data: { isDeleted: true },
     });
   }
 }

@@ -9,11 +9,15 @@ export class DeleteUserUseCase implements UseCase<{ userId: string; orgId: strin
     @Inject('IUserRepository') private readonly userRepo: IUserRepository,
   ) {}
 
-  async execute(request: { userId: string; orgId: string }): Promise<Result<void>> {
+  async execute(request: { userId: string; orgId: string; currentUserRole: string }): Promise<Result<void>> {
     const user = await this.userRepo.findById(request.userId);
 
     if (!user || user.orgId !== request.orgId) {
       return Result.fail('User not found or access denied');
+    }
+
+    if (user.role === 'ADMIN' && request.currentUserRole !== 'ADMIN') {
+      return Result.fail('Only an administrator can delete an administrator account');
     }
 
     // We don't delete the last admin of an organization for safety

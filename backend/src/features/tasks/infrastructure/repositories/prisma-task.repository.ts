@@ -14,7 +14,11 @@ export class PrismaTaskRepository implements ITaskRepository {
   async findById(id: string): Promise<Task | null> {
     const raw = await this.prisma.task.findUnique({ 
       where: { id },
-      include: { assignee: true }
+      include: { 
+        assignee: true,
+        contact: { select: { id: true, firstName: true, lastName: true } },
+        deal: { select: { id: true, title: true } }
+      }
     });
     if (!raw) return null;
     return this.mapToTask(raw);
@@ -26,7 +30,11 @@ export class PrismaTaskRepository implements ITaskRepository {
         orgId,
         isDeleted: false
       },
-      include: { assignee: true },
+      include: { 
+        assignee: true,
+        contact: { select: { id: true, firstName: true, lastName: true } },
+        deal: { select: { id: true, title: true } }
+      },
       orderBy: { createdAt: 'desc' }
     });
 
@@ -64,7 +72,7 @@ export class PrismaTaskRepository implements ITaskRepository {
   }
 
   private mapToTask(raw: any): Task {
-    return Task.create({
+    const task = Task.create({
       title: raw.title,
       description: raw.description || undefined,
       status: raw.status as any,
@@ -83,6 +91,12 @@ export class PrismaTaskRepository implements ITaskRepository {
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
     }, raw.id).getValue();
+
+    // Add extra info for DTO mapping
+    (task as any).contact = raw.contact;
+    (task as any).deal = raw.deal;
+    
+    return task;
   }
 
   async save(task: Task): Promise<void> {

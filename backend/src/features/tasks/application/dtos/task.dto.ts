@@ -19,10 +19,10 @@ export class CreateTaskDto {
   @IsEnum(['LOW', 'MEDIUM', 'HIGH', 'URGENT'])
   priority?: string;
 
-  @ApiProperty({ example: 'uuid-user-id', required: false })
+  @ApiProperty({ example: 'uuid-user-id', required: false, nullable: true })
   @IsOptional()
   @IsString()
-  assigneeId?: string;
+  assigneeId?: string | null;
 
   @ApiHideProperty()
   @IsOptional()
@@ -41,15 +41,15 @@ export class CreateTaskDto {
   @IsDateString()
   dueDate?: Date | null;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @IsOptional()
   @IsString()
-  contactId?: string;
+  contactId?: string | null;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @IsOptional()
   @IsString()
-  dealId?: string;
+  dealId?: string | null;
 
   @ApiProperty()
   @IsOptional()
@@ -128,6 +128,19 @@ export class TaskResponseDto {
     lastName: string;
   };
 
+  @ApiProperty({ required: false })
+  contact?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
+
+  @ApiProperty({ required: false })
+  deal?: {
+    id: string;
+    title: string;
+  };
+
   @ApiProperty()
   createdAt!: Date;
 }
@@ -148,25 +161,25 @@ export class UpdateTaskDto {
   @IsEnum(['LOW', 'MEDIUM', 'HIGH', 'URGENT'])
   priority?: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @IsOptional()
   @IsString()
-  assigneeId?: string;
+  assigneeId?: string | null;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @IsOptional()
   @IsDateString()
   dueDate?: Date | null;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @IsOptional()
   @IsString()
-  contactId?: string;
+  contactId?: string | null;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @IsOptional()
   @IsString()
-  dealId?: string;
+  dealId?: string | null;
 
   @ApiProperty({ required: false })
   @IsOptional()

@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angula
 import { PremiumService } from '../../../../core/services/premium.service';
 import { ToastActions } from '../../../../core/state/toast/toast.actions';
 import { Store } from '@ngrx/store';
+import { selectUser } from '../../../../core/state/auth/auth.reducer';
 import { take, forkJoin } from 'rxjs';
 import { SubscriptionService } from '../../../../core/services/subscription.service';
 import { ConfirmModalComponent } from '../../../../core/components/confirm-modal/confirm-modal.component';
@@ -44,10 +45,10 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
                 </div>
               </div>
               <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button (click)="editMember(member)" class="p-2 text-brand-secondary hover:text-white transition-colors rounded-lg hover:bg-white/5" title="Edit Member">
+                <button *hasPermission="'team:write'" (click)="editMember(member)" class="p-2 text-brand-secondary hover:text-white transition-colors rounded-lg hover:bg-white/5" title="Edit Member">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                 </button>
-                <button (click)="deleteMember(member)" class="p-2 text-brand-secondary hover:text-red-400 transition-colors rounded-lg hover:bg-white/5" title="Remove Member">
+                <button *hasPermission="'team:write'" (click)="deleteMember(member)" class="p-2 text-brand-secondary hover:text-red-400 transition-colors rounded-lg hover:bg-white/5" title="Remove Member">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 </button>
               </div>
@@ -123,7 +124,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
                 <select formControlName="role" class="w-full bg-[#0a0a0a] border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 appearance-none cursor-pointer">
                   <option value="MEMBER">Member</option>
                   <option value="MANAGER">Manager</option>
-                  <option value="ADMIN">Admin</option>
+                  <option *ngIf="currentUser()?.role === 'ADMIN'" value="ADMIN">Admin</option>
                 </select>
               </div>
 
@@ -135,6 +136,14 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
                     <option [value]="role.id">{{ role.name }}</option>
                   }
                 </select>
+              </div>
+
+              <div *ngIf="!editingMember()" class="bg-brand-primary/10 border border-brand-primary/20 rounded-xl p-3">
+                 <p class="text-[11px] text-brand-primary font-bold">
+                    <svg class="w-3.5 h-3.5 inline mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Default Password: <span class="tracking-widest">Password123!</span>
+                 </p>
+                 <p class="text-[10px] text-brand-secondary mt-1 ml-5">The new member will use this password to log in initially.</p>
               </div>
 
               <div class="pt-6 flex gap-3">
@@ -172,6 +181,7 @@ export class TeamManagementComponent implements OnInit {
   isConfirmDeleteOpen = signal(false);
   selectedMember = signal<any>(null);
   editingMember = signal<any>(null);
+  currentUser = this.store.selectSignal(selectUser);
   
   userForm: FormGroup = this.fb.group({
     firstName: ['', Validators.required],

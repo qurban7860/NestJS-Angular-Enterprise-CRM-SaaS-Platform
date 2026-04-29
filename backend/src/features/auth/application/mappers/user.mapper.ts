@@ -16,8 +16,10 @@ export class UserMapper extends Mapper<User, any, any> {
         role: raw.role,
         orgId: raw.orgId,
         isActive: raw.isActive,
+        isDeleted: raw.isDeleted,
         avatarUrl: raw.avatarUrl,
         refreshToken: raw.refreshToken,
+        customRole: raw.customRole,
         plan: raw.org?.plan || raw.plan,
         createdAt: raw.createdAt,
         updatedAt: raw.updatedAt,
@@ -37,6 +39,9 @@ export class UserMapper extends Mapper<User, any, any> {
       role: user.role,
       orgId: user.orgId,
       plan: user.plan,
+      isActive: user.isActive,
+      customRole: user.customRole,
+      customRoleId: user.customRole?.id || null,
     };
   }
 
@@ -50,6 +55,7 @@ export class UserMapper extends Mapper<User, any, any> {
       role: user.role,
       orgId: user.orgId,
       isActive: user.isActive,
+      isDeleted: user.isDeleted,
     };
   }
 }

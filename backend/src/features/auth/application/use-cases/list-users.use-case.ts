@@ -21,6 +21,7 @@ export class ListUsersUseCase implements UseCase<string, UserResponseDto[]> {
         lastName: user.lastName,
         role: user.role,
         orgId: user.orgId,
+        isActive: user.isActive,
       })),
     );
   }

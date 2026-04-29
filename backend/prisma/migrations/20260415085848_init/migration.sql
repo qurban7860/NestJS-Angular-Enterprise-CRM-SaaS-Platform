@@ -2,7 +2,7 @@
 CREATE TYPE "Role" AS ENUM ('ADMIN', 'MANAGER', 'MEMBER');
 
 -- CreateEnum
-CREATE TYPE "ContactStatus" AS ENUM ('LEAD', 'QUALIFIED', 'CUSTOMER', 'CHURNED');
+CREATE TYPE "ContactStatus" AS ENUM ('LEAD', 'QUALIFIED', 'CUSTOMER');
 
 -- CreateEnum
 CREATE TYPE "CompanySize" AS ENUM ('STARTUP', 'SMB', 'MID', 'ENTERPRISE');

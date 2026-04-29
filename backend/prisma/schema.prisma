@@ -25,7 +25,6 @@ enum ContactStatus {
   LEAD
   QUALIFIED
   CUSTOMER
-  CHURNED
 }
 
 enum CompanySize {
@@ -122,6 +121,7 @@ model User {
   orgId          String
   avatarUrl      String?
   isActive       Boolean  @default(true)
+  isDeleted      Boolean  @default(false)
   refreshToken   String?
   lastLogin      DateTime?
   createdAt      DateTime @default(now())
@@ -145,7 +145,7 @@ model User {
   sentBroadcasts   Broadcast[]      @relation("BroadcastSender")
 
   @@index([email])
-  @@index([orgId])
+  @@index([orgId, isDeleted])
   @@map("users")
 }
 

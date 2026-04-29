@@ -211,7 +211,7 @@ import { BroadcastingService } from '../../services/broadcasting.service';
         </div>
 
         <!-- System (Admin) -->
-        <div>
+        <div *hasPermission="['system:audit']">
           <p
             class="text-[10px] font-bold uppercase tracking-widest text-brand-secondary/60 px-3 mb-2"
           >
@@ -245,7 +245,7 @@ import { BroadcastingService } from '../../services/broadcasting.service';
         </div>
 
         <!-- Administration -->
-        <div>
+        <div *hasPermission="['team:read', 'roles:read', 'broadcast:write']; requireAll: false">
           <p
             class="text-[10px] font-bold uppercase tracking-widest text-brand-secondary/60 px-3 mb-2"
           >
@@ -253,7 +253,7 @@ import { BroadcastingService } from '../../services/broadcasting.service';
           </p>
           <div class="space-y-1">
             <a
-              *ngIf="(user$ | async)?.role === 'ADMIN'"
+              *hasPermission="'team:read'"
               routerLink="/premium/team"
               routerLinkActive="active"
               class="nav-link"
@@ -325,7 +325,7 @@ import { BroadcastingService } from '../../services/broadcasting.service';
         </div>
 
         <!-- Automation & Insights -->
-        <div>
+        <div *hasPermission="['workflows:read', 'reports:read']; requireAll: false">
           <p
             class="text-[10px] font-bold uppercase tracking-widest text-brand-secondary/60 px-3 mb-2"
           >
@@ -380,7 +380,7 @@ import { BroadcastingService } from '../../services/broadcasting.service';
         </div>
 
         <!-- Billing -->
-        <div>
+        <div *ngIf="(user$ | async)?.role === 'ADMIN' || (user$ | async)?.role === 'MANAGER'">
           <p
             class="text-[10px] font-bold uppercase tracking-widest text-brand-secondary/60 px-3 mb-2"
           >

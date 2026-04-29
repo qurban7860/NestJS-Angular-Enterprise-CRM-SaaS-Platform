@@ -7,11 +7,11 @@ export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 
 interface TaskProps {
   title: string;
-  description?: string;
+  description?: string | null;
   status: TaskStatus;
   priority: TaskPriority;
   orgId: string;
-  assigneeId?: string;
+  assigneeId?: string | null;
   creatorId: string;
   dueDate?: Date | null;
   completedAt?: Date | null;
@@ -31,11 +31,11 @@ export class Task extends Entity<TaskProps> {
   }
 
   get title(): string { return this.props.title; }
-  get description(): string | undefined { return this.props.description; }
+  get description(): string | undefined | null { return this.props.description; }
   get status(): TaskStatus { return this.props.status; }
   get priority(): TaskPriority { return this.props.priority; }
   get orgId(): string { return this.props.orgId; }
-  get assigneeId(): string | undefined { return this.props.assigneeId; }
+  get assigneeId(): string | null | undefined { return this.props.assigneeId; }
   get creatorId(): string { return this.props.creatorId; }
   get dueDate(): Date | null | undefined { return this.props.dueDate; }
   get completedAt(): Date | null | undefined { return this.props.completedAt; }
