@@ -174,7 +174,7 @@ const ACTION_LABELS: Record<string, string> = {
             <div>
               <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Workflow Name <span class="text-red-400">*</span></label>
               <input formControlName="name" type="text" placeholder="e.g., Auto-assign High Value Leads"
-                class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500/50 transition-all outline-none ring-0 focus:ring-2 focus:ring-emerald-500/30"
+                class="input-field px-4 py-2.5 text-sm"
                 [ngClass]="{'border-red-500/50': wfForm.get('name')?.invalid && wfForm.get('name')?.touched}">
               @if (wfForm.get('name')?.invalid && wfForm.get('name')?.touched) {
                 <p class="text-red-400 text-xs mt-1">Name must be at least 3 characters.</p>
@@ -196,7 +196,7 @@ const ACTION_LABELS: Record<string, string> = {
             <div>
               <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Description</label>
               <textarea formControlName="description" rows="2" placeholder="Briefly describe what this workflow does..."
-                class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500/50 transition-all resize-none outline-none ring-0 focus:ring-2 focus:ring-emerald-500/30"></textarea>
+                class="input-field px-4 py-2.5 text-sm resize-none"></textarea>
             </div>
 
             <!-- Actions Section -->
@@ -240,7 +240,7 @@ const ACTION_LABELS: Record<string, string> = {
                         <label class="block text-[9px] font-bold uppercase text-brand-secondary/60 mb-1">Configuration (JSON)</label>
                         <input formControlName="configText"
                           [placeholder]="getConfigPlaceholder(action.get('type')?.value)"
-                          class="w-full bg-white/5 border border-brand-border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-emerald-500/50 font-mono"
+                          class="input-field px-3 py-2 text-xs font-mono"
                           [ngClass]="{'border-red-500/50': isInvalidJson(action.get('configText')?.value)}">
                         @if (isInvalidJson(action.get('configText')?.value)) {
                           <p class="text-red-400 text-[10px] mt-1">Invalid JSON format.</p>

@@ -36,7 +36,7 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
               (focus)="showResults = true"
               (keydown.escape)="closeSearch()"
               placeholder="Search anything..."
-            class="w-full bg-white/5 border border-brand-border rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-brand-primary/50 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
+            class="input-field rounded-lg py-2 pl-10 pr-4"
             >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 absolute left-3 top-2.5 text-brand-secondary group-focus-within:text-brand-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -146,7 +146,7 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
                               <p class="text-[10px] text-brand-secondary/50 mt-2">{{ n.createdAt | date:'shortTime' }}</p>
                             </div>
                             @if (!n.isRead) {
-                              <div class="w-2 h-2 rounded-full bg-brand-primary mt-1.5 shrink-0 shadow-[0_0_8px_rgba(99,102,241,0.8)]"></div>
+                              <div class="w-2 h-2 rounded-full bg-brand-primary mt-1.5 shrink-0 shadow-[0_0_10px_rgba(99,102,241,0.5)]"></div>
                             }
                           </div>
                         </div>
@@ -183,7 +183,7 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
               (focus)="showResults = true"
               (keydown.escape)="closeMobileSearch()"
               placeholder="Search anything..."
-              class="w-full bg-white/5 border border-brand-border rounded-lg py-3 pl-12 pr-10 text-base focus:outline-none focus:border-brand-primary/50 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
+              class="input-field rounded-lg py-3 pl-12 pr-12 text-base mobile-search-input"
               autofocus
             >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 absolute left-4 top-3.5 text-brand-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -193,6 +193,11 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
               <div class="absolute right-12 top-3.5 flex items-center">
                 <div class="w-5 h-5 border-2 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin"></div>
               </div>
+            }
+            @if (searchControl.value) {
+              <button (click)="searchControl.setValue('')" class="absolute right-4 top-3.5 text-brand-secondary hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
             }
           </div>
           <button (click)="closeMobileSearch()" class="p-2 text-brand-secondary hover:text-white transition-colors whitespace-nowrap text-sm font-medium">Cancel</button>
@@ -309,6 +314,11 @@ export class TopNavComponent implements OnInit {
     this.showMobileSearch = !this.showMobileSearch;
     if (this.showMobileSearch) {
       this.showResults = true;
+      // Focus improvement for mobile browsers
+      setTimeout(() => {
+        const input = document.querySelector('.mobile-search-input') as HTMLInputElement;
+        input?.focus();
+      }, 150);
     }
   }
 
@@ -319,14 +329,16 @@ export class TopNavComponent implements OnInit {
 
   onSearchResultClick(event: Event, url: string) {
     event.preventDefault();
+    event.stopPropagation();
+    this.showResults = false;
     this.router.navigateByUrl(this.normalizeUrl(url));
-    this.closeSearch();
   }
 
   onMobileSearchResultClick(event: Event, url: string) {
     event.preventDefault();
+    event.stopPropagation();
+    this.showMobileSearch = false;
     this.router.navigateByUrl(this.normalizeUrl(url));
-    this.closeMobileSearch();
   }
 
 
@@ -344,6 +356,7 @@ export class TopNavComponent implements OnInit {
 
   private normalizeUrl(url: string): string {
     if (!url) return '/dashboard';
-    return url.startsWith('/') ? url : `/${url}`;
+    const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+    return cleanUrl.replace(/\/+/g, '/'); // Sanitize double slashes
   }
 }

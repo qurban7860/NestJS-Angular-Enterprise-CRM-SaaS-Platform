@@ -170,7 +170,7 @@ const REPORT_TYPE_META: Record<string, { label: string; icon: string; color: str
             <div>
               <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Report Name <span class="text-red-400">*</span></label>
               <input formControlName="name" type="text" placeholder="e.g., Q2 Sales Performance"
-                class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 transition-all outline-none ring-0 focus:ring-2 focus:ring-amber-500/30"
+                class="input-field px-4 py-2.5 text-sm"
                 [ngClass]="{'border-red-500/50': reportForm.get('name')?.invalid && reportForm.get('name')?.touched}">
               @if (reportForm.get('name')?.invalid && reportForm.get('name')?.touched) {
                 <p class="text-red-400 text-xs mt-1">Report name is required (min 3 characters).</p>
@@ -214,7 +214,7 @@ const REPORT_TYPE_META: Record<string, { label: string; icon: string; color: str
             <div>
               <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Description</label>
               <textarea formControlName="description" rows="2" placeholder="Briefly describe the objective of this report..."
-                class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500/50 transition-all resize-none outline-none ring-0 focus:ring-2 focus:ring-amber-500/30"></textarea>
+                class="input-field px-4 py-2.5 text-sm"></textarea>
             </div>
 
             <!-- Submit -->

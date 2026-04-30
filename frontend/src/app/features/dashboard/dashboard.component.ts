@@ -72,7 +72,7 @@ import { SubscriptionService } from '../../core/services/subscription.service';
           </div>
 
           <!-- Feature Spotlight -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          <!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             <div routerLink="/crm/deals" class="glass-panel p-5 border border-emerald-500/20 hover:border-emerald-400/40 transition-all cursor-pointer group">
               <p class="text-[10px] uppercase tracking-widest text-emerald-400/80 font-bold">Revenue Engine</p>
               <h3 class="text-lg font-bold mt-2">Pipeline Momentum</h3>
@@ -88,7 +88,7 @@ import { SubscriptionService } from '../../core/services/subscription.service';
               <h3 class="text-lg font-bold mt-2">Decision Analytics</h3>
               <p class="text-xs text-brand-secondary mt-1">Generate operational reports and leadership-ready exports from one control surface.</p>
             </div>
-          </div>
+          </div> -->
 
           <!-- Main Visual Section -->
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

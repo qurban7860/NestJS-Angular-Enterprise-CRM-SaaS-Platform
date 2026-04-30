@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { PremiumActions } from '../../../../core/state/premium/premium.actions';
@@ -9,6 +9,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angula
 import { ToastActions } from '../../../../core/state/toast/toast.actions';
 import { SubscriptionService } from '../../../../core/services/subscription.service';
 import { PremiumService } from '../../../../core/services/premium.service';
+import { selectUser } from '../../../../core/state/auth/auth.reducer';
 import { take } from 'rxjs';
 import { HasPermissionDirective } from '../../../../core/directives/has-permission.directive';
 import { ConfirmModalComponent } from '../../../../core/components/confirm-modal/confirm-modal.component';
@@ -117,17 +118,17 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
           <h2 class="text-2xl font-bold mb-6">{{ editingRole() ? 'Edit' : 'Create' }} Custom Role</h2>
 
           <form [formGroup]="roleForm" (ngSubmit)="submitRole()" class="space-y-6">
-            <div class="space-y-4">
+            <div class="space-y-5">
               <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Role Name</label>
-                <input formControlName="name" type="text" placeholder="e.g., Senior Accountant" 
-                class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 transition-all outline-none ring-0 focus:ring-2 focus:ring-blue-500/30">
+                <input formControlName="name" type="text" placeholder="e.g., Senior Accountant" aria-label="Role Name"
+                class="input-field px-4 py-2.5 text-sm">
               </div>
 
               <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Description</label>
                 <textarea formControlName="description" rows="2" placeholder="Briefly describe this role's purpose..." 
-                 class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 transition-all resize-none outline-none ring-0 focus:ring-2 focus:ring-blue-500/30"></textarea>
+                 class="input-field px-4 py-2.5 text-sm"></textarea>
               </div>
 
               <div>
@@ -209,7 +210,7 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
               <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Select Team Member</label>
               <select #uidSelect class="custom-select">
                 <option value="">— Choose Team Member —</option>
-                @for (user of orgUsers(); track user.id) {
+                @for (user of filteredOrgUsers(); track user.id) {
                   <option [value]="user.id">{{ user.firstName }} {{ user.lastName }} · {{ user.email }}</option>
                 }
               </select>
@@ -221,7 +222,7 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
             <div class="pt-6 flex gap-3">
               <button [disabled]="isSubmitting()" (click)="isAssignModalOpen.set(false)" class="flex-1 px-4 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-sm transition-all whitespace-nowrap disabled:opacity-50">Cancel</button>
               <button [disabled]="isSubmitting()" (click)="submitAssignment(uidSelect.value)" class="premium-button flex-1 py-2.5 whitespace-nowrap relative">
-                <span class="flex items-center justify-center gap-2" [class.opacity-0]="isSubmitting()">Confirm Assignment</span>
+                <span class="flex items-center justify-center gap-2" [class.opacity-0]="isSubmitting()">Confirm</span>
                 <div *ngIf="isSubmitting()" class="absolute inset-0 flex items-center justify-center">
                   <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                 </div>
@@ -255,6 +256,7 @@ export class RolesComponent implements OnInit {
   
   roles$ = this.store.select(selectPremiumRoles);
   loading$ = this.store.select(selectPremiumLoading);
+  currentUser$ = this.store.select(selectUser);
 
   isModalOpen = signal(false);
   isAssignModalOpen = signal(false);
@@ -262,9 +264,21 @@ export class RolesComponent implements OnInit {
   selectedRole = signal<any>(null);
   editingRole = signal<any>(null);
   isSubmitting = signal(false);
+  
   orgUsers = signal<any[]>([]);
   loadingUsers = signal(false);
   
+  // Top 1% Approach: Use computed for reactive filtering
+  filteredOrgUsers = computed(() => {
+    const users = this.orgUsers();
+    let currentAdminId: string | undefined;
+    
+    // Get current user ID to exclude from assignment
+    this.currentUser$.pipe(take(1)).subscribe(u => currentAdminId = u?.id);
+    
+    return users.filter(u => u.id !== currentAdminId);
+  });
+
   roleForm: FormGroup = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
     description: [''],
@@ -398,8 +412,10 @@ export class RolesComponent implements OnInit {
     if (this.orgUsers().length === 0) {
       this.loadingUsers.set(true);
       this.premiumService.getOrgUsers().pipe(take(1)).subscribe({
-        next: (users: any[]) => {
-          this.orgUsers.set(users);
+        next: (res: any) => {
+          // Correctly handle the response structure provided in the input
+          const users = res.data || res;
+          this.orgUsers.set(Array.isArray(users) ? users : []);
           this.loadingUsers.set(false);
         },
         error: () => this.loadingUsers.set(false)

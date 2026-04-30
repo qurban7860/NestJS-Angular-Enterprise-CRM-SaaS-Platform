@@ -103,7 +103,7 @@ import { selectUser } from '../../../../core/state/auth/auth.reducer';
               <div>
                 <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-brand-secondary mb-2">Subject Header</label>
                 <input formControlName="title" type="text" placeholder="URGENT SYSTEM UPDATE" 
-                class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-all placeholder:opacity-30">
+                class="input-field rounded-xl px-4 py-3 placeholder:opacity-30">
               </div>
 
               <div>
@@ -127,7 +127,7 @@ import { selectUser } from '../../../../core/state/auth/auth.reducer';
               <div>
                 <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-brand-secondary mb-2">Broadcast Message</label>
                 <textarea formControlName="message" rows="4" placeholder="Transmit your message here..." 
-                class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-all resize-none placeholder:opacity-30"></textarea>
+                class="input-field px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-all resize-none placeholder:opacity-30"></textarea>
               </div>
 
               <div>

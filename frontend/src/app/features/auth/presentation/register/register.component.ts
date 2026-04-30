@@ -41,7 +41,7 @@ import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.r
                   type="text" 
                   formControlName="firstName"
                   placeholder="John" 
-                  class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
+                  class="py-3 px-4 input-field"
                   [ngClass]="{'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20': registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched}">
                 @if (registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched) {
                   <p class="text-red-400 text-xs ml-1 mt-1">First name is required</p>
@@ -54,7 +54,7 @@ import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.r
                   type="text" 
                   formControlName="lastName"
                   placeholder="Doe" 
-                  class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
+                  class="input-field py-3 px-4"
                   [ngClass]="{'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20': registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched}">
                 @if (registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched) {
                   <p class="text-red-400 text-xs ml-1 mt-1">Last name is required</p>
@@ -69,7 +69,7 @@ import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.r
                 type="text" 
                 formControlName="orgName"
                 placeholder="Acme Corp" 
-                class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
+                class="input-field py-3 px-4"
                 [ngClass]="{'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20': registerForm.get('orgName')?.invalid && registerForm.get('orgName')?.touched}">
               @if (registerForm.get('orgName')?.invalid && registerForm.get('orgName')?.touched) {
                 <p class="text-red-400 text-xs ml-1 mt-1">Organization name is required</p>
@@ -83,7 +83,7 @@ import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.r
                 type="email" 
                 formControlName="email"
                 placeholder="john.doe@enterprise.com" 
-                class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
+                class="input-field py-3 px-4"
                 [ngClass]="{'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20': registerForm.get('email')?.invalid && registerForm.get('email')?.touched}">
               @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
                 <p class="text-red-400 text-xs ml-1 mt-1">
@@ -101,7 +101,7 @@ import { selectIsLoading, selectError } from '../../../../core/state/auth/auth.r
                   [type]="showPassword() ? 'text' : 'password'" 
                   formControlName="password"
                   placeholder="••••••••" 
-                  class="w-full bg-white/5 border border-brand-border rounded-xl py-3 px-4 pr-12 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
+                  class="input-field py-3 px-4 pr-12"
                   [ngClass]="{'border-red-500/50 focus:border-red-500/50 focus:ring-red-500/20': registerForm.get('password')?.invalid && registerForm.get('password')?.touched}">
                 <button type="button" (click)="togglePassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-secondary hover:text-white transition-colors p-1">
                   @if (showPassword()) {

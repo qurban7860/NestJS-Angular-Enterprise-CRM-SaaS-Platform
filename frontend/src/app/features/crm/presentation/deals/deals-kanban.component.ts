@@ -152,14 +152,14 @@ interface KanbanColumn {
           <form [formGroup]="dealForm" (ngSubmit)="submitDeal()" class="space-y-4">
             <div>
               <label class="block text-sm font-medium text-brand-secondary mb-1">Deal Title</label>
-              <input formControlName="title" type="text" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="Enter the deal title">
+              <input formControlName="title" type="text" class="input-field" placeholder="Enter the deal title">
             </div>
             <div>
               <label class="block text-sm font-medium text-brand-secondary mb-1">Value Amount</label>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                 <input formControlName="valueAmount" type="number" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="0.00">
+                 <input formControlName="valueAmount" type="number" class="input-field" placeholder="0.00">
                  <div class="relative">
-                    <input formControlName="probability" type="number" min="0" max="100" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="Win %">
+                    <input formControlName="probability" type="number" min="0" max="100" class="input-field" placeholder="Win %">
                     <span class="absolute right-3 top-2.5 text-brand-secondary text-xs">%</span>
                  </div>
               </div>
@@ -168,7 +168,7 @@ interface KanbanColumn {
             <div>
               <label class="block text-sm font-medium text-brand-secondary mb-1">Associate Contact</label>
               <div class="relative">
-                 <input [formControl]="contactSearchControl" type="text" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="Search contacts...">
+                 <input [formControl]="contactSearchControl" type="text" class="input-field" placeholder="Search contacts...">
                  <svg class="w-4 h-4 absolute right-3 top-3 text-brand-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                  
                  @if (contactSearchResults$ | async; as results) {
@@ -200,7 +200,7 @@ interface KanbanColumn {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Pipeline Stage</label>
-                <select formControlName="stage" class="custom-select ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500">
+                <select formControlName="stage" class="custom-select">
                   <option value="PROSPECTING">Prospecting</option>
                   <option value="QUALIFICATION">Qualification</option>
                   <option value="PROPOSAL">Proposal</option>
@@ -210,7 +210,7 @@ interface KanbanColumn {
               </div>
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Status</label>
-                <select formControlName="status" class="custom-select ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 ">
+                <select formControlName="status" class="custom-select">
                   <option value="OPEN">Open</option>
                   <option value="WON">Won</option>
                   <option value="LOST">Lost</option>

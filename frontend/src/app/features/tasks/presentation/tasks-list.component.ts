@@ -61,7 +61,7 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
         </svg>
       </span>
       <input formControlName="search" type="text" placeholder="Search tasks..."
-        class="w-full bg-white/5 border border-brand-border rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-brand-primary/50 ring-0 focus:ring-2 focus:ring-blue-500/30 transition-all duration-200">
+        class="input-field rounded-lg py-2 pl-10 pr-4 text-sm">
     </div>
 
     <!-- Priority -->
@@ -322,13 +322,13 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Task Title</label>
                 <input formControlName="title" type="text" placeholder="e.g., Follow up on Q2 proposal" 
-                class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200">
+                class="input-field">
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Description</label>
                 <textarea formControlName="description" rows="3" placeholder="Add context..." 
-                class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 resize-none"></textarea>
+                class="input-field resize-none"></textarea>
               </div>
 
               <div class="grid grid-cols-2 gap-4">
@@ -344,7 +344,7 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
                 <div>
                   <label class="block text-sm font-medium text-brand-secondary mb-1">Due Date</label>
                   <input formControlName="dueDate" type="date" 
-                  class="cursor-pointer w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 [color-scheme:dark]">
+                  class="cursor-pointer input-field [color-scheme:dark]">
                 </div>
               </div>
             </div>
@@ -365,7 +365,7 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
                   <label class="block text-sm font-medium text-brand-secondary mb-1">Associate Contact</label>
                   <div class="relative">
                     <input [formControl]="contactSearchControl" type="text" placeholder="Search contacts..." 
-                           class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500/30 transition-all text-xs">
+                           class="input-field text-xs">
                     @if (contactSearchResults$ | async; as results) {
                       @if (results.length > 0 && showContactResults) {
                         <div class="absolute top-full left-0 right-0 mt-1 glass-panel z-[60] border border-white/10 max-h-40 overflow-y-auto shadow-2xl">
@@ -381,7 +381,7 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
                   <label class="block text-sm font-medium text-brand-secondary mb-1">Associate Deal</label>
                   <div class="relative">
                     <input [formControl]="dealSearchControl" type="text" placeholder="Search deals..." 
-                           class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500/30 transition-all text-xs">
+                           class="input-field text-xs">
                     @if (dealSearchResults$ | async; as results) {
                       @if (results.length > 0 && showDealResults) {
                         <div class="absolute top-full left-0 right-0 mt-1 glass-panel z-[60] border border-white/10 max-h-40 overflow-y-auto shadow-2xl">

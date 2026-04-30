@@ -104,19 +104,19 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
               <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">First Name</label>
                 <input formControlName="firstName" type="text" placeholder="John" 
-                       class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 transition-all">
+                       class="input-field px-4 py-2.5 text-sm">
               </div>
               <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Last Name</label>
                 <input formControlName="lastName" type="text" placeholder="Doe" 
-                       class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 transition-all">
+                       class="input-field px-4 py-2.5 text-sm">
               </div>
             </div>
             
             <div>
               <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Email Address</label>
               <input formControlName="email" type="email" placeholder="john@example.com" [readonly]="!!editingMember()"
-                     class="w-full bg-white/5 border border-brand-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-primary/50 transition-all"
+                     class="input-field rounded-xl px-4 py-2.5 text-sm"
                      [class.opacity-50]="editingMember()">
             </div>
             

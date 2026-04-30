@@ -27,9 +27,9 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
   imports: [CommonModule, ReactiveFormsModule, ButtonComponent, ConfirmModalComponent, HasPermissionDirective],
   template: `
     <div class="space-y-4 sm:space-y-6 animate-in fade-in duration-500">
-      <!-- Header -->
+      <!-- Top Action Bar -->
       <div
-        class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white/5 border border-brand-border rounded-2xl p-4 sm:p-6 glass-panel gap-4"
+        class="flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white/5 border border-brand-border rounded-2xl p-4 sm:p-6 glass-panel gap-4 sm:gap-6"
       >
         <div>
           <h1 class="text-xl sm:text-2xl font-bold">Contacts</h1>
@@ -38,7 +38,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
           </p>
         </div>
         <div *hasPermission="'contacts:write'">
-          <app-button variant="premium" (clicked)="openCreateModal()" customClass="justify-center">
+          <app-button variant="premium" (clicked)="openCreateModal()" customClass="justify-center w-full sm:w-auto px-6">
             <span class="text-lg">+</span> Add Contact
           </app-button>
         </div>
@@ -68,7 +68,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
             [formControl]="searchControl"
             type="text"
             placeholder="Search contacts..."
-            class="w-full bg-white/5 border border-brand-border rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-brand-primary/50 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
+            class="input-field rounded-lg py-2 pl-10 pr-4"
           />
         </div>
 
@@ -78,7 +78,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
       </div>
 
       <!-- Table Section -->
-      <div class="glass-panel overflow-hidden border border-white/5 sm:border-brand-border">
+      <div class="glass-panel overflow-hidden border border-white/10">
         @if (isLoading$ | async) {
           <div class="flex flex-col items-center justify-center p-12 sm:p-20 space-y-4">
             <div
@@ -90,7 +90,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
           </div>
         } @else {
           <div class="overflow-x-auto">
-            <!-- Desktop Table -->
+            <!-- Data Grid -->
             <table class="w-full text-left border-collapse hidden md:table">
               <thead>
                 <tr class="border-b border-brand-border bg-white/5">
@@ -107,7 +107,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
                   <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-brand-secondary">
                     Phone
                   </th>
-                  <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-brand-secondary">
+                  <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-brand-secondary hidden lg:table-cell">
                     Email
                   </th>
                   <th
@@ -141,7 +141,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
                     <td class="px-6 py-4 text-xs font-medium text-brand-secondary">
                       {{ contact.phone || '—' }}
                     </td>
-                    <td class="px-6 py-4 text-brand-secondary text-sm">
+                    <td class="px-6 py-4 text-brand-secondary text-sm hidden lg:table-cell">
                       {{ contact.email }}
                     </td>
                     <td class="px-6 py-4 text-right">
@@ -249,7 +249,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
                   formControlName="firstName"
                   type="text"
                   placeholder="First Name"
-                  class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
+                  class="input-field rounded-xl py-2 px-3"
                 />
               </div>
               <div>
@@ -261,7 +261,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
                   formControlName="lastName"
                   type="text"
                   placeholder="Last Name"
-                  class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
+                  class="input-field"
                 />
               </div>
             </div>
@@ -274,13 +274,13 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
                 formControlName="email"
                 type="email"
                 placeholder="Email Address"
-                class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
+                class="input-field rounded-xl py-2 px-3"
               />
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Phone Number</label>
-                <input formControlName="phone" type="text" placeholder="+1..." class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500/30 transition-all">
+                <input formControlName="phone" type="text" placeholder="+1..." class="input-field">
               </div>
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Status</label>
