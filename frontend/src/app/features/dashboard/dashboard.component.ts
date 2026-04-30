@@ -14,7 +14,7 @@ import { SubscriptionService } from '../../core/services/subscription.service';
   standalone: true,
   imports: [CommonModule, RouterModule, RequiresPremiumDirective],
   template: `
-    <div class="space-y-6 sm:y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div class="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <!-- Welcome Header -->
       <section>
         @if (user$ | async; as user) {
@@ -68,6 +68,25 @@ import { SubscriptionService } from '../../core/services/subscription.service';
                   <div class="h-full bg-brand-primary transition-all duration-1000" [style.width.%]="stats.taskCompletionRate"></div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- Feature Spotlight -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            <div routerLink="/crm/deals" class="glass-panel p-5 border border-emerald-500/20 hover:border-emerald-400/40 transition-all cursor-pointer group">
+              <p class="text-[10px] uppercase tracking-widest text-emerald-400/80 font-bold">Revenue Engine</p>
+              <h3 class="text-lg font-bold mt-2">Pipeline Momentum</h3>
+              <p class="text-xs text-brand-secondary mt-1">Leverage live pipeline signals to prioritize high-value opportunities faster.</p>
+            </div>
+            <div routerLink="/tasks" class="glass-panel p-5 border border-amber-500/20 hover:border-amber-400/40 transition-all cursor-pointer group">
+              <p class="text-[10px] uppercase tracking-widest text-amber-400/80 font-bold">Execution Hub</p>
+              <h3 class="text-lg font-bold mt-2">Task Intelligence</h3>
+              <p class="text-xs text-brand-secondary mt-1">Track blockers, status flow, and completion velocity across teams in real time.</p>
+            </div>
+            <div routerLink="/premium/reports" class="glass-panel p-5 border border-indigo-500/20 hover:border-indigo-400/40 transition-all cursor-pointer group">
+              <p class="text-[10px] uppercase tracking-widest text-indigo-400/80 font-bold">Insight Layer</p>
+              <h3 class="text-lg font-bold mt-2">Decision Analytics</h3>
+              <p class="text-xs text-brand-secondary mt-1">Generate operational reports and leadership-ready exports from one control surface.</p>
             </div>
           </div>
 

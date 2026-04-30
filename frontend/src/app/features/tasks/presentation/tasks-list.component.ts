@@ -49,12 +49,12 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
         </div>
       </div>
 
-      <div class="glass-panel p-4 rounded-xl flex flex-row gap-4 items-center justify-between border border-white/5 relative z-20 overflow-x-auto">
+      <div class="glass-panel p-4 rounded-xl flex flex-col xl:flex-row gap-4 xl:items-center xl:justify-between border border-white/5 relative z-20">
   
-  <div class="flex flex-1 gap-3 items-center min-w-0" [formGroup]="advancedFilters">
+  <div class="flex flex-col sm:flex-row flex-1 gap-3 sm:items-center min-w-0 w-full" [formGroup]="advancedFilters">
 
     <!-- Search -->
-    <div class="relative w-64 shrink-0">
+    <div class="relative w-full sm:w-64 xl:flex-1 shrink-0">
       <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-secondary">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -65,7 +65,7 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
     </div>
 
     <!-- Priority -->
-    <select formControlName="priority" class="custom-select w-40 shrink-0">
+    <select formControlName="priority" class="custom-select w-full sm:w-40 shrink-0">
       <option value="">All Priorities</option>
       <option value="URGENT">Urgent</option>
       <option value="HIGH">High</option>
@@ -73,8 +73,17 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
       <option value="LOW">Low</option>
     </select>
 
+    <!-- Status -->
+    <select formControlName="status" class="custom-select w-full sm:w-40 shrink-0">
+      <option value="">All Statuses</option>
+      <option value="TODO">To Do</option>
+      <option value="IN_PROGRESS">In Progress</option>
+      <option value="REVIEW">Review</option>
+      <option value="DONE">Done</option>
+    </select>
+
     <!-- Assignee -->
-    <select formControlName="assigneeId" class="custom-select w-44 shrink-0">
+    <select formControlName="assigneeId" class="custom-select w-full sm:w-44 shrink-0">
       <option value="">All Assignees</option>
       <option [value]="currentUserId">My Tasks</option>
       @for (user of users$ | async; track user.id) {

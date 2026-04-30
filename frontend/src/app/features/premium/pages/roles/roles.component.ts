@@ -20,7 +20,7 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
   imports: [CommonModule, RequiresPremiumDirective, RouterLink, ReactiveFormsModule, HasPermissionDirective, ConfirmModalComponent, ButtonComponent],
   template: `
     <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white/5 border border-brand-border rounded-2xl p-8 glass-panel relative overflow-hidden gap-6">
+      <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white/5 border border-brand-border rounded-2xl p-6 sm:p-8 glass-panel relative overflow-hidden gap-4 sm:gap-6">
         <div class="relative z-10">
           <h1 class="text-3xl font-extrabold tracking-tight">Identity <span class="bg-gradient-premium bg-clip-text text-transparent italic">Manager</span></h1>
           <p class="text-brand-secondary mt-2 max-w-xl">Configure granular permissions and custom access levels for your organization.</p>
@@ -108,8 +108,8 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
 
     <!-- Create Role Modal -->
     @if (isModalOpen()) {
-      <div class="fixed inset-0 bg-black/65 backdrop-blur-[6px] z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
-        <div class="glass-panel w-full max-w-md p-8 shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200 relative max-h-[90vh] overflow-y-auto">
+      <div class="fixed inset-0 bg-black/65 backdrop-blur-[6px] z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200 overflow-y-auto">
+        <div class="glass-panel w-full max-w-2xl p-6 sm:p-8 shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200 relative my-auto">
           <button (click)="closeModal()" class="absolute top-4 right-4 text-brand-secondary hover:text-white transition-colors">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
@@ -133,8 +133,8 @@ import { ButtonComponent } from '../../../../core/components/button/button.compo
               <div>
                 <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-3">Permissions Matrix</label>
                 
-                <div class="glass-panel overflow-hidden border border-white/5 bg-black/20 rounded-xl">
-                  <table class="w-full text-left border-collapse">
+                <div class="glass-panel overflow-x-auto border border-white/5 bg-black/20 rounded-xl">
+                  <table class="w-full text-left border-collapse min-w-[400px]">
                     <thead>
                       <tr class="bg-white/5 border-b border-white/10">
                         <th class="p-3 text-[9px] font-black uppercase tracking-widest text-brand-secondary">Feature</th>

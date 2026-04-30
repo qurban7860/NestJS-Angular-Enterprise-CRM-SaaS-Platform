@@ -14,7 +14,7 @@ import { AuditLogService, AuditLogEntry, AuditLogPage } from '../../../core/serv
           <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">
             Audit <span class="bg-gradient-premium bg-clip-text text-transparent italic pr-2">Trail</span>
           </h1>
-          <p class="text-brand-secondary text-xs sm:sm mt-1">A complete history of all changes made in your organization.</p>
+          <p class="text-brand-secondary text-xs sm:text-sm mt-1">A complete history of all changes made in your organization.</p>
         </div>
         <div class="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-sm font-bold uppercase tracking-wider">
           <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

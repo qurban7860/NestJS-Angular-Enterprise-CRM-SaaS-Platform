@@ -4,9 +4,13 @@ import { MainLayoutComponent } from './core/layouts/main-layout/main-layout.comp
 export const routes: Routes = [
   {
     path: '',
+    loadComponent: () => import('./features/landing/landing.component').then(c => c.LandingComponent),
+    pathMatch: 'full'
+  },
+  {
+    path: '',
     component: MainLayoutComponent,
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
         path: 'dashboard',
         loadComponent: () => import('./features/dashboard/dashboard.component').then(c => c.DashboardComponent)

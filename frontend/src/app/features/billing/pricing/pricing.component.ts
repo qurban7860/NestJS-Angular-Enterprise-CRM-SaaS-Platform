@@ -2,6 +2,8 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BillingService, SubscriptionStatus } from '../../../core/services/billing.service';
 import { SubscriptionService } from '../../../core/services/subscription.service';
+import { Store } from '@ngrx/store';
+import { ToastActions } from '../../../core/state/toast/toast.actions';
 
 @Component({
   selector: 'app-pricing',
@@ -89,7 +91,7 @@ import { SubscriptionService } from '../../../core/services/subscription.service
                 Custom Workflows
               </li>
             </ul>
-            <button (click)="upgrade('PREMIUM')" class="premium-button mt-8 w-full py-3 px-4 rounded-xl font-bold text-sm shadow-lg shadow-brand-primary/20">Upgrade Now</button>
+            <button (click)="upgrade('PREMIUM')" [disabled]="processingPlan === 'PREMIUM'" class="premium-button mt-8 w-full py-3 px-4 rounded-xl font-bold text-sm shadow-lg shadow-brand-primary/20 disabled:opacity-60 disabled:cursor-not-allowed">Upgrade Now</button>
           </div>
 
           <!-- Enterprise Plan -->
@@ -114,7 +116,7 @@ import { SubscriptionService } from '../../../core/services/subscription.service
                 Custom Roles & Permissions
               </li>
             </ul>
-            <button (click)="upgrade('ENTERPRISE')" class="mt-8 w-full py-3 px-4 rounded-xl border border-indigo-500/30 text-indigo-400 font-bold text-sm hover:bg-indigo-500/10 transition-colors">Contact Sales</button>
+            <button (click)="upgrade('ENTERPRISE')" [disabled]="processingPlan === 'ENTERPRISE'" class="mt-8 w-full py-3 px-4 rounded-xl border border-indigo-500/30 text-indigo-400 font-bold text-sm hover:bg-indigo-500/10 transition-colors disabled:opacity-60 disabled:cursor-not-allowed">Contact Sales</button>
           </div>
         </div>
 
@@ -128,7 +130,9 @@ import { SubscriptionService } from '../../../core/services/subscription.service
 export class PricingComponent implements OnInit {
   private billing = inject(BillingService);
   private subscriptionService = inject(SubscriptionService);
+  private store = inject(Store);
   subscription: SubscriptionStatus | null = null;
+  processingPlan: 'PREMIUM' | 'ENTERPRISE' | null = null;
 
   ngOnInit() {
     this.subscriptionService.subscription$.subscribe(status => {
@@ -138,22 +142,24 @@ export class PricingComponent implements OnInit {
 
   syncStatus() {
     this.subscriptionService.refreshStatus().subscribe({
-      next: (status) => {
-        console.log('Subscription synced:', status);
+      next: () => {
+        this.store.dispatch(ToastActions.showToast({ message: 'Subscription status refreshed', toastType: 'success' }));
       },
       error: (err) => {
-        console.error('Failed to sync subscription:', err);
+        this.store.dispatch(ToastActions.showToast({ message: err?.error?.message || 'Failed to refresh subscription status', toastType: 'error' }));
       }
     });
   }
 
   upgrade(plan: 'PREMIUM' | 'ENTERPRISE') {
+    this.processingPlan = plan;
     this.billing.createCheckoutSession(plan).subscribe({
       next: (url) => {
         window.location.href = url;
       },
       error: (err) => {
-        console.error('Failed to initiate checkout:', err);
+        this.processingPlan = null;
+        this.store.dispatch(ToastActions.showToast({ message: err?.error?.message || 'Failed to initiate checkout', toastType: 'error' }));
       }
     });
   }

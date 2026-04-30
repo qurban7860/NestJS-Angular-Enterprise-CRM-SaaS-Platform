@@ -29,6 +29,11 @@ export class HasPermissionDirective implements OnInit, OnDestroy {
   
   @Input() requireAll: boolean = true;
 
+  @Input('hasPermissionRequireAll') 
+  set hasPermissionRequireAll(val: boolean | string) {
+    this.requireAll = val !== false && val !== 'false';
+  }
+
   @Input() set hasPermission(val: string[] | string | null | undefined) {
     if (typeof val === 'string') {
       this.requiredPermissions = [val];

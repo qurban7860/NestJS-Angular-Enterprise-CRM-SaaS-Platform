@@ -12,6 +12,7 @@ import { ConfirmModalComponent } from '../../../../core/components/confirm-modal
 import { PremiumService } from '../../../../core/services/premium.service';
 import { ButtonComponent } from '../../../../core/components/button/button.component';
 import { take } from 'rxjs';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 const REPORT_TYPE_META: Record<string, { label: string; icon: string; color: string }> = {
   SALES: {
@@ -79,9 +80,7 @@ const REPORT_TYPE_META: Record<string, { label: string; icon: string; color: str
               <div class="flex justify-between items-start mb-4">
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center border"
                   [class]="getTypeColorClass(report.config?.type)">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    [innerHTML]="getTypeIcon(report.config?.type)">
-                  </svg>
+                  <span [innerHTML]="getTypeIcon(report.config?.type)"></span>
                 </div>
                 <div class="flex items-center gap-2">
                   <!-- Format badge -->
@@ -252,6 +251,7 @@ export class ReportsComponent implements OnInit {
   private store = inject(Store);
   private fb = inject(FormBuilder);
   private premiumService = inject(PremiumService);
+  private sanitizer = inject(DomSanitizer);
 
   reports$ = this.store.select(selectPremiumReports);
   loading$ = this.store.select(selectPremiumLoading);
@@ -558,8 +558,10 @@ export class ReportsComponent implements OnInit {
     return REPORT_TYPE_META[type]?.label || type;
   }
 
-  getTypeIcon(type: string): string {
-    return REPORT_TYPE_META[type]?.icon || REPORT_TYPE_META['SALES'].icon;
+  getTypeIcon(type: string): SafeHtml {
+    const iconPath = REPORT_TYPE_META[type]?.icon || REPORT_TYPE_META['SALES'].icon;
+    const iconSvg = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">${iconPath}</svg>`;
+    return this.sanitizer.bypassSecurityTrustHtml(iconSvg);
   }
 
   getTypeColorClass(type: string): string {

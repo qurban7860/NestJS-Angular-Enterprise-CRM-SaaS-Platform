@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, HostListener, signal, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { selectUser } from '../../state/auth/auth.reducer';
 import { AuthActions } from '../../state/auth/auth.actions';
@@ -18,7 +18,8 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, RouterLink, ReactiveFormsModule],
   template: `
-    <header class="h-16 glass-panel !rounded-none border-x-0 border-t-0 flex items-center justify-between px-4 sm:px-8">
+    <header class="h-16 glass-panel !rounded-none border-x-0 border-t-0 flex items-center justify-between px-4 sm:px-8 relative z-20">
+
       <div class="flex items-center gap-4 flex-1">
         <button (click)="navService.toggleSidebar()" class="lg:hidden p-2 text-brand-secondary hover:text-white transition-colors hover:bg-white/5 rounded-lg">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -26,7 +27,8 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
           </svg>
         </button>
 
-        <div class="relative w-full max-w-md group hidden sm:block">
+        <div #searchContainer class="relative w-full max-w-md group hidden sm:block">
+
           <div class="relative">
             <input
               type="text"
@@ -48,7 +50,7 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
           </div>
 
           @if (showResults && searchControl.value) {
-            <div class="absolute top-full left-0 w-full mt-6 glass-panel glass-elevated p-2 animate-in fade-in slide-in-from-top-2 duration-200 z-[100] max-h-[70vh] overflow-y-auto">
+            <div class="absolute top-full left-0 w-full mt-2 glass-panel glass-elevated p-2 animate-in fade-in slide-in-from-top-2 duration-200 z-[150] max-h-[70vh] overflow-y-auto rounded-b-xl">
               @if (searchResults$ | async; as groups) {
                 @if (groups.length > 0) {
                   @for (group of groups; track group.type) {
@@ -56,7 +58,7 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
                       <h3 class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-secondary/60">{{ group.type }}</h3>
                       <div class="space-y-1 mt-1">
                         @for (item of group.results; track item.id) {
-                          <a [routerLink]="item.url" (click)="closeSearch()" class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/10 transition-colors group/item">
+                          <a [routerLink]="item.url" (click)="onSearchResultClick($event, item.url)" class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/10 transition-colors group/item">
                             <div class="w-8 h-8 rounded bg-brand-primary/10 flex items-center justify-center text-brand-primary group-hover/item:bg-brand-primary group-hover/item:text-white transition-all">
                               @if (item.type === 'contact') {
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
@@ -84,9 +86,17 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
             </div>
           }
         </div>
+
+        <!-- Mobile Search Toggle -->
+        <button (click)="toggleMobileSearch()" class="sm:hidden p-2 text-brand-secondary hover:text-white transition-colors hover:bg-white/5 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
       </div>
 
       <div class="flex items-center gap-2 sm:gap-4">
+
         @if (subscription$ | async; as sub) {
           @if (sub.plan && sub.plan !== 'FREE') {
             <div class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-gradient-premium text-white shadow-lg">
@@ -111,7 +121,8 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
           </button>
 
           @if (isNotificationOpen$ | async) {
-            <div class="absolute top-full right-0 mt-3 w-80 glass-panel glass-elevated animate-in fade-in slide-in-from-top-2 duration-200 z-[100] overflow-hidden">
+            <div class="fixed top-16 left-2 right-2 sm:absolute sm:top-full sm:left-auto sm:right-0 sm:mt-3 sm:w-96 sm:translate-x-0 w-auto sm:max-w-none glass-panel glass-elevated animate-in fade-in slide-in-from-top-2 duration-200 z-[150] overflow-hidden rounded-b-xl">
+
               <div class="p-4 border-b border-white/5 flex items-center justify-between bg-white/5">
                 <h3 class="font-bold text-sm">Notifications</h3>
                 <span class="text-[10px] bg-brand-primary/20 text-brand-primary px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
@@ -158,13 +169,83 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
           Upgrade
         </a>
       </div>
-    </header>
+  </header>
+
+  <!-- Mobile Search Overlay -->
+  @if (showMobileSearch) {
+    <div class="fixed inset-0 z-[250] bg-brand-dark/95 backdrop-blur-lg flex flex-col animate-in fade-in duration-200">
+      <div class="p-4 border-b border-brand-border">
+        <div class="flex items-center gap-3 max-w-2xl mx-auto">
+          <div class="relative flex-1">
+            <input
+              type="text"
+              [formControl]="searchControl"
+              (focus)="showResults = true"
+              (keydown.escape)="closeMobileSearch()"
+              placeholder="Search anything..."
+              class="w-full bg-white/5 border border-brand-border rounded-lg py-3 pl-12 pr-10 text-base focus:outline-none focus:border-brand-primary/50 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200"
+              autofocus
+            >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 absolute left-4 top-3.5 text-brand-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            @if (isSearching()) {
+              <div class="absolute right-12 top-3.5 flex items-center">
+                <div class="w-5 h-5 border-2 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin"></div>
+              </div>
+            }
+          </div>
+          <button (click)="closeMobileSearch()" class="p-2 text-brand-secondary hover:text-white transition-colors whitespace-nowrap text-sm font-medium">Cancel</button>
+        </div>
+      </div>
+      <div class="flex-1 overflow-y-auto p-4">
+        <div class="max-w-2xl mx-auto">
+          @if (showResults && searchControl.value) {
+            @if (searchResults$ | async; as groups) {
+              @if (groups.length > 0) {
+                @for (group of groups; track group.type) {
+                  <div class="mb-4 last:mb-0">
+                    <h3 class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-secondary/60">{{ group.type }}</h3>
+                    <div class="space-y-1 mt-1">
+                      @for (item of group.results; track item.id) {
+                        <a [routerLink]="item.url" (click)="onMobileSearchResultClick($event, item.url)" class="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-colors group/item">
+                          <div class="w-10 h-10 rounded bg-brand-primary/10 flex items-center justify-center text-brand-primary group-hover/item:bg-brand-primary group-hover/item:text-white transition-all">
+                            @if (item.type === 'contact') {
+                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                            } @else if (item.type === 'task') {
+                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                            } @else {
+                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            }
+                          </div>
+                          <div class="flex-1 min-w-0">
+                            <p class="text-base font-semibold text-white truncate">{{ item.title }}</p>
+                            <p class="text-sm text-brand-secondary truncate">{{ item.subtitle }}</p>
+                          </div>
+                        </a>
+                      }
+                    </div>
+                  </div>
+                }
+              } @else if (!isSearching()) {
+                <div class="p-8 text-center">
+                  <p class="text-base text-brand-secondary">No results found for "{{ searchControl.value }}"</p>
+                </div>
+              }
+            }
+          }
+        </div>
+      </div>
+    </div>
+  }
   `,
 })
+
 export class TopNavComponent implements OnInit {
   private store = inject(Store);
   private billing = inject(BillingService);
   private searchService = inject(GlobalSearchService);
+  private router = inject(Router);
   navService = inject(NavService);
 
   @ViewChild('searchContainer') searchContainer!: ElementRef;
@@ -179,7 +260,9 @@ export class TopNavComponent implements OnInit {
   searchControl = new FormControl('');
   searchResults$: Observable<SearchGroup[]> = of([]);
   showResults = false;
+  showMobileSearch = false;
   isSearching = signal(false); // Signal for better performance
+
 
   ngOnInit() {
     this.store.dispatch(NotificationActions.loadNotifications());
@@ -218,8 +301,34 @@ export class TopNavComponent implements OnInit {
 
   closeSearch() {
     this.showResults = false;
-    this.searchControl.setValue('', { emitEvent: false });
+    this.isSearching.set(false);
+    this.searchControl.setValue('');
   }
+
+  toggleMobileSearch() {
+    this.showMobileSearch = !this.showMobileSearch;
+    if (this.showMobileSearch) {
+      this.showResults = true;
+    }
+  }
+
+  closeMobileSearch() {
+    this.showMobileSearch = false;
+    this.closeSearch();
+  }
+
+  onSearchResultClick(event: Event, url: string) {
+    event.preventDefault();
+    this.router.navigateByUrl(this.normalizeUrl(url));
+    this.closeSearch();
+  }
+
+  onMobileSearchResultClick(event: Event, url: string) {
+    event.preventDefault();
+    this.router.navigateByUrl(this.normalizeUrl(url));
+    this.closeMobileSearch();
+  }
+
 
   toggleNotifications() {
     this.store.dispatch(NotificationActions.toggleDropdown({}));
@@ -231,5 +340,10 @@ export class TopNavComponent implements OnInit {
 
   logout() {
     this.store.dispatch(AuthActions.logout());
+  }
+
+  private normalizeUrl(url: string): string {
+    if (!url) return '/dashboard';
+    return url.startsWith('/') ? url : `/${url}`;
   }
 }

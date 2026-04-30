@@ -45,10 +45,10 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
                 </div>
               </div>
               <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button *hasPermission="'team:write'" (click)="editMember(member)" [disabled]="isSubmitting()" class="p-2 text-brand-secondary hover:text-white transition-colors rounded-lg hover:bg-white/5 disabled:opacity-50" title="Edit Member">
+                <button *hasPermission="'team:write'" (click)="editMember(member)" [disabled]="isSubmitting() || isCurrentUser(member)" class="p-2 text-brand-secondary hover:text-white transition-colors rounded-lg hover:bg-white/5 disabled:opacity-50" [title]="isCurrentUser(member) ? 'You cannot edit your own role settings' : 'Edit Member'">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                 </button>
-                <button *hasPermission="'team:write'" (click)="deleteMember(member)" [disabled]="isSubmitting()" class="p-2 text-brand-secondary hover:text-red-400 transition-colors rounded-lg hover:bg-white/5 disabled:opacity-50" title="Remove Member">
+                <button *hasPermission="'team:write'" (click)="deleteMember(member)" [disabled]="isSubmitting() || isCurrentUser(member)" class="p-2 text-brand-secondary hover:text-red-400 transition-colors rounded-lg hover:bg-white/5 disabled:opacity-50" [title]="isCurrentUser(member) ? 'You cannot remove yourself' : 'Remove Member'">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 </button>
               </div>
@@ -73,7 +73,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
             </div>
             
             <div class="mt-6 flex gap-2">
-               <app-button variant="ghost" customClass="w-full text-[11px] font-bold uppercase tracking-wider py-2" [disabled]="isSubmitting()" (clicked)="toggleStatus(member)">
+               <app-button variant="ghost" customClass="w-full text-[11px] font-bold uppercase tracking-wider py-2" [disabled]="isSubmitting() || isCurrentUser(member)" (clicked)="toggleStatus(member)">
                  {{ member.isActive ? 'Deactivate' : 'Activate' }}
                </app-button>
             </div>
@@ -122,7 +122,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
             
             <div>
               <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Base Role</label>
-              <select formControlName="role" class="custom-select">
+              <select formControlName="role" class="custom-select" [disabled]="isEditingCurrentUser()">
                 <option value="MEMBER">Member</option>
                 <option value="MANAGER">Manager</option>
                 <option *ngIf="currentUser()?.role === 'ADMIN'" value="ADMIN">Admin</option>
@@ -131,7 +131,7 @@ import { HasPermissionDirective } from '../../../../core/directives/has-permissi
 
             <div>
               <label class="block text-[10px] font-bold uppercase tracking-widest text-brand-secondary mb-1.5">Custom Role (Optional)</label>
-              <select formControlName="customRoleId" class="custom-select">
+              <select formControlName="customRoleId" class="custom-select" [disabled]="isEditingCurrentUser()">
                 <option [value]="null">No Custom Role</option>
                 @for (role of customRoles(); track role.id) {
                   <option [value]="role.id">{{ role.name }}</option>
@@ -279,6 +279,14 @@ export class TeamManagementComponent implements OnInit {
 
   submitUser() {
     if (this.userForm.valid) {
+      if (this.isEditingCurrentUser()) {
+        this.store.dispatch(ToastActions.showToast({
+          message: 'For security, admins cannot change their own role or custom role.',
+          toastType: 'warning'
+        }));
+        return;
+      }
+
       this.isSubmitting.set(true);
       const data = this.userForm.value;
       const obs = this.editingMember() 
@@ -301,5 +309,13 @@ export class TeamManagementComponent implements OnInit {
         }
       });
     }
+  }
+
+  isCurrentUser(member: any): boolean {
+    return !!member?.id && member.id === this.currentUser()?.id;
+  }
+
+  isEditingCurrentUser(): boolean {
+    return this.isCurrentUser(this.editingMember());
   }
 }

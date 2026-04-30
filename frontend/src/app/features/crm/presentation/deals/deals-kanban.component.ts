@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Store } from '@ngrx/store';
+import { ButtonComponent } from '../../../../core/components/button/button.component';
 import { CRMActions } from '../../../../core/state/crm/crm.actions';
 import { selectDeals, selectIsLoading } from '../../../../core/state/crm/crm.reducer';
 import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
@@ -23,7 +24,7 @@ interface KanbanColumn {
 @Component({
   selector: 'app-deals-kanban',
   standalone: true,
-  imports: [CommonModule, DragDropModule, ReactiveFormsModule, ConfirmModalComponent, HasPermissionDirective],
+  imports: [CommonModule, DragDropModule, ReactiveFormsModule, ButtonComponent, ConfirmModalComponent, HasPermissionDirective],
   template: `
     <div class="h-full flex flex-col space-y-4 sm:space-y-6 animate-in fade-in duration-500">
       <!-- Header -->
@@ -62,7 +63,7 @@ interface KanbanColumn {
                   {{ column.name }}
                   <span class="px-2 py-0.5 rounded-full bg-white/10 text-[10px]">{{ column.deals.length }}</span>
                 </h3>
-                <button (click)="columnSettings(column.id)" class="text-brand-secondary hover:text-white transition-colors">
+                <button class="text-brand-secondary hover:text-white transition-colors">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                 </button>
               </div>
@@ -142,8 +143,8 @@ interface KanbanColumn {
 
     <!-- Create Deal Modal Overlay -->
     @if (isModalOpen) {
-      <div class="fixed inset-0 bg-black/65 backdrop-blur-[6px] z-[100] flex items-center justify-center animate-in fade-in duration-200 p-2 sm:p-4">
-        <div class="glass-panel w-full max-w-lg p-4 sm:p-8 relative max-h-[95vh] overflow-y-auto custom-scrollbar shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200">
+      <div class="fixed inset-0 bg-black/65 backdrop-blur-[6px] z-[100] flex items-center justify-center animate-in fade-in duration-200 p-2 sm:p-4 overflow-y-auto">
+        <div class="glass-panel w-full max-w-lg p-4 sm:p-8 relative my-auto shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200">
           <button (click)="closeCreateModal()" class="absolute top-4 right-4 text-brand-secondary hover:text-white transition-colors">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
@@ -168,11 +169,11 @@ interface KanbanColumn {
               <label class="block text-sm font-medium text-brand-secondary mb-1">Associate Contact</label>
               <div class="relative">
                  <input [formControl]="contactSearchControl" type="text" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200" placeholder="Search contacts...">
-                 <svg class="w-4 h-4 absolute right-3 top-2.5 text-brand-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                 <svg class="w-4 h-4 absolute right-3 top-3 text-brand-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                  
                  @if (contactSearchResults$ | async; as results) {
                    @if (results.length > 0 && showContactResults) {
-                     <div class="absolute top-full left-0 right-0 mt-1 glass-panel z-[60] border border-white/10 max-h-48 overflow-y-auto shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200">
+                     <div class="absolute top-full left-0 right-0 mt-2 glass-panel z-[120] border border-white/10 max-h-56 overflow-y-auto shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200 rounded-xl bg-[#1a1a1e]">
                        @for (c of results; track c.id) {
                          <div (click)="selectContact(c)" class="p-3 hover:bg-white/10 cursor-pointer flex items-center justify-between group">
                            <div>
@@ -199,26 +200,30 @@ interface KanbanColumn {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Pipeline Stage</label>
-                <select formControlName="stageId" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500/30 transition-all text-sm">
-                  <option value="lead">Lead</option>
-                  <option value="contact_made">Contact Made</option>
-                  <option value="needs_defined">Needs Defined</option>
-                  <option value="proposal_made">Proposal Made</option>
-                  <option value="negotiations">Negotiations</option>
+                <select formControlName="stage" class="custom-select ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500">
+                  <option value="PROSPECTING">Prospecting</option>
+                  <option value="QUALIFICATION">Qualification</option>
+                  <option value="PROPOSAL">Proposal</option>
+                  <option value="NEGOTIATION">Negotiation</option>
+                  <option value="CLOSED_WON">Closed Won</option>
                 </select>
               </div>
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Status</label>
-                <select formControlName="status" class="w-full bg-white/5 border border-brand-border rounded-xl py-2 px-3 outline-none focus:ring-2 focus:ring-blue-500/30 transition-all text-sm">
+                <select formControlName="status" class="custom-select ring-0 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 ">
                   <option value="OPEN">Open</option>
                   <option value="WON">Won</option>
                   <option value="LOST">Lost</option>
                 </select>
               </div>
             </div>
-            <button type="submit" [disabled]="dealForm.invalid" class="w-full premium-button !py-3 mt-6 text-sm flex justify-center items-center gap-2">
-              {{ editingDealId ? 'Update Deal' : 'Initialize Deal' }}
-            </button>
+            <app-button
+              type="submit"
+              [disabled]="dealForm.invalid"
+              variant="premium"
+              customClass="w-full mt-6 py-3 justify-center cursor-pointer"
+              >{{ editingDealId ? 'Update Deal' : 'Initialize Deal' }}</app-button
+            >
           </form>
         </div>
       </div>
@@ -267,6 +272,7 @@ export class DealsKanbanComponent implements OnInit {
     valueAmount: [0, [Validators.required, Validators.min(0)]],
     valueCurrency: ['USD', Validators.required],
     stage: ['PROSPECTING', Validators.required],
+    status: ['OPEN', Validators.required],
     probability: [0, [Validators.min(0), Validators.max(100)]],
     expectedCloseDate: [null as string | null],
     contactId: [null as string | null],
@@ -277,11 +283,11 @@ export class DealsKanbanComponent implements OnInit {
   
   columns$ = this.deals$.pipe(
     map(deals => [
-      { id: 'PROSPECTING', name: 'Prospecting', deals: deals.filter(d => d.stage === 'PROSPECTING') },
-      { id: 'QUALIFICATION', name: 'Qualification', deals: deals.filter(d => d.stage === 'QUALIFICATION') },
-      { id: 'PROPOSAL', name: 'Proposal', deals: deals.filter(d => d.stage === 'PROPOSAL') },
-      { id: 'NEGOTIATION', name: 'Negotiation', deals: deals.filter(d => d.stage === 'NEGOTIATION') },
-      { id: 'CLOSED_WON', name: 'Closed', deals: deals.filter(d => d.stage === 'CLOSED_WON') }
+      { id: 'PROSPECTING', name: 'Prospecting', deals: deals.filter(d => this.getDealStage(d) === 'PROSPECTING') },
+      { id: 'QUALIFICATION', name: 'Qualification', deals: deals.filter(d => this.getDealStage(d) === 'QUALIFICATION') },
+      { id: 'PROPOSAL', name: 'Proposal', deals: deals.filter(d => this.getDealStage(d) === 'PROPOSAL') },
+      { id: 'NEGOTIATION', name: 'Negotiation', deals: deals.filter(d => this.getDealStage(d) === 'NEGOTIATION') },
+      { id: 'CLOSED_WON', name: 'Closed', deals: deals.filter(d => this.getDealStage(d) === 'CLOSED_WON') }
     ])
   );
 
@@ -332,7 +338,7 @@ export class DealsKanbanComponent implements OnInit {
       this.editingDealId = null;
       this.selectedContact = null;
       this.contactSearchControl.setValue('');
-      this.dealForm.reset({ valueCurrency: 'USD', stage: 'PROSPECTING', probability: 0 });
+      this.dealForm.reset({ valueCurrency: 'USD', stage: 'PROSPECTING', status: 'OPEN', probability: 0 });
       this.isModalOpen = true; 
     });
   }
@@ -341,11 +347,11 @@ export class DealsKanbanComponent implements OnInit {
     this.editingDealId = null;
     this.selectedContact = null;
     this.contactSearchControl.setValue('');
-    this.dealForm.reset({ valueCurrency: 'USD', stage: 'PROSPECTING', probability: 0 });
+    this.dealForm.reset({ valueCurrency: 'USD', stage: 'PROSPECTING', status: 'OPEN', probability: 0 });
   }
 
   submitDeal() {
-    if (this.dealForm.valid) {
+    if (this.dealForm.valid) { 
       const formValue = this.dealForm.value;
       if (this.editingDealId) {
         this.store.dispatch(CRMActions.updateDeal({ id: this.editingDealId, deal: formValue }));
@@ -382,9 +388,9 @@ export class DealsKanbanComponent implements OnInit {
     return '#94a3b8'; // Low Value Gray
   }
 
-  columnSettings(columnId: string) {
-    alert(`Manage settings for ${columnId} stage`);
-  }
+  // columnSettings(columnId: string) {
+  //   alert(`Manage settings for ${columnId} stage`);
+  // }
 
   editDeal(deal: any) {
     this.editingDealId = deal.id;
@@ -392,7 +398,8 @@ export class DealsKanbanComponent implements OnInit {
       title: deal.title,
       valueAmount: deal.valueAmount,
       valueCurrency: deal.valueCurrency,
-      stage: deal.stage,
+      stage: this.getDealStage(deal),
+      status: deal.status || 'OPEN',
       probability: deal.probability || 0,
       expectedCloseDate: deal.expectedCloseDate ? new Date(deal.expectedCloseDate).toISOString().split('T')[0] : null,
       contactId: deal.contactId,
@@ -428,5 +435,28 @@ export class DealsKanbanComponent implements OnInit {
 
   exportDeals() {
     this.store.dispatch(CRMActions.exportDeals());
+  }
+
+  private getDealStage(deal: any): string {
+    const rawStage = deal?.stage ?? deal?.stageId ?? 'PROSPECTING';
+    const normalizedStage = String(rawStage).toUpperCase();
+
+    if (normalizedStage === 'CONTACT_MADE' || normalizedStage === 'NEEDS_DEFINED') {
+      return 'QUALIFICATION';
+    }
+
+    if (normalizedStage === 'PROPOSAL_MADE') {
+      return 'PROPOSAL';
+    }
+
+    if (normalizedStage === 'NEGOTIATIONS') {
+      return 'NEGOTIATION';
+    }
+
+    if (normalizedStage === 'WON' || normalizedStage === 'CLOSED') {
+      return 'CLOSED_WON';
+    }
+
+    return normalizedStage;
   }
 }
