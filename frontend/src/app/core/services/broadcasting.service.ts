@@ -1,4 +1,4 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal, inject, NgZone } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
@@ -26,6 +26,7 @@ export class BroadcastingService {
   private socket?: Socket;
   private readonly store = inject(Store);
   private readonly http = inject(HttpClient);
+  private readonly zone = inject(NgZone);
   private readonly apiUrl = `${environment.apiUrl}/broadcasting`;
 
   // Signal to store active broadcasts for the current session
@@ -38,7 +39,7 @@ export class BroadcastingService {
   private initSocket() {
     this.store.select(selectUser).subscribe(user => {
       if (user) {
-        if (!this.socket?.connected) {
+        if (!this.socket) {
           this.connect();
           this.fetchActiveBroadcasts();
         }
@@ -56,7 +57,7 @@ export class BroadcastingService {
   }
 
   private connect() {
-    if (this.socket?.connected) return;
+    if (this.socket) return;
 
     const token = localStorage.getItem('access_token');
     
@@ -68,9 +69,11 @@ export class BroadcastingService {
     this.socket.on('broadcast:received', (broadcast: Broadcast) => {
       console.log('Broadcast received via socket:', broadcast.title);
       // Avoid duplicates if initial fetch and socket happen simultaneously
-      this.activeBroadcasts.update(current => {
-        const exists = current.some(b => b.id === broadcast.id);
-        return exists ? current : [broadcast, ...current];
+      this.zone.run(() => {
+        this.activeBroadcasts.update(current => {
+          const exists = current.some(b => b.id === broadcast.id);
+          return exists ? current : [broadcast, ...current];
+        });
       });
     });
 

@@ -595,7 +595,6 @@ export class TasksListComponent implements OnInit {
     return 'text-brand-primary';
   }
 
-  getAssigneeInitials(userId: string): string { return 'U'; }
 
   openCreateModal() { 
     combineLatest([this.subService.limits$, this.stats$]).pipe(take(1)).subscribe((data: any) => {
