@@ -3,6 +3,7 @@ import { MarkNotificationReadUseCase } from './application/use-cases/mark-read.u
 import { PrismaNotificationRepository } from './infrastructure/repositories/prisma-notification.repository';
 import { NotificationsController } from './presentation/controllers/notifications.controller';
 import { NotificationsGateway } from './infrastructure/gateways/notifications.gateway';
+import { NotificationService } from './application/services/notification.service';
 
 import { AuthModule } from '../auth/auth.module';
 
@@ -15,6 +16,7 @@ import { GetNotificationsUseCase } from './application/use-cases/get-notificatio
     MarkNotificationReadUseCase,
     GetNotificationsUseCase,
     NotificationsGateway,
+    NotificationService,
     {
       provide: 'INotificationRepository',
       useClass: PrismaNotificationRepository,
@@ -23,6 +25,7 @@ import { GetNotificationsUseCase } from './application/use-cases/get-notificatio
   exports: [
     MarkNotificationReadUseCase,
     NotificationsGateway,
+    NotificationService,
     'INotificationRepository',
   ],
 })

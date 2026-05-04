@@ -14,7 +14,7 @@ export class GetNotificationsUseCase {
   async execute(userId: string): Promise<Result<Notification[]>> {
     try {
       const notifications =
-        await this.notificationRepository.findUnreadByRecipient(userId);
+        await this.notificationRepository.findByRecipient(userId, 20);
       return Result.ok<Notification[]>(notifications);
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument

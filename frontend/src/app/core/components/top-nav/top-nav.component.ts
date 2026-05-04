@@ -137,13 +137,28 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
                       @for (n of notifications; track n.id) {
                         <div [ngClass]="{ 'bg-brand-primary/5': !n.isRead }" class="p-4 hover:bg-white/5 transition-colors cursor-pointer group" (click)="markAsRead(n.id)">
                           <div class="flex gap-3">
-                            <div class="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary shrink-0">
-                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" [ngClass]="{
+                              'bg-brand-primary/10 text-brand-primary': n.type === 'TASK_ASSIGNED',
+                              'bg-emerald-400/10 text-emerald-400': n.type === 'TASK_COMPLETED',
+                              'bg-amber-400/10 text-amber-400': n.type === 'TASK_OVERDUE',
+                              'bg-indigo-400/10 text-indigo-400': n.type === 'DEAL_STAGE_CHANGED',
+                              'bg-brand-secondary/10 text-brand-secondary': n.type === 'SYSTEM'
+                            }">
+                              @switch (n.type) {
+                                @case ('TASK_ASSIGNED') { <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg> }
+                                @case ('TASK_COMPLETED') { <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> }
+                                @case ('TASK_OVERDUE') { <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> }
+                                @case ('DEAL_STAGE_CHANGED') { <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg> }
+                                @default { <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> }
+                              }
                             </div>
                             <div class="flex-1 min-w-0">
                               <p class="text-sm font-semibold text-white truncate">{{ n.title }}</p>
                               <p class="text-xs text-brand-secondary line-clamp-2 mt-0.5">{{ n.body }}</p>
-                              <p class="text-[10px] text-brand-secondary/50 mt-2">{{ n.createdAt | date:'shortTime' }}</p>
+                              <p class="text-[10px] text-brand-secondary/50 mt-2 flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                {{ n.createdAt | date:'MMM d, h:mm a' }}
+                              </p>
                             </div>
                             @if (!n.isRead) {
                               <div class="w-2 h-2 rounded-full bg-brand-primary mt-1.5 shrink-0 shadow-[0_0_10px_rgba(99,102,241,0.5)]"></div>

@@ -43,6 +43,26 @@ export class PrismaNotificationRepository implements INotificationRepository {
     }, raw.id).getValue());
   }
 
+  async findByRecipient(recipientId: string, limit: number = 20): Promise<Notification[]> {
+    const raws = await this.prisma.notification.findMany({
+      where: { recipientId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+
+    return raws.map(raw => Notification.create({
+      recipientId: raw.recipientId,
+      type: raw.type as any,
+      channel: raw.channel as any,
+      title: raw.title,
+      body: raw.body,
+      metadata: raw.metadata as Record<string, any>,
+      isRead: raw.isRead,
+      readAt: raw.readAt || undefined,
+      createdAt: raw.createdAt,
+    }, raw.id).getValue());
+  }
+
   async save(notification: Notification): Promise<void> {
     const data = {
       recipientId: notification.recipientId,

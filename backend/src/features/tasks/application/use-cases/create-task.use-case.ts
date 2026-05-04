@@ -4,13 +4,13 @@ import type { ITaskRepository } from '../../domain/repositories/task.repository.
 import { CreateTaskDto, TaskResponseDto } from '../dtos/task.dto';
 import { Task, TaskPriority } from '../../domain/entities/task.entity';
 import { Injectable, Inject } from '@nestjs/common';
-import { NotificationsGateway } from '../../../notifications/infrastructure/gateways/notifications.gateway';
+import { NotificationService } from '../../../notifications/application/services/notification.service';
 
 @Injectable()
 export class CreateTaskUseCase implements UseCase<CreateTaskDto, TaskResponseDto> {
   constructor(
     @Inject('ITaskRepository') private readonly taskRepo: ITaskRepository,
-    private readonly notificationsGateway: NotificationsGateway,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async execute(request: CreateTaskDto): Promise<Result<TaskResponseDto>> {
@@ -41,13 +41,14 @@ export class CreateTaskUseCase implements UseCase<CreateTaskDto, TaskResponseDto
     const savedTask = await this.taskRepo.findById(task.id);
     if (!savedTask) return Result.fail<TaskResponseDto>("Failed to retrieve created task");
 
-    // Emit Real-time Notification if assigned to someone else
+    // Persist and Emit Notification if assigned to someone else
     if (savedTask.assigneeId && savedTask.assigneeId !== savedTask.creatorId) {
-      this.notificationsGateway.sendToUser(savedTask.assigneeId, 'notification', {
-        title: 'New Task Assigned',
-        message: `You have been assigned a new task: ${savedTask.title}`,
+      await this.notificationService.notify({
+        recipientId: savedTask.assigneeId,
         type: 'TASK_ASSIGNED',
-        data: { taskId: savedTask.id }
+        title: 'New Task Assigned',
+        body: `You have been assigned a new task: ${savedTask.title}`,
+        metadata: { taskId: savedTask.id }
       });
     }
 

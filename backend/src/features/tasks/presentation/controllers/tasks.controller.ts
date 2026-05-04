@@ -171,6 +171,7 @@ export class TasksController {
       ...dto,
       id,
       orgId: user.orgId,
+      userId: user.id,
     });
 
     if (result.isFailure) {

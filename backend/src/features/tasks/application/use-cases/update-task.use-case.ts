@@ -5,6 +5,8 @@ import { Result } from '../../../../core/domain/base/result';
 import * as taskRepositoryInterface from '../../domain/repositories/task.repository.interface';
 import { TaskResponseDto } from '../dtos/task.dto';
 
+import { NotificationService } from '../../../notifications/application/services/notification.service';
+
 export interface UpdateTaskRequest {
   id: string;
   orgId: string;
@@ -16,6 +18,7 @@ export interface UpdateTaskRequest {
   dueDate?: Date | null;
   contactId?: string | null;
   dealId?: string | null;
+  userId?: string; // ID of the person performing the update
 }
 
 @Injectable()
@@ -23,6 +26,7 @@ export class UpdateTaskUseCase {
   constructor(
     @Inject('ITaskRepository')
     private readonly taskRepo: taskRepositoryInterface.ITaskRepository,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async execute(req: UpdateTaskRequest): Promise<Result<TaskResponseDto>> {
@@ -30,6 +34,8 @@ export class UpdateTaskUseCase {
     if (!task || task.orgId !== req.orgId || task.isDeleted) {
       return Result.fail('Task not found or access denied');
     }
+
+    const oldAssigneeId = task.assigneeId;
 
     task.update({
       title: req.title,
@@ -43,6 +49,17 @@ export class UpdateTaskUseCase {
     });
 
     await this.taskRepo.save(task);
+
+    // Notify if reassigned
+    if (req.assigneeId && req.assigneeId !== oldAssigneeId && req.assigneeId !== req.userId) {
+      await this.notificationService.notify({
+        recipientId: req.assigneeId,
+        type: 'TASK_ASSIGNED',
+        title: 'Task Assigned',
+        body: `A task has been assigned to you: ${task.title}`,
+        metadata: { taskId: task.id }
+      });
+    }
 
     // Fetch the task with relations
     const savedTask = await this.taskRepo.findById(task.id);

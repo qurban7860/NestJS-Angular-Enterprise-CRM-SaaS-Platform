@@ -522,7 +522,7 @@ export class TasksListComponent implements OnInit {
     this.route.queryParams.pipe(take(1)).subscribe((params: any) => {
       if (params['id']) {
         this.tasks$.pipe(
-          filter((tasks: any[]) => tasks.length > 0),
+          filter((tasks: any[]) => !!tasks && tasks.length > 0),
           take(1)
         ).subscribe((tasks: any[]) => {
           const task = tasks.find((t: any) => t.id === params['id']);
