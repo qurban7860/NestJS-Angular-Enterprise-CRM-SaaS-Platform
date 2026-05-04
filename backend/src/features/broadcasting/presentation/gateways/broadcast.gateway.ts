@@ -49,9 +49,9 @@ export class BroadcastGateway implements OnGatewayConnection, OnGatewayDisconnec
       if (payload.orgId) {
         const orgRoom = `org_${payload.orgId}`;
         await client.join(orgRoom);
-        this.logger.log(`Client ${client.id} joined rooms: system, ${orgRoom}`);
+        this.logger.log(`[Socket] Client ${client.id} joined rooms: system, ${orgRoom} (OrgID: ${payload.orgId})`);
       } else {
-        this.logger.log(`Client ${client.id} joined room: system`);
+        this.logger.log(`[Socket] Client ${client.id} joined room: system (No OrgID)`);
       }
 
       this.logger.log(`Client authenticated: ${client.id} (${payload.email})`);
@@ -78,7 +78,7 @@ export class BroadcastGateway implements OnGatewayConnection, OnGatewayDisconnec
    */
   broadcastToOrg(orgId: string, data: any) {
     const orgRoom = `org_${orgId}`;
-    this.logger.log(`Broadcasting to ORG ${orgId}: ${data.title}`);
+    this.logger.log(`[Socket] Broadcasting to ORG ${orgId} via room ${orgRoom}: ${data.title}`);
     this.server.to(orgRoom).emit('broadcast:received', data);
   }
 }

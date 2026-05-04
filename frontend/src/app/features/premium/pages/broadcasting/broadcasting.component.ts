@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BroadcastingService, Broadcast } from '../../../../core/services/broadcasting.service';
 import { ButtonComponent } from '../../../../core/components/button/button.component';
+import { ToastActions } from '../../../../core/state/toast/toast.actions';
 import { RequiresPremiumDirective } from '../../../../core/directives/premium-gate.directive';
 import { HasPermissionDirective } from '../../../../core/directives/has-permission.directive';
 import { ConfirmModalComponent } from '../../../../core/components/confirm-modal/confirm-modal.component';
@@ -103,31 +104,51 @@ import { selectUser } from '../../../../core/state/auth/auth.reducer';
               <div>
                 <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-brand-secondary mb-2">Subject Header</label>
                 <input formControlName="title" type="text" placeholder="URGENT SYSTEM UPDATE" 
-                class="input-field rounded-xl px-4 py-3 placeholder:opacity-30">
+                class="input-field rounded-xl px-4 py-3 placeholder:opacity-30"
+                [class.border-red-500]="broadcastForm.get('title')?.invalid && broadcastForm.get('title')?.touched">
+                @if (broadcastForm.get('title')?.invalid && broadcastForm.get('title')?.touched) {
+                  <p class="text-[10px] text-red-400 mt-1 ml-1">Title must be at least 5 characters.</p>
+                }
               </div>
 
               <div>
                 <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-brand-secondary mb-2">Target Audience</label>
                 <div class="grid grid-cols-2 gap-3">
                   <button type="button" (click)="broadcastForm.patchValue({orgId: null})" 
-                          [class]="!broadcastForm.get('orgId')?.value ? 'border-brand-primary bg-brand-primary/20 text-white' : 'border-white/5 bg-white/5 text-brand-secondary hover:bg-white/10'"
-                          class="px-3 py-3 rounded-xl border text-[10px] font-bold transition-all flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
+                          [class]="!broadcastForm.get('orgId')?.value ? 'border-brand-primary bg-brand-primary/20 text-white shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'border-white/5 bg-white/5 text-brand-secondary hover:bg-white/10'"
+                          class="px-3 py-4 rounded-xl border text-[10px] font-black transition-all flex flex-col items-center justify-center gap-2 group">
+                    <svg class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" [class.text-brand-primary]="!broadcastForm.get('orgId')?.value" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
                     Global System
                   </button>
                   <button type="button" (click)="setOrgScope()" 
-                          [class]="broadcastForm.get('orgId')?.value ? 'border-brand-primary bg-brand-primary/20 text-white' : 'border-white/5 bg-white/5 text-brand-secondary hover:bg-white/10'"
-                          class="px-3 py-3 rounded-xl border text-[10px] font-bold transition-all flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5" /></svg>
+                          [disabled]="!currentUser?.orgId"
+                          [class]="broadcastForm.get('orgId')?.value ? 'border-brand-primary bg-brand-primary/20 text-white shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'border-white/5 bg-white/5 text-brand-secondary hover:bg-white/10 opacity-60 disabled:cursor-not-allowed'"
+                          class="px-3 py-4 rounded-xl border text-[10px] font-black transition-all flex flex-col items-center justify-center gap-2 group">
+                    <svg class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" [class.text-brand-primary]="broadcastForm.get('orgId')?.value" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5" /></svg>
                     My Organization
                   </button>
                 </div>
+                @if (broadcastForm.get('orgId')?.value) {
+                  <p class="text-[9px] text-brand-primary font-bold mt-2 flex items-center gap-1 animate-in fade-in slide-in-from-left-1">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path></svg>
+                    Locked to: {{ currentUser?.orgName || 'Your Organization' }}
+                  </p>
+                } @else {
+                  <p class="text-[9px] text-amber-400/70 font-bold mt-2 flex items-center gap-1 animate-in fade-in slide-in-from-left-1">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path></svg>
+                    Visible to all users in the system
+                  </p>
+                }
               </div>
 
               <div>
                 <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-brand-secondary mb-2">Broadcast Message</label>
                 <textarea formControlName="message" rows="4" placeholder="Transmit your message here..." 
-                class="input-field px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-all resize-none placeholder:opacity-30"></textarea>
+                class="input-field px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-all resize-none placeholder:opacity-30"
+                [class.border-red-500]="broadcastForm.get('message')?.invalid && broadcastForm.get('message')?.touched"></textarea>
+                @if (broadcastForm.get('message')?.invalid && broadcastForm.get('message')?.touched) {
+                  <p class="text-[10px] text-red-400 mt-1 ml-1">Message must be at least 10 characters.</p>
+                }
               </div>
 
               <div>
@@ -148,7 +169,7 @@ import { selectUser } from '../../../../core/state/auth/auth.reducer';
 
             <div class="pt-4 flex gap-3">
               <app-button type="button" variant="secondary" [disabled]="isSubmitting()" (clicked)="isModalOpen.set(false)" customClass="flex-1 py-3 justify-center">Abort</app-button>
-              <app-button type="submit" [disabled]="broadcastForm.invalid || isSubmitting()" [loading]="isSubmitting()" variant="premium" customClass="flex-1 py-3 justify-center">Initiate Broadcast</app-button>
+              <app-button type="button" [disabled]="broadcastForm.invalid || isSubmitting()" [loading]="isSubmitting()" (clicked)="submit()" variant="premium" customClass="flex-1 py-3 justify-center">Initiate Broadcast</app-button>
             </div>
           </form>
         </div>
@@ -180,7 +201,7 @@ export class BroadcastingComponent implements OnInit {
   private readonly broadcastService = inject(BroadcastingService);
   private readonly store = inject(Store);
   private readonly user$ = this.store.select(selectUser);
-  private currentUser: any;
+  public currentUser: any;
 
   broadcasts = this.broadcastService.activeBroadcasts;
   isModalOpen = signal(false);
@@ -196,7 +217,13 @@ export class BroadcastingComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.user$.subscribe((user: any) => this.currentUser = user);
+    this.user$.subscribe((user: any) => {
+      this.currentUser = user;
+      // Auto-set org scope if user is not global admin
+      if (user?.orgId && user?.role !== 'ADMIN') {
+        this.broadcastForm.patchValue({ orgId: user.orgId });
+      }
+    });
   }
 
   setOrgScope() {
@@ -231,13 +258,23 @@ export class BroadcastingComponent implements OnInit {
     this.isSubmitting.set(true);
     this.broadcastService.sendBroadcast(this.broadcastForm.value).subscribe({
       next: () => {
+        this.store.dispatch(ToastActions.showToast({
+          message: 'Signal transmitted successfully!',
+          toastType: 'success'
+        }));
         setTimeout(() => {
           this.isModalOpen.set(false);
           this.isSubmitting.set(false);
           this.broadcastForm.reset({ type: 'INFO', orgId: null });
         }, 500);
       },
-      error: () => this.isSubmitting.set(false)
+      error: (err) => {
+        this.isSubmitting.set(false);
+        this.store.dispatch(ToastActions.showToast({
+          message: 'Transmission failed: ' + (err.error?.message || 'Unknown error'),
+          toastType: 'error'
+        }));
+      }
     });
   }
 
@@ -252,9 +289,12 @@ export class BroadcastingComponent implements OnInit {
     this.isSubmitting.set(true);
     this.broadcastService.deactivateBroadcast(id).subscribe({
       next: () => {
+        this.store.dispatch(ToastActions.showToast({
+          message: 'Signal terminated.',
+          toastType: 'success'
+        }));
         setTimeout(() => {
           this.broadcastService.dismiss(id);
-          this.broadcasts.set(this.broadcastService.activeBroadcasts());
           this.isSubmitting.set(false);
           this.isConfirmDeleteOpen.set(false);
           this.selectedBroadcastId.set(null);

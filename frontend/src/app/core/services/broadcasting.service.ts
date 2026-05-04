@@ -3,9 +3,9 @@ import { io, Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, delay, take, filter, switchMap, tap } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { selectUser } from '../state/auth/auth.reducer';
+import { selectUser, selectAccessToken } from '../state/auth/auth.reducer';
 
 export interface Broadcast {
   id: string;
@@ -37,12 +37,17 @@ export class BroadcastingService {
   }
 
   private initSocket() {
+    // Combine user and token to ensure we have everything needed for authenticated requests
     this.store.select(selectUser).subscribe(user => {
       if (user) {
-        if (!this.socket) {
-          this.connect();
+        // Use a small delay to ensure effects have finished saving token to localStorage
+        // This prevents the race condition where the first 'active' fetch has no token
+        setTimeout(() => {
+          if (!this.socket) {
+            this.connect();
+          }
           this.fetchActiveBroadcasts();
-        }
+        }, 100);
       } else {
         this.disconnect();
       }
