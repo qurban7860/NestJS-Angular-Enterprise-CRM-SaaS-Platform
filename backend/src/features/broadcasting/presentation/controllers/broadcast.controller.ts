@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateBroadcastUseCase } from '../../application/use-cases/create-broadcast.use-case';
 import { PrismaBroadcastRepository } from '../../infrastructure/repositories/prisma-broadcast.repository';
@@ -21,10 +23,12 @@ export class BroadcastController {
   @RequirePermissions('broadcast:write')
   @ApiOperation({ summary: 'Create and send a system-wide or org-wide broadcast' })
   async create(@CurrentUser() user: any, @Body() dto: any) {
-    return this.createBroadcastUseCase.execute({
+    const result = await this.createBroadcastUseCase.execute({
       ...dto,
       senderId: user.id,
     });
+    if (result.isFailure) throw new BadRequestException(result.error);
+    return result.getValue();
   }
 
   @Get('active')
