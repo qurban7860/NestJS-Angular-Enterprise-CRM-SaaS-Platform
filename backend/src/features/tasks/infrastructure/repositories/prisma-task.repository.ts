@@ -85,7 +85,6 @@ export class PrismaTaskRepository implements ITaskRepository {
       contactId: raw.contactId || undefined,
       dealId: raw.dealId || undefined,
       tags: raw.tags,
-      checklist: (raw.checklist as any[]) || [],
       isDeleted: raw.isDeleted,
       version: raw.version,
       createdAt: raw.createdAt,
@@ -113,7 +112,6 @@ export class PrismaTaskRepository implements ITaskRepository {
       contactId: task.contactId,
       dealId: task.dealId,
       tags: task.tags,
-      checklist: task.checklist,
       isDeleted: task.isDeleted,
       version: { increment: 1 },
     };

@@ -31,17 +31,17 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
       </div>
 
       <!-- Input Area -->
-      <div *hasPermission="'tasks:write'" class="flex gap-2">
+      <div *hasPermission="'tasks:write'" class="flex flex-col sm:flex-row gap-2">
         <input 
           [(ngModel)]="newCommentText" 
           (keyup.enter)="postComment()"
           placeholder="Add a comment..." 
-          class="flex-1 bg-black/40 border border-brand-border rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-brand-primary/50 transition-all"
+          class="input-field text-xs"
         >
         <button 
           (click)="postComment()" 
           [disabled]="!newCommentText.trim() || isSubmitting()"
-          class="bg-brand-primary hover:bg-brand-primary-hover disabled:opacity-50 text-black px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0"
+          class="w-full sm:w-auto bg-brand-primary hover:bg-brand-primary-hover disabled:opacity-50 text-black px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0"
         >
           Send
         </button>

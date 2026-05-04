@@ -35,7 +35,7 @@ import { AuditLogService, AuditLogEntry, AuditLogPage } from '../../../core/serv
             <button
               (click)="loadPage(currentPage() - 1)"
               [disabled]="currentPage() === 1"
-              class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg border border-brand-border hover:border-brand-primary/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-[10px] sm:text-xs font-bold uppercase tracking-widest"
+              class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg border border-brand-border hover:border-brand-primary/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-[10px] sm:text-xs font-bold uppercase tracking-widest whitespace-nowrap"
             >
               ← Prev
             </button>
@@ -45,7 +45,7 @@ import { AuditLogService, AuditLogEntry, AuditLogPage } from '../../../core/serv
             <button
               (click)="loadPage(currentPage() + 1)"
               [disabled]="currentPage() >= pageData()!.totalPages"
-              class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg border border-brand-border hover:border-brand-primary/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-[10px] sm:text-xs font-bold uppercase tracking-widest"
+              class="flex-1 sm:flex-none px-3 py-1.5 rounded-lg border border-brand-border hover:border-brand-primary/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-[10px] sm:text-xs font-bold uppercase tracking-widest whitespace-nowrap"
             >
               Next →
             </button>

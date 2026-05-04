@@ -55,10 +55,6 @@ export class CreateTaskDto {
   @IsOptional()
   @IsString()
   status?: string;
-
-  @ApiProperty({ example: [] })
-  @IsOptional()
-  checklist?: any[];
 }
 
 export class TaskFiltersDto {
@@ -117,9 +113,6 @@ export class TaskResponseDto {
 
   @ApiProperty({ required: false, nullable: true })
   dueDate?: Date | null;
-
-  @ApiProperty({ example: [] })
-  checklist?: any[];
 
   @ApiProperty({ required: false })
   assignee?: {
@@ -185,8 +178,4 @@ export class UpdateTaskDto {
   @IsOptional()
   @IsString()
   status?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  checklist?: any[];
 }

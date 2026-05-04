@@ -36,7 +36,6 @@ export class ListTasksUseCase implements UseCase<{ orgId: string; filters?: any 
         contactId: task.contactId,
         dealId: task.dealId,
         dueDate: task.dueDate,
-        checklist: task.checklist,
         assignee: (task as any).props?.assignee ? {
           id: (task as any).props.assignee.id,
           firstName: (task as any).props.assignee.firstName,
