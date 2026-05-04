@@ -4,19 +4,20 @@ import type { ITaskRepository } from '../../domain/repositories/task.repository.
 import { TaskResponseDto } from '../dtos/task.dto';
 import { TaskStatus } from '../../domain/entities/task.entity';
 import { Injectable, Inject } from '@nestjs/common';
-import { NotificationsGateway } from '../../../notifications/infrastructure/gateways/notifications.gateway';
+import { NotificationService } from '../../../notifications/application/services/notification.service';
 
 export interface UpdateTaskStatusRequest {
   taskId: string;
   orgId: string;
   status: TaskStatus;
+  userId?: string;
 }
 
 @Injectable()
 export class UpdateTaskStatusUseCase implements UseCase<UpdateTaskStatusRequest, TaskResponseDto> {
   constructor(
     @Inject('ITaskRepository') private readonly taskRepo: ITaskRepository,
-    private readonly notificationsGateway: NotificationsGateway,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async execute(request: UpdateTaskStatusRequest): Promise<Result<TaskResponseDto>> {
@@ -39,12 +40,13 @@ export class UpdateTaskStatusUseCase implements UseCase<UpdateTaskStatusRequest,
     if (!savedTask) return Result.fail<TaskResponseDto>("Failed to retrieve updated task");
 
     // Notify creator if task is completed by someone else
-    if (request.status === 'DONE' && savedTask.creatorId !== savedTask.assigneeId) {
-      this.notificationsGateway.sendToUser(savedTask.creatorId, 'notification', {
-        title: 'Task Completed',
-        message: `Task "${savedTask.title}" has been marked as completed.`,
+    if (request.status === 'DONE' && savedTask.creatorId !== savedTask.assigneeId && savedTask.creatorId !== request.userId) {
+      await this.notificationService.notify({
+        recipientId: savedTask.creatorId,
         type: 'TASK_COMPLETED',
-        data: { taskId: savedTask.id }
+        title: 'Task Completed',
+        body: `Task "${savedTask.title}" has been marked as completed.`,
+        metadata: { taskId: savedTask.id }
       });
     }
 

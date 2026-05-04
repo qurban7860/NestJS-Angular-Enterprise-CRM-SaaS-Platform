@@ -150,6 +150,7 @@ export class TasksController {
       taskId,
       status: dto.status as any,
       orgId: user.orgId,
+      userId: user.id,
     });
 
     if (result.isFailure) {

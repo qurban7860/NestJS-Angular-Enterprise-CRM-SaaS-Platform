@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { CreateContactUseCase } from './application/use-cases/create-contact.use-case';
 import { ListContactsUseCase } from './application/use-cases/list-contacts.use-case';
 import { GetContactUseCase } from './application/use-cases/get-contact.use-case';
@@ -15,9 +15,10 @@ import { SearchDealsUseCase } from './application/use-cases/search-deals.use-cas
 import { PrismaCRMRepository } from './infrastructure/repositories/prisma-crm.repository';
 import { ContactsController } from './presentation/controllers/contacts.controller';
 import { DealsController } from './presentation/controllers/deals.controller';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [],
+  imports: [forwardRef(() => NotificationsModule)],
   controllers: [ContactsController, DealsController],
   providers: [
     CreateContactUseCase,

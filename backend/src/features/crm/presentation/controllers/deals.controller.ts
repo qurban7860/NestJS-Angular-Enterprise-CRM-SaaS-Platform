@@ -132,6 +132,7 @@ export class DealsController {
       dealId,
       orgId: user.orgId,
       stage: dto.stage,
+      userId: user.id,
     });
     if (result.isFailure) throw result.error;
     return result.getValue();

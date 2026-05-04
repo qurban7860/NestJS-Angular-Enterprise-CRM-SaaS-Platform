@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MarkNotificationReadUseCase } from './application/use-cases/mark-read.use-case';
 import { PrismaNotificationRepository } from './infrastructure/repositories/prisma-notification.repository';
 import { NotificationsController } from './presentation/controllers/notifications.controller';
@@ -10,7 +10,7 @@ import { AuthModule } from '../auth/auth.module';
 import { GetNotificationsUseCase } from './application/use-cases/get-notifications.use-case';
 
 @Module({
-  imports: [AuthModule],
+  imports: [forwardRef(() => AuthModule)],
   controllers: [NotificationsController],
   providers: [
     MarkNotificationReadUseCase,
