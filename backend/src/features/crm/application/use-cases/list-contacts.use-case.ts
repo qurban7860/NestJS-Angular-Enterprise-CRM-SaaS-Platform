@@ -5,16 +5,19 @@ import { ContactResponseDto } from '../dtos/contact.dto';
 import { Injectable, Inject } from '@nestjs/common';
 
 @Injectable()
-export class ListContactsUseCase implements UseCase<string, ContactResponseDto[]> {
+export class ListContactsUseCase implements UseCase<
+  string,
+  ContactResponseDto[]
+> {
   constructor(
     @Inject('ICRMRepository') private readonly crmRepo: ICRMRepository,
   ) {}
 
   async execute(orgId: string): Promise<Result<ContactResponseDto[]>> {
     const contacts = await this.crmRepo.findContactsByOrgId(orgId);
-    
+
     return Result.ok<ContactResponseDto[]>(
-      contacts.map(contact => ({
+      contacts.map((contact) => ({
         id: contact.id,
         firstName: contact.firstName,
         lastName: contact.lastName,
@@ -22,7 +25,7 @@ export class ListContactsUseCase implements UseCase<string, ContactResponseDto[]
         email: contact.email,
         status: contact.status,
         phone: contact.phone ?? undefined,
-      }))
+      })),
     );
   }
 }

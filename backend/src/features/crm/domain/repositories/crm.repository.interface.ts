@@ -14,7 +14,7 @@ export interface ICRMRepository {
   findContactsByOrgId(orgId: string): Promise<Contact[]>;
   searchContacts(orgId: string, query: string): Promise<Contact[]>;
   saveContact(contact: Contact): Promise<void>;
-  
+
   // Company
   findCompanyById(id: string): Promise<Company | null>;
   saveCompany(company: Company): Promise<void>;

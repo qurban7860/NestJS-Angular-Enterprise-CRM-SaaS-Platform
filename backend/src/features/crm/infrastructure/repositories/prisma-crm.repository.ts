@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable } from '@nestjs/common';
 import { ICRMRepository } from '../../domain/repositories/crm.repository.interface';
 import { Contact } from '../../domain/entities/contact.entity';
@@ -15,24 +17,30 @@ export class PrismaCRMRepository implements ICRMRepository {
     const raw = await this.prisma.organization.findUnique({ where: { id } });
     if (!raw) return null;
 
-    return Organization.create({
-      name: raw.name,
-      slug: raw.slug,
-      createdAt: raw.createdAt,
-      updatedAt: raw.updatedAt,
-    }, raw.id).getValue();
+    return Organization.create(
+      {
+        name: raw.name,
+        slug: raw.slug,
+        createdAt: raw.createdAt,
+        updatedAt: raw.updatedAt,
+      },
+      raw.id,
+    ).getValue();
   }
 
   async findOrganizationBySlug(slug: string): Promise<Organization | null> {
     const raw = await this.prisma.organization.findUnique({ where: { slug } });
     if (!raw) return null;
 
-    return Organization.create({
-      name: raw.name,
-      slug: raw.slug,
-      createdAt: raw.createdAt,
-      updatedAt: raw.updatedAt,
-    }, raw.id).getValue();
+    return Organization.create(
+      {
+        name: raw.name,
+        slug: raw.slug,
+        createdAt: raw.createdAt,
+        updatedAt: raw.updatedAt,
+      },
+      raw.id,
+    ).getValue();
   }
 
   async saveOrganization(org: Organization): Promise<void> {
@@ -56,11 +64,11 @@ export class PrismaCRMRepository implements ICRMRepository {
   }
 
   async findContactsByOrgId(orgId: string): Promise<Contact[]> {
-    const raws = await this.prisma.contact.findMany({ 
+    const raws = await this.prisma.contact.findMany({
       where: { orgId, isDeleted: false },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
-    return raws.map(raw => this.mapToContact(raw));
+    return raws.map((raw) => this.mapToContact(raw));
   }
 
   async searchContacts(orgId: string, query: string): Promise<Contact[]> {
@@ -77,25 +85,28 @@ export class PrismaCRMRepository implements ICRMRepository {
       take: 20,
       orderBy: { createdAt: 'desc' },
     });
-    return raws.map(raw => this.mapToContact(raw));
+    return raws.map((raw) => this.mapToContact(raw));
   }
 
   private mapToContact(raw: any): Contact {
-    return Contact.create({
-      firstName: raw.firstName,
-      lastName: raw.lastName,
-      email: raw.email,
-      phone: raw.phone || undefined,
-      status: raw.status as any,
-      orgId: raw.orgId,
-      ownerId: raw.ownerId,
-      companyId: raw.companyId || undefined,
-      tags: raw.tags,
-      notes: raw.notes || undefined,
-      isDeleted: raw.isDeleted,
-      createdAt: raw.createdAt,
-      updatedAt: raw.updatedAt,
-    }, raw.id).getValue();
+    return Contact.create(
+      {
+        firstName: raw.firstName,
+        lastName: raw.lastName,
+        email: raw.email,
+        phone: raw.phone || undefined,
+        status: raw.status as any,
+        orgId: raw.orgId,
+        ownerId: raw.ownerId,
+        companyId: raw.companyId || undefined,
+        tags: raw.tags,
+        notes: raw.notes || undefined,
+        isDeleted: raw.isDeleted,
+        createdAt: raw.createdAt,
+        updatedAt: raw.updatedAt,
+      },
+      raw.id,
+    ).getValue();
   }
 
   async saveContact(contact: Contact): Promise<void> {
@@ -103,6 +114,7 @@ export class PrismaCRMRepository implements ICRMRepository {
       firstName: contact.firstName,
       lastName: contact.lastName,
       email: contact.email,
+      phone: contact.phone,
       status: contact.status,
       orgId: contact.orgId,
       ownerId: contact.ownerId,
@@ -124,16 +136,19 @@ export class PrismaCRMRepository implements ICRMRepository {
     const raw = await this.prisma.company.findUnique({ where: { id } });
     if (!raw) return null;
 
-    return Company.create({
-      name: raw.name,
-      industry: raw.industry || undefined,
-      website: raw.website || undefined,
-      size: raw.size as any,
-      orgId: raw.orgId,
-      isDeleted: raw.isDeleted,
-      createdAt: raw.createdAt,
-      updatedAt: raw.updatedAt,
-    }, raw.id).getValue();
+    return Company.create(
+      {
+        name: raw.name,
+        industry: raw.industry || undefined,
+        website: raw.website || undefined,
+        size: raw.size as any,
+        orgId: raw.orgId,
+        isDeleted: raw.isDeleted,
+        createdAt: raw.createdAt,
+        updatedAt: raw.updatedAt,
+      },
+      raw.id,
+    ).getValue();
   }
 
   async saveCompany(company: Company): Promise<void> {
@@ -161,11 +176,11 @@ export class PrismaCRMRepository implements ICRMRepository {
   }
 
   async findDealsByOrgId(orgId: string): Promise<Deal[]> {
-    const raws = await this.prisma.deal.findMany({ 
+    const raws = await this.prisma.deal.findMany({
       where: { orgId, isDeleted: false },
-      orderBy: { updatedAt: 'desc' }
+      orderBy: { updatedAt: 'desc' },
     });
-    return raws.map(raw => this.mapToDeal(raw));
+    return raws.map((raw) => this.mapToDeal(raw));
   }
 
   async searchDeals(orgId: string, query: string): Promise<Deal[]> {
@@ -173,33 +188,34 @@ export class PrismaCRMRepository implements ICRMRepository {
       where: {
         orgId,
         isDeleted: false,
-        OR: [
-          { title: { contains: query, mode: 'insensitive' } },
-        ],
+        OR: [{ title: { contains: query, mode: 'insensitive' } }],
       },
       take: 20,
       orderBy: { updatedAt: 'desc' },
     });
-    return raws.map(raw => this.mapToDeal(raw));
+    return raws.map((raw) => this.mapToDeal(raw));
   }
 
   private mapToDeal(raw: any): Deal {
-    return Deal.create({
-      title: raw.title,
-      valueAmount: Number(raw.valueAmount),
-      valueCurrency: raw.valueCurrency,
-      stage: raw.stage as any,
-      orgId: raw.orgId,
-      ownerId: raw.ownerId,
-      contactId: raw.contactId,
-      companyId: raw.companyId,
-      expectedCloseDate: raw.expectedCloseDate || undefined,
-      probability: raw.probability ? Number(raw.probability) : undefined,
-      closedAt: raw.closedAt || undefined,
-      isDeleted: raw.isDeleted,
-      createdAt: raw.createdAt,
-      updatedAt: raw.updatedAt,
-    }, raw.id).getValue();
+    return Deal.create(
+      {
+        title: raw.title,
+        valueAmount: Number(raw.valueAmount),
+        valueCurrency: raw.valueCurrency,
+        stage: raw.stage as any,
+        orgId: raw.orgId,
+        ownerId: raw.ownerId,
+        contactId: raw.contactId,
+        companyId: raw.companyId,
+        expectedCloseDate: raw.expectedCloseDate || undefined,
+        probability: raw.probability ? Number(raw.probability) : undefined,
+        closedAt: raw.closedAt || undefined,
+        isDeleted: raw.isDeleted,
+        createdAt: raw.createdAt,
+        updatedAt: raw.updatedAt,
+      },
+      raw.id,
+    ).getValue();
   }
 
   async saveDeal(deal: Deal): Promise<void> {

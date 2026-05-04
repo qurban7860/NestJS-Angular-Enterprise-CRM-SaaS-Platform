@@ -10,17 +10,21 @@ export interface SearchContactsRequest {
 }
 
 @Injectable()
-export class SearchContactsUseCase implements UseCase<SearchContactsRequest, ContactResponseDto[]> {
+export class SearchContactsUseCase implements UseCase<
+  SearchContactsRequest,
+  ContactResponseDto[]
+> {
   constructor(
     @Inject('ICRMRepository') private readonly crmRepo: ICRMRepository,
   ) {}
 
-  async execute(req: SearchContactsRequest): Promise<Result<ContactResponseDto[]>> {
-    // We'll add this method to the repository interface
+  async execute(
+    req: SearchContactsRequest,
+  ): Promise<Result<ContactResponseDto[]>> {
     const contacts = await this.crmRepo.searchContacts(req.orgId, req.query);
-    
+
     return Result.ok<ContactResponseDto[]>(
-      contacts.map(contact => ({
+      contacts.map((contact) => ({
         id: contact.id,
         firstName: contact.firstName,
         lastName: contact.lastName,
@@ -28,7 +32,7 @@ export class SearchContactsUseCase implements UseCase<SearchContactsRequest, Con
         email: contact.email,
         status: contact.status,
         phone: contact.phone ?? undefined,
-      }))
+      })),
     );
   }
 }

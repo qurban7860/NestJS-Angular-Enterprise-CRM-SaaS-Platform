@@ -197,7 +197,7 @@ interface KanbanColumn {
               }
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div class="grid grid-cols-1 gap-4 pt-2">
               <div>
                 <label class="block text-sm font-medium text-brand-secondary mb-1">Pipeline Stage</label>
                 <select formControlName="stage" class="custom-select">
@@ -206,14 +206,7 @@ interface KanbanColumn {
                   <option value="PROPOSAL">Proposal</option>
                   <option value="NEGOTIATION">Negotiation</option>
                   <option value="CLOSED_WON">Closed Won</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-brand-secondary mb-1">Status</label>
-                <select formControlName="status" class="custom-select">
-                  <option value="OPEN">Open</option>
-                  <option value="WON">Won</option>
-                  <option value="LOST">Lost</option>
+                  <option value="CLOSED_LOST">Closed Lost</option>
                 </select>
               </div>
             </div>
@@ -272,7 +265,6 @@ export class DealsKanbanComponent implements OnInit {
     valueAmount: [0, [Validators.required, Validators.min(0)]],
     valueCurrency: ['USD', Validators.required],
     stage: ['PROSPECTING', Validators.required],
-    status: ['OPEN', Validators.required],
     probability: [0, [Validators.min(0), Validators.max(100)]],
     expectedCloseDate: [null as string | null],
     contactId: [null as string | null],
@@ -338,7 +330,7 @@ export class DealsKanbanComponent implements OnInit {
       this.editingDealId = null;
       this.selectedContact = null;
       this.contactSearchControl.setValue('');
-      this.dealForm.reset({ valueCurrency: 'USD', stage: 'PROSPECTING', status: 'OPEN', probability: 0 });
+      this.dealForm.reset({ valueCurrency: 'USD', stage: 'PROSPECTING', probability: 0 });
       this.isModalOpen = true; 
     });
   }
@@ -347,7 +339,7 @@ export class DealsKanbanComponent implements OnInit {
     this.editingDealId = null;
     this.selectedContact = null;
     this.contactSearchControl.setValue('');
-    this.dealForm.reset({ valueCurrency: 'USD', stage: 'PROSPECTING', status: 'OPEN', probability: 0 });
+    this.dealForm.reset({ valueCurrency: 'USD', stage: 'PROSPECTING', probability: 0 });
   }
 
   submitDeal() {
@@ -399,7 +391,6 @@ export class DealsKanbanComponent implements OnInit {
       valueAmount: deal.valueAmount,
       valueCurrency: deal.valueCurrency,
       stage: this.getDealStage(deal),
-      status: deal.status || 'OPEN',
       probability: deal.probability || 0,
       expectedCloseDate: deal.expectedCloseDate ? new Date(deal.expectedCloseDate).toISOString().split('T')[0] : null,
       contactId: deal.contactId,

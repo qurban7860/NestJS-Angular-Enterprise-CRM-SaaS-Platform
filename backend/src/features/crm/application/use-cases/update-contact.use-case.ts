@@ -41,10 +41,12 @@ export class UpdateContactUseCase {
 
     const dto = new ContactResponseDto();
     dto.id = contact.id;
-    dto.fullName = `${contact.firstName} ${contact.lastName}`;
+    dto.firstName = contact.firstName;
+    dto.lastName = contact.lastName;
+    dto.fullName = contact.fullName;
     dto.email = contact.email;
     dto.status = contact.status;
-
+    dto.phone = contact.phone;
     return Result.ok(dto);
   }
 }
