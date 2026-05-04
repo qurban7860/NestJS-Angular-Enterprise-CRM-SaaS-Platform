@@ -43,19 +43,32 @@ export class UpdateDealUseCase {
 
     await this.crmRepo.saveDeal(deal);
 
+    // Fetch the deal with relations
+    const savedDeal = await this.crmRepo.findDealById(deal.id);
+    if (!savedDeal) return Result.fail<DealResponseDto>("Failed to retrieve updated deal");
+
     const dto = new DealResponseDto();
-    dto.id = deal.id;
-    dto.title = deal.title;
-    dto.valueAmount = deal.valueAmount;
-    dto.valueCurrency = deal.valueCurrency;
-    dto.stage = deal.stage as any;
-    dto.orgId = deal.orgId;
-    dto.ownerId = deal.ownerId;
-    dto.contactId = deal.contactId;
-    dto.companyId = deal.companyId;
-    dto.expectedCloseDate = deal.expectedCloseDate;
-    dto.probability = deal.probability;
-    dto.createdAt = deal.createdAt || new Date();
+    dto.id = savedDeal.id;
+    dto.title = savedDeal.title;
+    dto.valueAmount = savedDeal.valueAmount;
+    dto.valueCurrency = savedDeal.valueCurrency;
+    dto.stage = savedDeal.stage as any;
+    dto.orgId = savedDeal.orgId;
+    dto.ownerId = savedDeal.ownerId;
+    dto.contactId = savedDeal.contactId;
+    dto.companyId = savedDeal.companyId;
+    dto.expectedCloseDate = savedDeal.expectedCloseDate;
+    dto.probability = savedDeal.probability;
+    dto.createdAt = savedDeal.createdAt || new Date();
+
+    if ((savedDeal as any).contact) {
+      dto.contact = {
+        id: (savedDeal as any).contact.id,
+        firstName: (savedDeal as any).contact.firstName,
+        lastName: (savedDeal as any).contact.lastName,
+        fullName: `${(savedDeal as any).contact.firstName} ${(savedDeal as any).contact.lastName}`
+      };
+    }
 
     return Result.ok(dto);
   }

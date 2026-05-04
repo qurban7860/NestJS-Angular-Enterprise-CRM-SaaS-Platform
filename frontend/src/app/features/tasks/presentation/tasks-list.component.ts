@@ -4,7 +4,8 @@ import { Store } from '@ngrx/store';
 import { TasksActions } from '../../../core/state/tasks/tasks.actions';
 import { selectTasks, selectIsLoading } from '../../../core/state/tasks/tasks.reducer';
 import { FormControl, ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
-import { map, startWith, combineLatest, Observable, take, debounceTime, distinctUntilChanged, switchMap, tap, of } from 'rxjs';
+import { map, startWith, combineLatest, Observable, take, debounceTime, distinctUntilChanged, switchMap, tap, of, filter } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 import { FileUploadComponent } from '../../../core/components/file-upload/file-upload.component';
 import { TaskCommentsComponent } from '../../../core/components/task-comments/task-comments.component';
 import { ToastActions } from '../../../core/state/toast/toast.actions';
@@ -162,6 +163,18 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
                                 {{ task.dueDate | date:'MMM d' }}
                               </span>
                             }
+                            @if (task.contact) {
+                              <span class="flex items-center gap-1 text-brand-secondary">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                {{ task.contact.firstName[0] }}. {{ task.contact.lastName }}
+                              </span>
+                            }
+                            @if (task.deal) {
+                              <span class="flex items-center gap-1 text-brand-primary/80">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                {{ task.deal.title }}
+                              </span>
+                            }
                           </div>
                           @if (task.assignee) {
                             <div class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-brand-primary/20 flex items-center justify-center text-[8px] sm:text-[10px] font-bold text-brand-primary border border-brand-primary/30" [title]="task.assignee.firstName + ' ' + task.assignee.lastName">
@@ -234,6 +247,18 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
                         <span class="text-[10px] sm:text-[11px] font-bold flex items-center gap-1" [class]="getDueDateClass(task.dueDate)">
                           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                           {{ task.dueDate | date:'MMM d, yyyy' }}
+                        </span>
+                      }
+                      @if (task.contact) {
+                        <span class="text-[10px] sm:text-[11px] text-brand-secondary flex items-center gap-1">
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                          {{ task.contact.firstName }} {{ task.contact.lastName }}
+                        </span>
+                      }
+                      @if (task.deal) {
+                        <span class="text-[10px] sm:text-[11px] text-brand-primary flex items-center gap-1">
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                          {{ task.deal.title }}
                         </span>
                       }
                     </div>
@@ -359,6 +384,14 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
                       }
                     }
                   </div>
+                  @if (taskForm.get('contactId')?.value) {
+                    <div class="mt-1.5 inline-flex items-center gap-2 px-2 py-0.5 bg-white/5 border border-white/10 rounded-lg animate-in fade-in zoom-in-95 duration-200">
+                      <span class="text-[10px] font-medium">{{ selectedContact?.fullName }}</span>
+                      <button type="button" (click)="clearContact()" class="text-brand-secondary hover:text-red-400 transition-colors">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                      </button>
+                    </div>
+                  }
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-brand-secondary mb-1">Associate Deal</label>
@@ -375,6 +408,14 @@ import { HasPermissionDirective } from '../../../core/directives/has-permission.
                       }
                     }
                   </div>
+                  @if (taskForm.get('dealId')?.value) {
+                    <div class="mt-1.5 inline-flex items-center gap-2 px-2 py-0.5 bg-brand-primary/10 border border-brand-primary/20 rounded-lg animate-in fade-in zoom-in-95 duration-200">
+                      <span class="text-[10px] font-medium text-brand-primary">{{ selectedDeal?.title }}</span>
+                      <button type="button" (click)="clearDeal()" class="text-brand-secondary hover:text-red-400 transition-colors">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                      </button>
+                    </div>
+                  }
                 </div>
               </div>
             </div>
@@ -401,6 +442,7 @@ export class TasksListComponent implements OnInit {
   private crmService = inject(CrmService);
   private authService = inject(AuthService);
   private subService = inject(SubscriptionService);
+  private route = inject(ActivatedRoute);
   
   // Data Streams
   tasks$ = this.store.select(selectTasks);
@@ -425,10 +467,12 @@ export class TasksListComponent implements OnInit {
   // Search State
   contactSearchControl = new FormControl('');
   contactSearchResults$: Observable<any[]> = of([]);
+  selectedContact: any = null;
   showContactResults = false;
-  
+
   dealSearchControl = new FormControl('');
   dealSearchResults$: Observable<any[]> = of([]);
+  selectedDeal: any = null;
   showDealResults = false;
 
   // Advanced Filtering Form
@@ -474,6 +518,21 @@ export class TasksListComponent implements OnInit {
       this.store.dispatch(DashboardActions.loadStats());
     });
 
+    // Handle direct navigation to a task from global search
+    this.route.queryParams.pipe(take(1)).subscribe((params: any) => {
+      if (params['id']) {
+        this.tasks$.pipe(
+          filter((tasks: any[]) => tasks.length > 0),
+          take(1)
+        ).subscribe((tasks: any[]) => {
+          const task = tasks.find((t: any) => t.id === params['id']);
+          if (task) {
+            this.editTask(task);
+          }
+        });
+      }
+    });
+
     // Reactive Pipeline for Filtering
     combineLatest([
       this.tasks$,
@@ -510,15 +569,29 @@ export class TasksListComponent implements OnInit {
   }
 
   selectContact(c: any) {
+    this.selectedContact = c;
     this.taskForm.patchValue({ contactId: c.id });
     this.contactSearchControl.setValue(c.fullName, { emitEvent: false });
     this.showContactResults = false;
   }
 
   selectDeal(d: any) {
+    this.selectedDeal = d;
     this.taskForm.patchValue({ dealId: d.id });
     this.dealSearchControl.setValue(d.title, { emitEvent: false });
     this.showDealResults = false;
+  }
+
+  clearContact() {
+    this.selectedContact = null;
+    this.taskForm.patchValue({ contactId: null });
+    this.contactSearchControl.setValue('');
+  }
+
+  clearDeal() {
+    this.selectedDeal = null;
+    this.taskForm.patchValue({ dealId: null });
+    this.dealSearchControl.setValue('');
   }
 
   // Kanban Helper
@@ -674,8 +747,14 @@ export class TasksListComponent implements OnInit {
     });
     
     // Set search control values for edit mode
-    if (task.contactId) this.contactSearchControl.setValue('Linked Contact', { emitEvent: false });
-    if (task.dealId) this.dealSearchControl.setValue('Linked Deal', { emitEvent: false });
+    if (task.contactId) {
+      this.selectedContact = task.contact ? { ...task.contact, fullName: task.contact.fullName || `${task.contact.firstName} ${task.contact.lastName}` } : { id: task.contactId, fullName: 'Linked Contact' };
+      this.contactSearchControl.setValue(this.selectedContact.fullName, { emitEvent: false });
+    }
+    if (task.dealId) {
+      this.selectedDeal = task.deal || { id: task.dealId, title: 'Linked Deal' };
+      this.dealSearchControl.setValue(this.selectedDeal.title, { emitEvent: false });
+    }
 
     this.isModalOpen = true;
   }

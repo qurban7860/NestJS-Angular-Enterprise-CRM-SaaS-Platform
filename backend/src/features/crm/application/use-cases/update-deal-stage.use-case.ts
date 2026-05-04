@@ -30,18 +30,28 @@ export class UpdateDealStageUseCase implements UseCase<UpdateDealStageRequest, D
     deal.advanceStage(request.stage);
     
     await this.crmRepo.saveDeal(deal);
+    
+    // Fetch the deal with relations
+    const savedDeal = await this.crmRepo.findDealById(deal.id);
+    if (!savedDeal) return Result.fail<DealResponseDto>("Failed to retrieve updated deal");
 
     return Result.ok<DealResponseDto>({
-      id: deal.id,
-      title: deal.title,
-      valueAmount: deal.valueAmount,
-      valueCurrency: deal.valueCurrency,
-      stage: deal.stage as any,
-      orgId: deal.orgId,
-      ownerId: deal.ownerId,
-      contactId: deal.contactId,
-      companyId: deal.companyId,
-      createdAt: deal.createdAt!,
+      id: savedDeal.id,
+      title: savedDeal.title,
+      valueAmount: savedDeal.valueAmount,
+      valueCurrency: savedDeal.valueCurrency,
+      stage: savedDeal.stage as any,
+      orgId: savedDeal.orgId,
+      ownerId: savedDeal.ownerId,
+      contactId: savedDeal.contactId,
+      companyId: savedDeal.companyId,
+      contact: (savedDeal as any).contact ? {
+        id: (savedDeal as any).contact.id,
+        firstName: (savedDeal as any).contact.firstName,
+        lastName: (savedDeal as any).contact.lastName,
+        fullName: `${(savedDeal as any).contact.firstName} ${(savedDeal as any).contact.lastName}`
+      } : undefined,
+      createdAt: savedDeal.createdAt!,
     });
   }
 }

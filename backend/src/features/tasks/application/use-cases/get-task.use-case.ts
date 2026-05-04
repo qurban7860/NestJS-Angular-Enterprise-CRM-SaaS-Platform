@@ -32,6 +32,31 @@ export class GetTaskUseCase {
     dto.dueDate = task.dueDate;
     dto.createdAt = task.createdAt || new Date();
 
+    if ((task as any).assignee) {
+      dto.assignee = {
+        id: (task as any).assignee.id,
+        firstName: (task as any).assignee.firstName,
+        lastName: (task as any).assignee.lastName,
+        fullName: `${(task as any).assignee.firstName} ${(task as any).assignee.lastName}`
+      };
+    }
+
+    if ((task as any).contact) {
+      dto.contact = {
+        id: (task as any).contact.id,
+        firstName: (task as any).contact.firstName,
+        lastName: (task as any).contact.lastName,
+        fullName: `${(task as any).contact.firstName} ${(task as any).contact.lastName}`
+      };
+    }
+
+    if ((task as any).deal) {
+      dto.deal = {
+        id: (task as any).deal.id,
+        title: (task as any).deal.title,
+      };
+    }
+
     return Result.ok(dto);
   }
 }

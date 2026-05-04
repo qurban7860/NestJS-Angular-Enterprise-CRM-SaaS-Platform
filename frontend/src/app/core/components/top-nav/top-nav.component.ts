@@ -173,7 +173,7 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
 
   <!-- Mobile Search Overlay -->
   @if (showMobileSearch) {
-    <div class="fixed inset-0 z-[250] bg-brand-dark/95 backdrop-blur-lg flex flex-col animate-in fade-in duration-200">
+    <div #mobileSearchOverlay class="fixed inset-0 z-[250] bg-brand-dark/95 backdrop-blur-lg flex flex-col animate-in fade-in duration-200">
       <div class="p-4 border-b border-brand-border">
         <div class="flex items-center gap-3 max-w-2xl mx-auto">
           <div class="relative flex-1">
@@ -254,6 +254,7 @@ export class TopNavComponent implements OnInit {
   navService = inject(NavService);
 
   @ViewChild('searchContainer') searchContainer!: ElementRef;
+  @ViewChild('mobileSearchOverlay') mobileSearchOverlay!: ElementRef;
   @ViewChild('notifContainer') notifContainer!: ElementRef;
 
   user$ = this.store.select(selectUser);
@@ -295,7 +296,10 @@ export class TopNavComponent implements OnInit {
     const target = event.target as HTMLElement;
     
     // Using ElementRef for reliable target checking
-    if (this.searchContainer && !this.searchContainer.nativeElement.contains(target)) {
+    const isInsideSearch = this.searchContainer?.nativeElement.contains(target);
+    const isInsideMobileSearch = this.mobileSearchOverlay?.nativeElement.contains(target);
+
+    if (!isInsideSearch && !isInsideMobileSearch) {
       this.showResults = false;
     }
 
@@ -329,15 +333,16 @@ export class TopNavComponent implements OnInit {
 
   onSearchResultClick(event: Event, url: string) {
     event.preventDefault();
-    event.stopPropagation();
     this.showResults = false;
+    this.searchControl.setValue('', { emitEvent: false });
     this.router.navigateByUrl(this.normalizeUrl(url));
   }
 
   onMobileSearchResultClick(event: Event, url: string) {
     event.preventDefault();
-    event.stopPropagation();
     this.showMobileSearch = false;
+    this.showResults = false;
+    this.searchControl.setValue('', { emitEvent: false });
     this.router.navigateByUrl(this.normalizeUrl(url));
   }
 

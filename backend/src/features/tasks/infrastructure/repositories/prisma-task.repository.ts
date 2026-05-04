@@ -92,6 +92,7 @@ export class PrismaTaskRepository implements ITaskRepository {
     }, raw.id).getValue();
 
     // Add extra info for DTO mapping
+    (task as any).assignee = raw.assignee;
     (task as any).contact = raw.contact;
     (task as any).deal = raw.deal;
     

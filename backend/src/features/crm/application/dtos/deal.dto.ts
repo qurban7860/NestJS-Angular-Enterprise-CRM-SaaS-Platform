@@ -96,6 +96,14 @@ export class DealResponseDto {
   @ApiProperty({ required: false })
   probability?: number;
 
+  @ApiProperty({ required: false })
+  contact?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    fullName: string;
+  };
+
   @ApiProperty()
   createdAt!: Date;
 }

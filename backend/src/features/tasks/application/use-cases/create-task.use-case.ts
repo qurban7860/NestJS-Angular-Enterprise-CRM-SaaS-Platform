@@ -37,25 +37,46 @@ export class CreateTaskUseCase implements UseCase<CreateTaskDto, TaskResponseDto
     const task = taskOrError.getValue();
     await this.taskRepo.save(task);
 
+    // Fetch the task with relations
+    const savedTask = await this.taskRepo.findById(task.id);
+    if (!savedTask) return Result.fail<TaskResponseDto>("Failed to retrieve created task");
+
     // Emit Real-time Notification if assigned to someone else
-    if (task.assigneeId && task.assigneeId !== task.creatorId) {
-      this.notificationsGateway.sendToUser(task.assigneeId, 'notification', {
+    if (savedTask.assigneeId && savedTask.assigneeId !== savedTask.creatorId) {
+      this.notificationsGateway.sendToUser(savedTask.assigneeId, 'notification', {
         title: 'New Task Assigned',
-        message: `You have been assigned a new task: ${task.title}`,
+        message: `You have been assigned a new task: ${savedTask.title}`,
         type: 'TASK_ASSIGNED',
-        data: { taskId: task.id }
+        data: { taskId: savedTask.id }
       });
     }
 
     return Result.ok<TaskResponseDto>({
-      id: task.id,
-      title: task.title,
-      status: task.status,
-      priority: task.priority,
-      assigneeId: task.assigneeId,
-      contactId: task.contactId,
-      dealId: task.dealId,
-      createdAt: task.createdAt!,
+      id: savedTask.id,
+      title: savedTask.title,
+      status: savedTask.status,
+      priority: savedTask.priority,
+      assigneeId: savedTask.assigneeId,
+      contactId: savedTask.contactId,
+      dealId: savedTask.dealId,
+      dueDate: savedTask.dueDate,
+      assignee: (savedTask as any).assignee ? {
+        id: (savedTask as any).assignee.id,
+        firstName: (savedTask as any).assignee.firstName,
+        lastName: (savedTask as any).assignee.lastName,
+        fullName: `${(savedTask as any).assignee.firstName} ${(savedTask as any).assignee.lastName}`
+      } : undefined,
+      contact: (savedTask as any).contact ? {
+        id: (savedTask as any).contact.id,
+        firstName: (savedTask as any).contact.firstName,
+        lastName: (savedTask as any).contact.lastName,
+        fullName: `${(savedTask as any).contact.firstName} ${(savedTask as any).contact.lastName}`
+      } : undefined,
+      deal: (savedTask as any).deal ? {
+        id: (savedTask as any).deal.id,
+        title: (savedTask as any).deal.title,
+      } : undefined,
+      createdAt: savedTask.createdAt!,
     });
   }
 }

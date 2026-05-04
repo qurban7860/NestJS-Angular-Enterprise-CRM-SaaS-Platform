@@ -1,19 +1,29 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { Injectable, Inject } from '@nestjs/common';
 import { UseCase } from '../../../../core/application/base/use-case.base';
 import { Result } from '../../../../core/domain/base/result';
 import type { ICRMRepository } from '../../domain/repositories/crm.repository.interface';
 import { DealResponseDto } from '../dtos/deal.dto';
-import { Injectable, Inject } from '@nestjs/common';
+
+export interface SearchDealsRequest {
+  orgId: string;
+  query: string;
+}
 
 @Injectable()
-export class ListDealsUseCase implements UseCase<string, DealResponseDto[]> {
+export class SearchDealsUseCase implements UseCase<
+  SearchDealsRequest,
+  DealResponseDto[]
+> {
   constructor(
-    @Inject('ICRMRepository') private readonly crmRepo: ICRMRepository,
+    @Inject('ICRMRepository')
+    private readonly crmRepo: ICRMRepository,
   ) {}
 
-  async execute(orgId: string): Promise<Result<DealResponseDto[]>> {
-    const deals = await this.crmRepo.findDealsByOrgId(orgId);
-
+  async execute(
+    req: SearchDealsRequest,
+  ): Promise<Result<DealResponseDto[]>> {
+    const deals = await this.crmRepo.searchDeals(req.orgId, req.query);
+    
     return Result.ok<DealResponseDto[]>(
       deals.map((deal) => ({
         id: deal.id,
@@ -27,14 +37,12 @@ export class ListDealsUseCase implements UseCase<string, DealResponseDto[]> {
         companyId: deal.companyId,
         expectedCloseDate: deal.expectedCloseDate,
         probability: deal.probability,
-        contact: (deal as any).contact
-          ? {
-              id: (deal as any).contact.id,
-              firstName: (deal as any).contact.firstName,
-              lastName: (deal as any).contact.lastName,
-              fullName: `${(deal as any).contact.firstName} ${(deal as any).contact.lastName}`
-            }
-          : undefined,
+        contact: (deal as any).contact ? {
+          id: (deal as any).contact.id,
+          firstName: (deal as any).contact.firstName,
+          lastName: (deal as any).contact.lastName,
+          fullName: `${(deal as any).contact.firstName} ${(deal as any).contact.lastName}`
+        } : undefined,
         createdAt: deal.createdAt!,
       })),
     );

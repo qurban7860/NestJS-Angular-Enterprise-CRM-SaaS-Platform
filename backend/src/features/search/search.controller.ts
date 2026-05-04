@@ -3,6 +3,7 @@ import { SearchService } from './search.service';
 import { JwtAuthGuard } from '../auth/presentation/guards/jwt-auth.guard';
 import { CurrentUser } from '../../core/presentation/decorators/current-user.decorator';
 
+// Heartbeat for reload
 @Controller('search')
 @UseGuards(JwtAuthGuard)
 export class SearchController {

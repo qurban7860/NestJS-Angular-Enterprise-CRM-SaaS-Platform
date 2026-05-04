@@ -34,6 +34,15 @@ export class GetDealUseCase {
     dto.companyId = deal.companyId;
     dto.createdAt = deal.createdAt || new Date();
 
+    if ((deal as any).contact) {
+      dto.contact = {
+        id: (deal as any).contact.id,
+        firstName: (deal as any).contact.firstName,
+        lastName: (deal as any).contact.lastName,
+        fullName: `${(deal as any).contact.firstName} ${(deal as any).contact.lastName}`
+      };
+    }
+
     return Result.ok(dto);
   }
 }

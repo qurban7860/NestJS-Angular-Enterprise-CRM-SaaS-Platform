@@ -54,7 +54,7 @@ export class SearchService {
           title: `${c.firstName} ${c.lastName}`,
           subtitle: c.email,
           type: 'contact',
-          url: `/crm/contacts/${c.id}`,
+          url: `/crm/contacts`,
         })),
       });
     }
@@ -67,7 +67,7 @@ export class SearchService {
           title: d.title,
           subtitle: `Stage: ${d.stage}`,
           type: 'deal',
-          url: `/crm/deals/${d.id}`,
+          url: `/crm/deals`,
         })),
       });
     }

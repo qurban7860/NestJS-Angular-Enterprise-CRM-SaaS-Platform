@@ -44,18 +44,45 @@ export class UpdateTaskUseCase {
 
     await this.taskRepo.save(task);
 
+    // Fetch the task with relations
+    const savedTask = await this.taskRepo.findById(task.id);
+    if (!savedTask) return Result.fail<TaskResponseDto>("Failed to retrieve updated task");
+
     const dto = new TaskResponseDto();
-    dto.id = task.id;
-    dto.title = task.title;
-    dto.status = task.status;
-    dto.priority = task.priority;
-    dto.assigneeId = task.assigneeId;
-    dto.contactId = task.contactId;
-    dto.dealId = task.dealId;
-    dto.dueDate = task.dueDate;
-    dto.contact = (task as any).contact;
-    dto.deal = (task as any).deal;
-    dto.createdAt = task.createdAt || new Date();
+    dto.id = savedTask.id;
+    dto.title = savedTask.title;
+    dto.status = savedTask.status;
+    dto.priority = savedTask.priority;
+    dto.assigneeId = savedTask.assigneeId;
+    dto.contactId = savedTask.contactId;
+    dto.dealId = savedTask.dealId;
+    dto.dueDate = savedTask.dueDate;
+    dto.createdAt = savedTask.createdAt || new Date();
+
+    if ((savedTask as any).assignee) {
+      dto.assignee = {
+        id: (savedTask as any).assignee.id,
+        firstName: (savedTask as any).assignee.firstName,
+        lastName: (savedTask as any).assignee.lastName,
+        fullName: `${(savedTask as any).assignee.firstName} ${(savedTask as any).assignee.lastName}`
+      };
+    }
+
+    if ((savedTask as any).contact) {
+      dto.contact = {
+        id: (savedTask as any).contact.id,
+        firstName: (savedTask as any).contact.firstName,
+        lastName: (savedTask as any).contact.lastName,
+        fullName: `${(savedTask as any).contact.firstName} ${(savedTask as any).contact.lastName}`
+      };
+    }
+
+    if ((savedTask as any).deal) {
+      dto.deal = {
+        id: (savedTask as any).deal.id,
+        title: (savedTask as any).deal.title,
+      };
+    }
 
     return Result.ok(dto);
   }

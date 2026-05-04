@@ -33,19 +33,29 @@ export class CreateDealUseCase implements UseCase<CreateDealDto, DealResponseDto
     const deal = dealOrError.getValue();
     await this.crmRepo.saveDeal(deal);
 
+    // Fetch the deal with relations
+    const savedDeal = await this.crmRepo.findDealById(deal.id);
+    if (!savedDeal) return Result.fail<DealResponseDto>("Failed to retrieve created deal");
+
     return Result.ok<DealResponseDto>({
-      id: deal.id,
-      title: deal.title,
-      valueAmount: deal.valueAmount,
-      valueCurrency: deal.valueCurrency,
-      stage: deal.stage as any,
-      orgId: deal.orgId,
-      ownerId: deal.ownerId,
-      contactId: deal.contactId,
-      companyId: deal.companyId,
-      expectedCloseDate: deal.expectedCloseDate,
-      probability: deal.probability,
-      createdAt: deal.createdAt!,
+      id: savedDeal.id,
+      title: savedDeal.title,
+      valueAmount: savedDeal.valueAmount,
+      valueCurrency: savedDeal.valueCurrency,
+      stage: savedDeal.stage as any,
+      orgId: savedDeal.orgId,
+      ownerId: savedDeal.ownerId,
+      contactId: savedDeal.contactId,
+      companyId: savedDeal.companyId,
+      expectedCloseDate: savedDeal.expectedCloseDate,
+      probability: savedDeal.probability,
+      contact: (savedDeal as any).contact ? {
+        id: (savedDeal as any).contact.id,
+        firstName: (savedDeal as any).contact.firstName,
+        lastName: (savedDeal as any).contact.lastName,
+        fullName: `${(savedDeal as any).contact.firstName} ${(savedDeal as any).contact.lastName}`
+      } : undefined,
+      createdAt: savedDeal.createdAt!,
     });
   }
 }

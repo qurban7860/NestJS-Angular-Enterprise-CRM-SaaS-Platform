@@ -36,10 +36,21 @@ export class ListTasksUseCase implements UseCase<{ orgId: string; filters?: any 
         contactId: task.contactId,
         dealId: task.dealId,
         dueDate: task.dueDate,
-        assignee: (task as any).props?.assignee ? {
-          id: (task as any).props.assignee.id,
-          firstName: (task as any).props.assignee.firstName,
-          lastName: (task as any).props.assignee.lastName,
+        assignee: (task as any).assignee ? {
+          id: (task as any).assignee.id,
+          firstName: (task as any).assignee.firstName,
+          lastName: (task as any).assignee.lastName,
+          fullName: `${(task as any).assignee.firstName} ${(task as any).assignee.lastName}`
+        } : undefined,
+        contact: (task as any).contact ? {
+          id: (task as any).contact.id,
+          firstName: (task as any).contact.firstName,
+          lastName: (task as any).contact.lastName,
+          fullName: `${(task as any).contact.firstName} ${(task as any).contact.lastName}`
+        } : undefined,
+        deal: (task as any).deal ? {
+          id: (task as any).deal.id,
+          title: (task as any).deal.title,
         } : undefined,
         createdAt: task.createdAt!,
       }))

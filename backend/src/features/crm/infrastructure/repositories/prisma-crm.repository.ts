@@ -170,7 +170,12 @@ export class PrismaCRMRepository implements ICRMRepository {
 
   // ── Deal ──────────────────────────────────────────────────
   async findDealById(id: string): Promise<Deal | null> {
-    const raw = await this.prisma.deal.findUnique({ where: { id } });
+    const raw = await this.prisma.deal.findUnique({
+      where: { id },
+      include: {
+        contact: { select: { id: true, firstName: true, lastName: true } },
+      },
+    });
     if (!raw) return null;
     return this.mapToDeal(raw);
   }
@@ -178,6 +183,9 @@ export class PrismaCRMRepository implements ICRMRepository {
   async findDealsByOrgId(orgId: string): Promise<Deal[]> {
     const raws = await this.prisma.deal.findMany({
       where: { orgId, isDeleted: false },
+      include: {
+        contact: { select: { id: true, firstName: true, lastName: true } },
+      },
       orderBy: { updatedAt: 'desc' },
     });
     return raws.map((raw) => this.mapToDeal(raw));
@@ -190,6 +198,9 @@ export class PrismaCRMRepository implements ICRMRepository {
         isDeleted: false,
         OR: [{ title: { contains: query, mode: 'insensitive' } }],
       },
+      include: {
+        contact: { select: { id: true, firstName: true, lastName: true } },
+      },
       take: 20,
       orderBy: { updatedAt: 'desc' },
     });
@@ -197,7 +208,7 @@ export class PrismaCRMRepository implements ICRMRepository {
   }
 
   private mapToDeal(raw: any): Deal {
-    return Deal.create(
+    const deal = Deal.create(
       {
         title: raw.title,
         valueAmount: Number(raw.valueAmount),
@@ -216,6 +227,12 @@ export class PrismaCRMRepository implements ICRMRepository {
       },
       raw.id,
     ).getValue();
+
+    if (raw.contact) {
+      (deal as any).contact = raw.contact;
+    }
+
+    return deal;
   }
 
   async saveDeal(deal: Deal): Promise<void> {

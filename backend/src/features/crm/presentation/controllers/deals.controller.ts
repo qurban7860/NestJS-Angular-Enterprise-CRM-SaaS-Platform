@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable prettier/prettier */
-import { Controller, Post, Body, Get, Param, Patch, Delete, Res, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Patch, Delete, Res, UseGuards, Query } from '@nestjs/common';
 import { PermissionsGuard } from '../../../rbac/presentation/guards/permissions.guard';
 import { RequirePermissions } from '../../../rbac/presentation/decorators/require-permissions.decorator';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
@@ -12,6 +12,7 @@ import { UpdateDealStageUseCase } from '../../application/use-cases/update-deal-
 import { GetDealUseCase } from '../../application/use-cases/get-deal.use-case';
 import { UpdateDealUseCase } from '../../application/use-cases/update-deal.use-case';
 import { DeleteDealUseCase } from '../../application/use-cases/delete-deal.use-case';
+import { SearchDealsUseCase } from '../../application/use-cases/search-deals.use-case';
 import { DealResponseDto, CreateDealDto, UpdateDealStageDto, UpdateDealDto } from '../../application/dtos/deal.dto';
 import { CurrentUser } from '../../../../core/presentation/decorators/current-user.decorator';
 import { CsvExportService } from '../../../../core/application/services/csv-export.service';
@@ -32,6 +33,7 @@ export class DealsController {
     private readonly getDealUseCase: GetDealUseCase,
     private readonly updateDealUseCase: UpdateDealUseCase,
     private readonly deleteDealUseCase: DeleteDealUseCase,
+    private readonly searchDealsUseCase: SearchDealsUseCase,
     private readonly csvExportService: CsvExportService,
     private readonly limitsService: PlanLimitsService,
   ) {}
@@ -69,6 +71,21 @@ export class DealsController {
   @ApiResponse({ status: 200, type: [DealResponseDto] })
   async findAll(@CurrentUser() user: any) {
     const result = await this.listDealsUseCase.execute(user.orgId);
+    if (result.isFailure) {
+      throw new BusinessException(result.error!);
+    }
+    return result.getValue();
+  }
+
+  @Get('search')
+  @RequirePermissions('deals:read')
+  @ApiOperation({ summary: 'Search deals with query' })
+  @ApiResponse({ status: 200, type: [DealResponseDto] })
+  async search(@Query('q') query: string, @CurrentUser() user: any) {
+    const result = await this.searchDealsUseCase.execute({
+      orgId: user.orgId,
+      query: query || '',
+    });
     if (result.isFailure) {
       throw new BusinessException(result.error!);
     }

@@ -119,6 +119,7 @@ export class TaskResponseDto {
     id: string;
     firstName: string;
     lastName: string;
+    fullName: string;
   };
 
   @ApiProperty({ required: false })
@@ -126,6 +127,7 @@ export class TaskResponseDto {
     id: string;
     firstName: string;
     lastName: string;
+    fullName: string;
   };
 
   @ApiProperty({ required: false })

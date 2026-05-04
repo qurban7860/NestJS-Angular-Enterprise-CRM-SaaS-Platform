@@ -11,9 +11,10 @@ import { ConfirmModalComponent } from '../../../../core/components/confirm-modal
 import { SubscriptionService } from '../../../../core/services/subscription.service';
 import { selectStats } from '../../../../core/state/dashboard/dashboard.reducer';
 import { DashboardActions } from '../../../../core/state/dashboard/dashboard.actions';
-import { combineLatest, take, Observable, of, debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs';
+import { combineLatest, take, Observable, of, debounceTime, distinctUntilChanged, switchMap, tap, filter } from 'rxjs';
 import { HasPermissionDirective } from '../../../../core/directives/has-permission.directive';
 import { CrmService } from '../../../../core/services/crm.service';
+import { ActivatedRoute } from '@angular/router';
 
 interface KanbanColumn {
   id: string;
@@ -120,6 +121,13 @@ interface KanbanColumn {
                         </div>
                       </div>
                     </div>
+
+                    @if (deal.contact) {
+                      <div class="mt-2 flex items-center gap-1.5 text-[10px] text-brand-secondary font-medium">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                        <span class="truncate">{{ deal.contact.firstName }} {{ deal.contact.lastName }}</span>
+                      </div>
+                    }
 
                     <div class="mt-4 pt-3 flex items-center justify-between border-t border-white/5 opacity-40 text-[9px] uppercase tracking-tighter font-bold">
                       <span>#{{ deal.id.substring(0,4) }}</span>
@@ -244,6 +252,7 @@ export class DealsKanbanComponent implements OnInit {
   private fb = inject(FormBuilder);
   private subService = inject(SubscriptionService);
   private crmService = inject(CrmService);
+  private route = inject(ActivatedRoute);
   
   deals$ = this.store.select(selectDeals);
   stats$ = this.store.select(selectStats);
@@ -290,6 +299,21 @@ export class DealsKanbanComponent implements OnInit {
   ngOnInit() {
     this.store.dispatch(CRMActions.loadDeals());
     this.store.dispatch(DashboardActions.loadStats());
+
+    // Handle direct navigation to a deal from global search
+    this.route.queryParams.pipe(take(1)).subscribe((params: any) => {
+      if (params['id']) {
+        this.deals$.pipe(
+          filter((deals: any[]) => deals.length > 0),
+          take(1)
+        ).subscribe((deals: any[]) => {
+          const deal = deals.find((d: any) => d.id === params['id']);
+          if (deal) {
+            this.editDeal(deal);
+          }
+        });
+      }
+    });
 
     this.contactSearchResults$ = this.contactSearchControl.valueChanges.pipe(
       debounceTime(300),
@@ -398,8 +422,7 @@ export class DealsKanbanComponent implements OnInit {
     });
     
     if (deal.contactId) {
-      // In a real app we'd fetch the contact details if not in store
-      this.selectedContact = { id: deal.contactId, fullName: 'Linked Contact' };
+      this.selectedContact = deal.contact ? { ...deal.contact, fullName: deal.contact.fullName || `${deal.contact.firstName} ${deal.contact.lastName}` } : { id: deal.contactId, fullName: 'Linked Contact' };
       this.contactSearchControl.setValue(this.selectedContact.fullName, { emitEvent: false });
     }
 

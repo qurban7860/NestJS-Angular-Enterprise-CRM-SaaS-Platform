@@ -12,14 +12,14 @@ import {
   FormBuilder,
   Validators,
 } from '@angular/forms';
-import { map, startWith, combineLatest } from 'rxjs';
+import { map, startWith, combineLatest, take, filter } from 'rxjs';
 import { ButtonComponent } from '../../../../core/components/button/button.component';
 import { ConfirmModalComponent } from '../../../../core/components/confirm-modal/confirm-modal.component';
 import { SubscriptionService } from '../../../../core/services/subscription.service';
 import { selectStats } from '../../../../core/state/dashboard/dashboard.reducer';
 import { DashboardActions } from '../../../../core/state/dashboard/dashboard.actions';
-import { take } from 'rxjs';
 import { HasPermissionDirective } from '../../../../core/directives/has-permission.directive';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-contacts-list',
@@ -327,6 +327,7 @@ export class ContactsListComponent implements OnInit {
   private store = inject(Store);
   private fb = inject(FormBuilder);
   private subService = inject(SubscriptionService);
+  private route = inject(ActivatedRoute);
 
   contacts$ = this.store.select(selectContacts);
   stats$ = this.store.select(selectStats);
@@ -351,11 +352,11 @@ export class ContactsListComponent implements OnInit {
     this.contacts$,
     this.searchControl.valueChanges.pipe(startWith('')),
   ]).pipe(
-    map(([contacts, search]) => {
+    map(([contacts, search]: [any[], string]) => {
       const term = search.toLowerCase();
       if (!term) return contacts;
       return contacts.filter(
-        (c) =>
+        (c: any) =>
           c.fullName.toLowerCase().includes(term) ||
           c.email.toLowerCase().includes(term),
       );
@@ -365,6 +366,21 @@ export class ContactsListComponent implements OnInit {
   ngOnInit() {
     this.store.dispatch(CRMActions.loadContacts());
     this.store.dispatch(DashboardActions.loadStats());
+
+    // Handle direct navigation to a contact from global search
+    this.route.queryParams.pipe(take(1)).subscribe((params: any) => {
+      if (params['id']) {
+        this.contacts$.pipe(
+          filter((contacts: any[]) => contacts.length > 0),
+          take(1)
+        ).subscribe((contacts: any[]) => {
+          const contact = contacts.find((c: any) => c.id === params['id']);
+          if (contact) {
+            this.editContact(contact);
+          }
+        });
+      }
+    });
   }
 
   openCreateModal() {
