@@ -12,8 +12,14 @@ A production-ready, multi-tenant enterprise backend built with **NestJS**, follo
 - **Multi-tenant Architecture**: Strict organization-level data isolation.
 - **Enterprise Security**: JWT-based authentication with Role-Based Access Control (RBAC).
 - **Domain Driven Design (DDD)**: Logic organized into Use Cases, Repositories, and Domain Entities.
-- **Task Management**: Full task lifecycle, status transitions, and assignee management.
+- **Task Management**: Full task lifecycle, status transitions, comments, and assignee management.
 - **CRM Suite**: Lead tracking, Contact management, and Deal pipeline (Kanban support).
+- **Stripe Integration**: Secure webhook processing with idempotency for automated plan upgrades and subscription lifecycle management.
+- **Real-Time WebSockets**: Unified `NotificationsGateway` and `BroadcastGateway` for instant client synchronization, task alerts, and system announcements.
+- **Premium Features Module**:
+  - Advanced RBAC (`PermissionsGuard`, `RequirePermissions`).
+  - Event-driven Automated Workflows executing business rules.
+  - Data aggregation and generation for Custom Reports.
 - **File Management**: Integrated file upload and attachment system.
 - **Automated Documentation**: Full Swagger/OpenAPI integration.
 

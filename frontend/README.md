@@ -12,7 +12,10 @@ A high-performance, premium enterprise dashboard built with **Angular 17** and *
 - **State Management**: Robust reactive architecture powered by NgRx (Store, Effects, Selectors).
 - **Premium UI**: Modern glassmorphism aesthetics with optimized dark mode support.
 - **Dynamic Kanban**: Fully interactive drag-and-drop pipeline for deals and tasks.
-- **Enterprise Components**: Reusable, atomic design components (Modals, Toasts, Charts).
+- **Real-Time Integration**: Integrated WebSockets (Socket.io) for live notifications, task comment synchronization, and system broadcasts.
+- **Enterprise Features Dashboard**: Dedicated interfaces for Custom RBAC, Automated Workflows, and Advanced Reporting.
+- **Billing & Subscriptions**: Seamless Stripe checkout integration with live feature-flagging based on subscription tiers.
+- **Enterprise Components**: Reusable, atomic design components (Modals, Toasts, Charts, Global Search).
 - **Real-time Validation**: Advanced reactive forms with deep validation logic.
 - **Optimized Performance**: Standalone components, lazy loading, and OnPush change detection.
 

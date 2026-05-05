@@ -10,8 +10,15 @@ An all-in-one, multi-tenant enterprise solution for managing CRM contacts, deal 
 This platform provides a comprehensive suite of tools for modern businesses:
 - **CRM Module**: Manage contacts, companies, and relationship history.
 - **Deal Pipeline**: A visual Kanban board for tracking sales stages and conversion.
-- **Task Management**: A robust system for team assignments, priority tracking, and board views.
+- **Task Management**: A robust system for team assignments, priority tracking, comments, and board views.
 - **Enterprise Core**: Integrated authentication, file attachments, and multi-tenant isolation.
+- **Real-Time Notifications & WebSockets**: Instant updates for task assignments, comments, and deal stage changes via a unified gateway.
+- **Stripe Billing & Subscriptions**: Automated webhook handling for subscription tier upgrades (Free, Premium, Enterprise).
+- **Signal Broadcasting**: Real-time system-wide and organization-specific announcements and alerts.
+- **Premium SaaS Features**:
+  - **Custom RBAC**: Create and manage granular custom roles and permissions.
+  - **Automated Workflows**: Rule-based automation (e.g., auto-create tasks on deal stage changes).
+  - **Custom Reporting**: Generate data-rich PDF/CSV reports with dynamic config.
 
 ## 🏗️ System Architecture
 
