@@ -35,6 +35,14 @@ node generate-demo.js
 node render-pdf.js
 ```
 
+## Verify PDF output
+
+```powershell
+cd demo-deliverables/automation
+node render-pdf.js
+start ..\artifacts\ENTERPRISE_DEMO_REPORT.pdf
+```
+
 ## Convert WebM to MP4 manually (if needed)
 
 ```powershell
@@ -45,3 +53,9 @@ $ffmpeg = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Win
 ## Notes
 - `node_modules` and temporary capture files are intentionally removed for clean upload.
 - If you need to run automation again, install dependencies using the setup commands above.
+- Cleanup command after generation:
+
+```powershell
+cd demo-deliverables/automation
+if (Test-Path .\node_modules) { Remove-Item .\node_modules -Recurse -Force }
+```
