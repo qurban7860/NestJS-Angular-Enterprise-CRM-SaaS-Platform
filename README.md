@@ -1,7 +1,6 @@
 # Enterprise Platform: CRM, Tasks & Pipeline Management
 
 [![Stack: NestJS & Angular](https://img.shields.io/badge/Stack-NestJS%20%2B%20Angular-blueviolet?style=for-the-badge)](https://github.com/qurban7860/NestJS-Angular-Enterprise-CRM-SaaS-Platform)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
 An all-in-one, multi-tenant enterprise solution for managing CRM contacts, deal pipelines, and team tasks. Built with a focus on high-performance architecture, security, and a premium user experience.
 
