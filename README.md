@@ -25,7 +25,7 @@ The project is split into two main components:
 1. **Frontend**: Angular 17+ with NgRx for state management and a premium glassmorphism UI.
 2. **Backend**: NestJS with Prisma ORM and PostgreSQL for a scalable, type-safe API.
 
-```mermaid
+```
 graph LR
     User([User]) --> Frontend[Angular Web App]
     Frontend --> API[NestJS API]
