@@ -2,54 +2,57 @@ name: Automated Daily Commits
 
 on:
   schedule:
-    # Runs at 08:00 UTC every day. 
-    # You can change this to any time using CRON syntax.
-    - cron: '0 8 * * *'
-  # Allows you to run this workflow manually from the Actions tab for testing
+    - cron: '20 11,17 * * *'
   workflow_dispatch: 
 
 jobs:
   make-commits:
     runs-on: ubuntu-latest
     permissions:
-      # Git is required to write to the repository
       contents: write
     
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          # Fetches entire history so we can push back seamlessly
-          fetch-depth: 0 
 
       - name: Setup Git Config
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Generate Distinct Commits
+      - name: Generate Human-Like Commits
         run: |
-          # Define how many commits you want (2 or 3)
-          NUM_COMMITS=$(( ( RANDOM % 2 )  + 2 ))
+          # Pool of realistic, varied human commit messages
+          MESSAGES=(
+            "fix: handle edge case in data parsing utility"
+            "refactor: optimize loop performance in helper module"
+            "docs: add clarification to function parameters"
+            "style: clean up indentation and trailing spaces"
+            "chore: update internal tracking notes"
+            "feat: add initial skeleton for upcoming helper"
+            "fix: correct minor typo in comments"
+          )
           
-          echo "Generating $NUM_COMMITS commits"
+          # Randomly decide to make 1 or 2 commits to vary daily patterns
+          NUM_COMMITS=$(( ( RANDOM % 2 )  + 1 ))
+          echo "Generating $NUM_COMMITS human-like commits"
           
-          # Ensure the log file exists
-          touch contribution_log.txt
+          touch scratchpad.js
           
           for i in $(seq 1 $NUM_COMMITS)
           do
-            # Create a unique change using date and nanoseconds + loop index
-            echo "Contribution update: $(date +'%Y-%m-%d %H:%M:%S:%N') - commit $i" >> contribution_log.txt
+            # Pick a random message from the array
+            RANDOM_INDEX=$(( RANDOM % ${#MESSAGES[@]} ))
+            COMMIT_MSG="${MESSAGES[$RANDOM_INDEX]}"
             
-            # Stage the file
-            git add contribution_log.txt
+            # Append a realistic timestamped code comment instead of raw logs
+            echo "// Updated at $(date +'%Y-%m-%d %H:%M:%S') - routine maintenance" >> scratchpad.js
             
-            # Commit with a varying message to ensure they are distinct commits
-            git commit -m "chore: automated daily update $(date +'%Y-%m-%d') [part $i]"
+            git add scratchpad.js
+            git commit -m "$COMMIT_MSG"
             
-            # Optional: Small pause to ensure timestamps are slightly different
-            sleep 2
+            # Random pause to mimic natural development pacing
+            sleep $(( ( RANDOM % 5 ) + 3 ))
           done
 
       - name: Push Changes
