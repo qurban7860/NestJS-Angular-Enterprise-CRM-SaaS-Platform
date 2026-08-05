@@ -2,58 +2,94 @@ name: Automated Daily Commits
 
 on:
   schedule:
-    - cron: '20 11,17 * * *'
-  workflow_dispatch: 
+    # Runs twice daily (UTC)
+    # 16:20 UTC = 9:20 PM PKT
+    # 18:20 UTC = 11:20 PM PKT
+    - cron: "20 16,18 * * *"
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
 
 jobs:
   make-commits:
+
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    
+
     steps:
-      - name: Checkout Code
+
+      - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup Git Config
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Generate Human-Like Commits
+      - name: Configure Git Identity
         run: |
-          # Pool of realistic, varied human commit messages
+          git config --global user.name "Qurban Hanif"
+          git config --global user.email "qurbanhanif120@gmail.com"
+
+
+      - name: Create Meaningful Maintenance Commit
+        run: |
+
+          FILE="maintenance/daily-update.md"
+
+          mkdir -p maintenance
+
+          touch $FILE
+
+
           MESSAGES=(
-            "fix: handle edge case in data parsing utility"
-            "refactor: optimize loop performance in helper module"
-            "docs: add clarification to function parameters"
-            "style: clean up indentation and trailing spaces"
-            "chore: update internal tracking notes"
-            "feat: add initial skeleton for upcoming helper"
-            "fix: correct minor typo in comments"
+            "chore: update daily maintenance log"
+            "docs: improve project documentation notes"
+            "refactor: optimize internal utilities"
+            "chore: maintain project consistency"
+            "fix: improve minor code quality"
+            "docs: update development notes"
           )
-          
-          # Randomly decide to make 1 or 2 commits to vary daily patterns
-          NUM_COMMITS=$(( ( RANDOM % 2 )  + 1 ))
-          echo "Generating $NUM_COMMITS human-like commits"
-          
-          touch scratchpad.js
-          
-          for i in $(seq 1 $NUM_COMMITS)
+
+
+          COUNT=$(( RANDOM % 2 + 1 ))
+
+          echo "Creating $COUNT commits"
+
+
+          for i in $(seq 1 $COUNT)
           do
-            # Pick a random message from the array
-            RANDOM_INDEX=$(( RANDOM % ${#MESSAGES[@]} ))
-            COMMIT_MSG="${MESSAGES[$RANDOM_INDEX]}"
-            
-            # Append a realistic timestamped code comment instead of raw logs
-            echo "// Updated at $(date +'%Y-%m-%d %H:%M:%S') - routine maintenance" >> scratchpad.js
-            
-            git add scratchpad.js
-            git commit -m "$COMMIT_MSG"
-            
-            # Random pause to mimic natural development pacing
-            sleep $(( ( RANDOM % 5 ) + 3 ))
+
+            INDEX=$(( RANDOM % ${#MESSAGES[@]} ))
+
+            MESSAGE="${MESSAGES[$INDEX]}"
+
+
+            echo "
+## Daily Maintenance
+
+Updated:
+$(date '+%Y-%m-%d %H:%M:%S')
+
+Routine project maintenance.
+" >> $FILE
+
+
+            git add $FILE
+
+
+            git commit \
+            --author="Qurban Hanif <qurbanhanif120@gmail.com>" \
+            -m "$MESSAGE"
+
+
+            sleep $(( RANDOM % 10 + 5 ))
+
           done
 
+
+
       - name: Push Changes
-        run: git push
+        run: |
+
+          git push origin HEAD:main
