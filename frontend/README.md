@@ -71,7 +71,3 @@ A high-performance, premium enterprise dashboard built with **Angular 17** and *
 # Unit tests
 ng test
 ```
-
-## 📜 License
-
-This project is [MIT licensed](LICENSE).
