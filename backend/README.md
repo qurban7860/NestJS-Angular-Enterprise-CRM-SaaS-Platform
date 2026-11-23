@@ -5,11 +5,13 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 
-A production-ready, multi-tenant enterprise backend built with **NestJS**, following clean architecture principles and industry best practices.
+[![Backend CI](https://github.com/qurban7860/NestJS-Angular-Enterprise-CRM-SaaS-Platform/actions/workflows/backend-ci.yml/badge.svg?branch=main)](https://github.com/qurban7860/NestJS-Angular-Enterprise-CRM-SaaS-Platform/actions/workflows/backend-ci.yml)
+
+An enterprise-style, multi-tenant backend built with **NestJS**, following clean architecture principles and domain-driven design patterns.
 
 ## 🚀 Key Features
 
-- **Multi-tenant Architecture**: Strict organization-level data isolation.
+- **Multi-tenant Architecture**: Organization-scoped business data.
 - **Enterprise Security**: JWT-based authentication with Role-Based Access Control (RBAC).
 - **Domain Driven Design (DDD)**: Logic organized into Use Cases, Repositories, and Domain Entities.
 - **Task Management**: Full task lifecycle, status transitions, comments, and assignee management.
@@ -25,7 +27,7 @@ A production-ready, multi-tenant enterprise backend built with **NestJS**, follo
 
 ## 🏗️ Architecture
 
-The backend follows a layered architecture to ensure scalability and maintainability:
+The backend follows a layered architecture to keep presentation, application, domain, and infrastructure concerns separated:
 
 ```mermaid
 graph TD
@@ -41,30 +43,28 @@ graph TD
 - **Framework**: [NestJS](https://nestjs.com/)
 - **Database**: [PostgreSQL](https://www.postgresql.org/)
 - **ORM**: [Prisma](https://www.prisma.io/)
-- **Validation**: [Class-validator](https://github.com/typestack/class-validator)
+- **Validation**: [class-validator](https://github.com/typestack/class-validator)
 - **Security**: Passport.js + JWT
-- **Documentation**: Swagger UI
+- **Documentation**: Swagger / OpenAPI
 
 ## 🏁 Getting Started
 
 ### Prerequisites
-- Node.js (v18+)
+
+- Node.js 24
 - PostgreSQL instance
 
 ### Installation
+
 1. Install dependencies:
    ```bash
-   npm install
+   npm ci
    ```
 
-2. Configure Environment:
-   Create a `.env` file based on `.env.example`:
-   ```env
-   DATABASE_URL="postgresql://user:pass@localhost:5432/crm_db"
-   JWT_SECRET="your-super-secret-key"
-   ```
+2. Configure environment variables:
+   Create a `.env` file based on `.env.example`. Supply the database connection values and authentication secrets required by your local setup. Never commit real secrets.
 
-3. Database Migration:
+3. Apply database migrations:
    ```bash
    npx prisma migrate dev
    ```
@@ -73,27 +73,36 @@ graph TD
    ```bash
    # Development
    npm run start:dev
-   
-   # Production
+
+   # Production build
    npm run build
    npm run start:prod
    ```
 
 ## 📖 API Documentation
 
-Once the server is running, access the interactive Swagger documentation at:
+When the application is running outside production mode, the Swagger UI is available at:
+
 `http://localhost:3000/api/docs`
 
 ## 🧪 Testing
 
 ```bash
 # Unit tests
-npm run test
+npm test -- --runInBand
 
-# End-to-end tests
+# End-to-end smoke tests (requires configured application dependencies)
 npm run test:e2e
 ```
 
+The end-to-end smoke test boots the full `AppModule`, so configure the database and supporting services before running it.
+
+## 🔁 Continuous Integration
+
+The **Backend CI** workflow runs for pushes and pull requests targeting `main` when backend files or the workflow itself change. It performs a clean install from `package-lock.json`, builds the NestJS backend, and runs the backend unit tests.
+
+The first hosted workflow run is the authoritative verification result. Infrastructure-dependent end-to-end tests and a non-mutating lint check are not included in this initial baseline; they are tracked in [`docs/ROADMAP.md`](../../docs/ROADMAP.md).
+
 ## 📜 License
 
-This project is [MIT licensed](LICENSE).
+No `LICENSE` file is currently included in this repository, so reuse terms have not been explicitly granted.
