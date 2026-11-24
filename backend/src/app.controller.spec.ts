@@ -15,8 +15,10 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('should return the API status message', () => {
+      expect(appController.getHello()).toBe(
+        'Enterprise CRM & Tasks Platform API is running...',
+      );
     });
   });
 });

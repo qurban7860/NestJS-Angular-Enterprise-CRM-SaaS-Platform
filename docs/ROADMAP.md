@@ -1,6 +1,6 @@
 # Engineering Roadmap
 
-Last reviewed: 2026-11-23
+Last reviewed: 2026-11-24
 
 ## Scope
 
@@ -9,10 +9,10 @@ Strengthen this existing NestJS + Angular multi-tenant CRM platform as a credibl
 ## Milestone 1 — Backend CI baseline
 
 - [x] Add a GitHub Actions workflow for a clean backend dependency install, NestJS build, and unit tests.
-- [ ] Confirm the first hosted workflow run succeeds; fix any failures before expanding the pipeline.
+- [ ] Confirm the hosted workflow run succeeds after the unit-test corrections below.
 - [ ] Add a non-mutating lint check. The current `npm run lint` script includes `--fix`, so it is intentionally not invoked by the initial CI workflow.
 
-Status: workflow committed; first hosted run not yet verified.
+Status: workflow and first round of test corrections are committed; the follow-up hosted run is pending.
 
 ## Milestone 2 — Multi-tenant isolation regression tests
 
@@ -42,6 +42,17 @@ Acceptance criteria: a user from organization A cannot read or mutate organizati
 - [ ] Add traceable structured logs and request correlation where missing.
 - [ ] Document deployment configuration, rollback expectations, and known limitations.
 - [ ] Add architecture decision records for material tenancy, authorization, and data-consistency decisions.
+
+## CI findings (2026-11-24)
+
+The first hosted run ([run #1](https://github.com/qurban7860/NestJS-Angular-Enterprise-CRM-SaaS-Platform/actions/runs/45109597322)) completed dependency installation and the NestJS build, then failed in two existing unit specs:
+
+- The registration success test used an incomplete CRM repository mock and omitted the JWT `sign` mock. The corrected spec now mocks the complete repository contract and verifies organization creation, admin-user persistence, and access-token signing. It also covers duplicate organization slugs.
+- The app-controller test still expected NestJS's starter response (`Hello World!`) even though the controller returns the CRM API status message. The assertion now matches the controller's current public response.
+
+The initial run passed 5 of 7 tests. The follow-up CI run is required before this milestone can be marked complete.
+
+During `npm ci`, npm reported 54 dependency advisories (2 low, 30 moderate, 20 high, and 2 critical). This is the install-time summary, not a completed advisory triage. Review the detailed audit output before selecting targeted upgrades; do not apply a blanket force upgrade.
 
 ## Audit baseline (2026-11-23)
 
