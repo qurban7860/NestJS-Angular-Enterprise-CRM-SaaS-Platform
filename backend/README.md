@@ -88,6 +88,9 @@ When the application is running outside production mode, the Swagger UI is avail
 ## 🧪 Testing
 
 ```bash
+# Non-mutating TypeScript source lint
+npm run lint:check
+
 # Unit tests
 npm test -- --runInBand
 
@@ -99,9 +102,9 @@ The end-to-end smoke test boots the full `AppModule`, so configure the database 
 
 ## 🔁 Continuous Integration
 
-The **Backend CI** workflow runs for pushes and pull requests targeting `main` when backend files or the workflow itself change. It performs a clean install from `package-lock.json`, builds the NestJS backend, and runs the backend unit tests.
+The **Backend CI** workflow runs for pushes and pull requests targeting `main` when backend files or the workflow itself change. It performs a clean install from `package-lock.json`, builds the NestJS backend, runs the backend unit tests, and executes `npm run lint:check`.
 
-The first hosted workflow run is the authoritative verification result. Infrastructure-dependent end-to-end tests and a non-mutating lint check are not included in this initial baseline; they are tracked in [`docs/ROADMAP.md`](../../docs/ROADMAP.md).
+The `lint:check` script checks TypeScript files under `src/` without modifying them. The existing `npm run lint` script is auto-fixing and should not be used as a CI validation command. Infrastructure-dependent end-to-end tests remain separate until their database and supporting-service requirements are provisioned. See [`docs/ROADMAP.md`](../../docs/ROADMAP.md) for verification status and remaining work.
 
 ## 📜 License
 

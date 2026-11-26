@@ -1,6 +1,6 @@
 # Engineering Roadmap
 
-Last reviewed: 2026-11-24
+Last reviewed: 2026-11-26
 
 ## Scope
 
@@ -9,10 +9,10 @@ Strengthen this existing NestJS + Angular multi-tenant CRM platform as a credibl
 ## Milestone 1 — Backend CI baseline
 
 - [x] Add a GitHub Actions workflow for a clean backend dependency install, NestJS build, and unit tests.
-- [ ] Confirm the hosted workflow run succeeds after the unit-test corrections below.
-- [ ] Add a non-mutating lint check. The current `npm run lint` script includes `--fix`, so it is intentionally not invoked by the initial CI workflow.
+- [x] Confirm the hosted workflow run succeeds after the unit-test corrections.
+- [ ] Add and validate a non-mutating TypeScript source lint check.
 
-Status: workflow and first round of test corrections are committed; the follow-up hosted run is pending.
+Status: the default-branch CI baseline is green. The lint check is proposed in [draft PR](https://github.com/qurban7860/NestJS-Angular-Enterprise-CRM-SaaS-Platform/pull/1) and remains pending hosted validation before this milestone is complete.
 
 ## Milestone 2 — Multi-tenant isolation regression tests
 
@@ -50,9 +50,11 @@ The first hosted run ([run #1](https://github.com/qurban7860/NestJS-Angular-Ente
 - The registration success test used an incomplete CRM repository mock and omitted the JWT `sign` mock. The corrected spec now mocks the complete repository contract and verifies organization creation, admin-user persistence, and access-token signing. It also covers duplicate organization slugs.
 - The app-controller test still expected NestJS's starter response (`Hello World!`) even though the controller returns the CRM API status message. The assertion now matches the controller's current public response.
 
-The initial run passed 5 of 7 tests. The follow-up CI run is required before this milestone can be marked complete.
+The initial run passed 5 of 7 tests.
 
-During `npm ci`, npm reported 54 dependency advisories (2 low, 30 moderate, 20 high, and 2 critical). This is the install-time summary, not a completed advisory triage. Review the detailed audit output before selecting targeted upgrades; do not apply a blanket force upgrade.
+The follow-up hosted run ([run #2](https://github.com/qurban7860/NestJS-Angular-Enterprise-CRM-SaaS-Platform/actions/runs/45321759478)) succeeded on 2026-11-24: dependency installation, Prisma Client generation, NestJS build, and all 8 unit tests across 3 suites passed.
+
+During dependency installation, npm reported 54 advisories (2 low, 30 moderate, 20 high, and 2 critical). This was the install-time summary, not a completed advisory triage. Review detailed advisory paths before selecting targeted upgrades; do not apply a blanket force upgrade.
 
 ## Audit baseline (2026-11-23)
 

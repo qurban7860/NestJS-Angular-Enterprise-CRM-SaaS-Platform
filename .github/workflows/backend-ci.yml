@@ -53,3 +53,6 @@ jobs:
 
       - name: Run backend unit tests
         run: npm test -- --runInBand
+
+      - name: Run non-mutating TypeScript source lint
+        run: npm run lint:check
