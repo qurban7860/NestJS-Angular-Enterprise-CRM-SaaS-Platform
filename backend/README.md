@@ -88,8 +88,11 @@ When the application is running outside production mode, the Swagger UI is avail
 ## 🧪 Testing
 
 ```bash
-# Non-mutating TypeScript source lint
-npm run lint:check
+# Lint selected TypeScript files without modifying them
+npm run lint:check -- src/path/to/file.ts
+
+# Full source lint (the current baseline is documented in the roadmap)
+npm run lint:check:all
 
 # Unit tests
 npm test -- --runInBand
@@ -102,9 +105,9 @@ The end-to-end smoke test boots the full `AppModule`, so configure the database 
 
 ## 🔁 Continuous Integration
 
-The **Backend CI** workflow runs for pushes and pull requests targeting `main` when backend files or the workflow itself change. It performs a clean install from `package-lock.json`, builds the NestJS backend, runs the backend unit tests, and executes `npm run lint:check`.
+The **Backend CI** workflow runs for pushes and pull requests targeting `main` when backend files or the workflow itself change. It performs a clean install from `package-lock.json`, builds the NestJS backend, runs the backend unit tests, and runs non-mutating ESLint on changed TypeScript source files.
 
-The `lint:check` script checks TypeScript files under `src/` without modifying them. The existing `npm run lint` script is auto-fixing and should not be used as a CI validation command. Infrastructure-dependent end-to-end tests remain separate until their database and supporting-service requirements are provisioned. See [`docs/ROADMAP.md`](../../docs/ROADMAP.md) for verification status and remaining work.
+The lint gate is incremental: only changed `backend/src/**/*.ts` files are checked. The full-source command remains available for cleanup work; the existing repository-wide baseline currently contains violations and is tracked in [`docs/ROADMAP.md`](../../docs/ROADMAP.md). The existing `npm run lint` script is auto-fixing and is not used by CI. Infrastructure-dependent end-to-end tests remain separate until their database and supporting-service requirements are provisioned.
 
 ## 📜 License
 

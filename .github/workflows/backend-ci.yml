@@ -37,6 +37,8 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
@@ -54,5 +56,27 @@ jobs:
       - name: Run backend unit tests
         run: npm test -- --runInBand
 
-      - name: Run non-mutating TypeScript source lint
-        run: npm run lint:check
+      - name: Run non-mutating lint on changed TypeScript source
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          base_sha="$BASE_SHA"
+          if [[ -z "$base_sha" || "$base_sha" =~ ^0+$ ]]; then
+            base_sha="$(git -C .. rev-parse HEAD^)"
+          fi
+
+          mapfile -t changed_files < <(
+            git -C .. diff --name-only --diff-filter=ACMR "$base_sha" "$HEAD_SHA" -- backend/src \
+              | sed -n '/^backend\/.*\.ts$/s#^backend/##p'
+          )
+
+          if (("${#changed_files[@]}" == 0)); then
+            echo "No changed TypeScript source files; skipping incremental lint."
+            exit 0
+          fi
+
+          printf 'Linting %s changed TypeScript file(s):\n' "${#changed_files[@]}"
+          printf ' - %s\n' "${changed_files[@]}"
+          npm run lint:check -- "${changed_files[@]}"
