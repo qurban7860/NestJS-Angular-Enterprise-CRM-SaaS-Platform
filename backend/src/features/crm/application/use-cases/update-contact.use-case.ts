@@ -24,7 +24,7 @@ export class UpdateContactUseCase {
   async execute(
     req: UpdateContactRequest,
   ): Promise<Result<ContactResponseDto>> {
-    const contact = await this.crmRepo.findContactById(req.id);
+    const contact = await this.crmRepo.findContactById(req.id, req.orgId);
     if (!contact || contact.orgId !== req.orgId || contact.isDeleted) {
       return Result.fail('Contact not found or access denied');
     }

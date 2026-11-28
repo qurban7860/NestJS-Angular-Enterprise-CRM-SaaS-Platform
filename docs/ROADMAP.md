@@ -1,6 +1,6 @@
 # Engineering Roadmap
 
-Last reviewed: 2026-11-24
+Last reviewed: 2026-11-28
 
 ## Scope
 
@@ -9,17 +9,17 @@ Strengthen this existing NestJS + Angular multi-tenant CRM platform as a credibl
 ## Milestone 1 — Backend CI baseline
 
 - [x] Add a GitHub Actions workflow for a clean backend dependency install, NestJS build, and unit tests.
-- [ ] Confirm the hosted workflow run succeeds after the unit-test corrections below.
-- [ ] Add a non-mutating lint check. The current `npm run lint` script includes `--fix`, so it is intentionally not invoked by the initial CI workflow.
+- [x] Confirm the hosted workflow run succeeds after the unit-test corrections.
+- [ ] Validate the incremental, non-mutating lint check on a PR that changes TypeScript source.
+- [ ] Reduce the repository-wide lint baseline before switching CI to full-source lint.
 
-Status: workflow and first round of test corrections are committed; the follow-up hosted run is pending.
+Status: the default-branch build and unit-test baseline is green. The first full-source lint attempt failed on existing violations; the incremental lint gate is now in place. This run adds TypeScript source tests so the next hosted run can validate the gate rather than skip it.
 
 ## Milestone 2 — Multi-tenant isolation regression tests
 
-- [ ] Build reusable fixtures for two organizations with separate users, contacts, companies, deals, and tasks.
-- [ ] Test that list, read, update, and delete paths are always scoped to the authenticated organization.
-- [ ] Test cross-organization references (for example, attaching another organization's contact or deal to a task) are rejected.
-- [ ] Add negative-path tests at the application/repository boundary, not only domain-entity tests.
+- [ ] Verify organization-scoped contact lookup at the Prisma query boundary and application use-case layer (implementation and regression specs added in PR #1; hosted validation pending).
+- [ ] Extend equivalent coverage to deals, companies, tasks, and cross-organization references.
+- [ ] Add database-backed integration tests proving that one organization's users cannot read or mutate another organization's records.
 
 Acceptance criteria: a user from organization A cannot read or mutate organization B's records; valid same-organization operations continue to work.
 
@@ -45,18 +45,34 @@ Acceptance criteria: a user from organization A cannot read or mutate organizati
 
 ## CI findings (2026-11-24)
 
-The first hosted run ([run #1](https://github.com/qurban7860/NestJS-Angular-Enterprise-CRM-SaaS-Platform/actions/runs/45109597322)) completed dependency installation and the NestJS build, then failed in two existing unit specs:
+The first hosted run (run #1) completed dependency installation and the NestJS build, then failed in two existing unit specs:
 
-- The registration success test used an incomplete CRM repository mock and omitted the JWT `sign` mock. The corrected spec now mocks the complete repository contract and verifies organization creation, admin-user persistence, and access-token signing. It also covers duplicate organization slugs.
-- The app-controller test still expected NestJS's starter response (`Hello World!`) even though the controller returns the CRM API status message. The assertion now matches the controller's current public response.
+- The registration success test used an incomplete CRM repository mock and omitted the JWT sign mock. The corrected spec now mocks the complete repository contract and verifies organization creation, admin-user persistence, and access-token signing. It also covers duplicate organization slugs.
+- The app-controller test still expected the NestJS starter response even though the controller returns the CRM API status message. The assertion now matches the controller's current public response.
 
-The initial run passed 5 of 7 tests. The follow-up CI run is required before this milestone can be marked complete.
+The initial run passed 5 of 7 tests.
 
-During `npm ci`, npm reported 54 dependency advisories (2 low, 30 moderate, 20 high, and 2 critical). This is the install-time summary, not a completed advisory triage. Review the detailed audit output before selecting targeted upgrades; do not apply a blanket force upgrade.
+The follow-up hosted run (run #2) succeeded on 2026-11-24: dependency installation, Prisma Client generation, NestJS build, and all 8 unit tests across 3 suites passed.
+
+During dependency installation, npm reported 54 advisories (2 low, 30 moderate, 20 high, and 2 critical). This was the install-time summary, not a completed advisory triage. Review detailed advisory paths before selecting targeted upgrades; do not apply a blanket force upgrade.
+
+## CI findings (2026-11-26)
+
+The first PR lint attempt (run #3) completed dependency installation, Prisma generation, NestJS build, and all 8 unit tests successfully. The full-source ESLint step then reported 567 errors and 63 warnings across the existing TypeScript source tree. No auto-fix was run and no source files were reformatted as part of this attempt.
+
+The repository-wide lint baseline is therefore not clean. The workflow now uses an incremental changed-file gate so new or modified TypeScript source is checked without requiring a broad, unrelated cleanup in the same PR. This is a transitional policy, not a claim that the existing source tree passes full lint.
+
+## CI findings (2026-11-27)
+
+The incremental lint workflow ran on a documentation/configuration-only PR update and skipped lint because no TypeScript source files changed. The hosted run (run #4) passed dependency installation, Prisma generation, NestJS build, and all 8 unit tests. This did not validate ESLint against a source file.
+
+## CI findings (2026-11-28)
+
+The current PR adds organization-scoped contact retrieval at the Prisma query boundary and regression tests for cross-organization contact reads, updates, and deletes. The next hosted run must verify the NestJS build, all unit tests, and incremental lint against the changed TypeScript files before this milestone is marked complete.
 
 ## Audit baseline (2026-11-23)
 
 - The backend contains three source-level unit spec files: the app controller, registration use case, and contact entity.
-- One end-to-end smoke spec exists and boots the full `AppModule`; it is kept out of the initial CI job until its database and supporting-service requirements are explicitly provisioned.
+- One end-to-end smoke spec exists and boots the full AppModule; it is kept out of the initial CI job until its database and supporting-service requirements are explicitly provisioned.
 - No GitHub Actions workflow or engineering roadmap was present at the time of this audit.
 - The current roadmap deliberately prioritizes tenancy and authorization regression coverage before adding more product modules.
