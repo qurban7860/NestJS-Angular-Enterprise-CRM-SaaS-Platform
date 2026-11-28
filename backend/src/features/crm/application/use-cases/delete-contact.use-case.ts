@@ -15,7 +15,7 @@ export class DeleteContactUseCase {
   ) {}
 
   async execute(req: DeleteContactRequest): Promise<Result<void>> {
-    const contact = await this.crmRepo.findContactById(req.id);
+    const contact = await this.crmRepo.findContactById(req.id, req.orgId);
     if (!contact || contact.orgId !== req.orgId || contact.isDeleted) {
       return Result.fail('Contact not found or access denied');
     }

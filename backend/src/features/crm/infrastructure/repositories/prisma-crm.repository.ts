@@ -57,8 +57,10 @@ export class PrismaCRMRepository implements ICRMRepository {
   }
 
   // ── Contact ───────────────────────────────────────────────
-  async findContactById(id: string): Promise<Contact | null> {
-    const raw = await this.prisma.contact.findUnique({ where: { id } });
+  async findContactById(id: string, orgId: string): Promise<Contact | null> {
+    const raw = await this.prisma.contact.findFirst({
+      where: { id, orgId },
+    });
     if (!raw) return null;
     return this.mapToContact(raw);
   }
@@ -95,7 +97,7 @@ export class PrismaCRMRepository implements ICRMRepository {
         lastName: raw.lastName,
         email: raw.email,
         phone: raw.phone || undefined,
-        status: raw.status as any,
+        status: raw.status,
         orgId: raw.orgId,
         ownerId: raw.ownerId,
         companyId: raw.companyId || undefined,
@@ -213,7 +215,7 @@ export class PrismaCRMRepository implements ICRMRepository {
         title: raw.title,
         valueAmount: Number(raw.valueAmount),
         valueCurrency: raw.valueCurrency,
-        stage: raw.stage as any,
+        stage: raw.stage,
         orgId: raw.orgId,
         ownerId: raw.ownerId,
         contactId: raw.contactId,

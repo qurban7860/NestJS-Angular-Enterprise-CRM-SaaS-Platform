@@ -10,7 +10,7 @@ export interface ICRMRepository {
   saveOrganization(org: Organization): Promise<void>;
 
   // Contact
-  findContactById(id: string): Promise<Contact | null>;
+  findContactById(id: string, orgId: string): Promise<Contact | null>;
   findContactsByOrgId(orgId: string): Promise<Contact[]>;
   searchContacts(orgId: string, query: string): Promise<Contact[]>;
   saveContact(contact: Contact): Promise<void>;
